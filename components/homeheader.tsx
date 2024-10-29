@@ -10,12 +10,12 @@ function Header() {
       <div className="flex-grow"></div>
       <div className="flex space-x-4">
         <button 
-          className="px-4 py-2 bg-c4 rounded hover:bg-c3"
+          className="px-4 py-2 text-c5 bg-c4 rounded hover:bg-c3"
           onClick={() => signIn()} // Add signIn functionality here
         >
           Sign In
         </button>
-        <button className="px-4 py-2 bg-c4 rounded hover:bg-c3">
+        <button className="px-4 py-2 text-c5 bg-c4 rounded hover:bg-c3">
           Sign Up
         </button>
       </div>
