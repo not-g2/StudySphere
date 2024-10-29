@@ -554,10 +554,6 @@ video {
   display: none;
 }
 
-.absolute {
-  position: absolute;
-}
-
 .mb-4 {
   margin-bottom: 1rem;
 }
