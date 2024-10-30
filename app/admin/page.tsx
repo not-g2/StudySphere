@@ -1,4 +1,5 @@
-// Add "use client" directive at the top to make this a client component
+// app/components/MyCourses.tsx
+
 "use client";
 
 import React, { useState } from 'react';
@@ -11,7 +12,7 @@ type Course = {
 };
 
 const MyCourses: React.FC = () => {
-  // Use placeholder data directly as the initial state
+  // Placeholder courses
   const [courses] = useState<Course[]>([
     { id: 1, title: 'Math 101', description: 'An introduction to mathematics.', instructor: 'John Doe' },
     { id: 2, title: 'Physics 101', description: 'Basic concepts of physics.', instructor: 'Jane Smith' },
@@ -19,20 +20,27 @@ const MyCourses: React.FC = () => {
   ]);
 
   return (
-    <div>
-      <h2>Your Created Courses</h2>
+    <div className="p-4 min-h-screen bg-c2">
+      <h2 className="text-2xl font-semibold mb-4 text-center text-c5">Your Courses</h2>
       {courses.length > 0 ? (
-        <ul>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
-            <li key={course.id}>
-              <h3>{course.title}</h3>
-              <p>{course.description}</p>
-              <p><strong>Instructor:</strong> {course.instructor}</p>
-            </li>
+            <div
+              key={course.id}
+              className="bg-c4 rounded-lg shadow-md p-6 flex flex-col justify-between"
+            >
+              <div>
+                <h3 className="text-xl font-bold text-gray-800">{course.title}</h3>
+                <p className="text-c5 mt-2">{course.description}</p>
+              </div>
+              <p className="mt-4 text-c5">
+                <strong>Instructor:</strong> {course.instructor}
+              </p>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p>You haven't created any courses yet.</p>
+        <p className="text-center text-gray-700">You haven't created any courses yet.</p>
       )}
     </div>
   );
