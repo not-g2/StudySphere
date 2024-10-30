@@ -5,6 +5,11 @@ import { Button, Container, Typography, Avatar } from '@mui/material';
 import Popup from '../../components/popup'; // Import the Popup component
 import { useRouter } from 'next/navigation';
 
+interface FormData {
+  description: string;
+  startDate: string;
+  endDate: string;
+}
 
 const ProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
@@ -16,6 +21,10 @@ const ProfilePage: React.FC = () => {
       router.push('/'); // Redirect to home page
     }
   }, [status, router]);
+
+  const handleDeadlineSubmit = (formData: FormData) => {
+    console.log(formData);
+  }
 
   return (
     <Container>
@@ -34,9 +43,8 @@ const ProfilePage: React.FC = () => {
       {/* Popup Component */}
       <Popup
         open={openPopup}
-        onClose={() => setOpenPopup(false)}
-        title="My Popup"
-        content="This is the content of the popup!"
+        handleClose={() => setOpenPopup(false)}
+        handleSubmit={handleDeadlineSubmit}
       />
     </Container>
   );
