@@ -31,23 +31,26 @@ const Header: React.FC = () => {
   return (
     <header className="flex items-center justify-between p-4 bg-c1 text-white">
       <div className="flex space-x-4">
-        <div onClick={() => handleGo('/')}>Home</div>
-        <div onClick={() => handleGo('/Dashboard')}>Dashboard</div>
+        <div onClick={() => handleGo('/')} className="cursor-pointer hover:underline">Home</div>
+        <div onClick={() => handleGo('/Dashboard')} className="cursor-pointer hover:underline">Dashboard</div>
+        <div onClick={() => handleGo('/Courses')} className="cursor-pointer hover:underline">Courses</div>
+        <div onClick={() => handleGo('/Challenges')} className="cursor-pointer hover:underline">Challenges</div>
+        <div onClick={() => handleGo('/Rewards')} className="cursor-pointer hover:underline">Rewards</div>
       </div>
-      <div className="flex space-x-4">
+      
+      <div className="flex items-center space-x-4">
         {!session ? (
-          <div>
-            <Button variant="contained" onClick={() => signIn()}>
-              Sign In
-            </Button>
-          </div>
+          <Button variant="contained" color="primary" onClick={() => signIn()}>
+            Sign In
+          </Button>
         ) : (
-          <div>
+          <div className="relative flex items-center">
             <Avatar
               src={session.user?.image ?? '/default-profile.png'}
               alt="Profile Picture"
               onClick={handleClick}
               sx={{ width: 40, height: 40, cursor: 'pointer' }}
+              className="hover:shadow-lg"
             />
             <Dropdown
               anchorEl={anchorEl}
@@ -58,7 +61,6 @@ const Header: React.FC = () => {
         )}
       </div>
     </header>
-  );
-};
-
+  )
+}
 export default Header;
