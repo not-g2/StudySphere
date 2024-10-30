@@ -1,40 +1,86 @@
-// components/Popup.tsx
-import React from 'react';
-import { Modal, Box, Typography, Button } from '@mui/material';
+import React, { useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 
-interface PopupProps {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  content: string;
+interface FormData {
+  description: string;
+  startDate: string;
+  endDate: string;
 }
 
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  borderRadius: 2,
-};
+interface PopupFormProps {
+  open: boolean;
+  handleClose: () => void;
+  handleSubmit: (formData: FormData) => void;
+}
 
-const Popup: React.FC<PopupProps> = ({ open, onClose, title, content }) => {
+const PopupForm: React.FC<PopupFormProps> = ({ open, handleClose, handleSubmit }) => {
+  const [formData, setFormData] = useState<FormData>({
+    description: '',
+    startDate: '',
+    endDate: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
+  const onSubmit = () => {
+    handleSubmit(formData);
+    setFormData({
+      description: '',
+      startDate: '',
+      endDate: ''})
+    handleClose();
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={style}>
-        <Typography variant="h6" component="h2">
-          {title}
-        </Typography>
-        <Typography sx={{ mt: 2 }}>{content}</Typography>
-        <Button variant="contained" onClick={onClose} sx={{ mt: 2 }}>
-          Close
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle>Enter Deadline Details</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Description"
+          name="description"
+          type="text"
+          fullWidth
+          value={formData.description}
+          onChange={handleChange}
+        />
+        <TextField
+          margin="dense"
+          label="Start Date"
+          name="startDate"
+          type="date"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          value={formData.startDate}
+          onChange={handleChange}
+        />
+        <TextField
+          margin="dense"
+          label="End Date"
+          name="endDate"
+          type="date"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          value={formData.endDate}
+          onChange={handleChange}
+          inputProps={{min: formData.startDate}}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={onSubmit} color="primary">
+          Submit
         </Button>
-      </Box>
-    </Modal>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-export default Popup;
+export default PopupForm;
