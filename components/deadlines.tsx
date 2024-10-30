@@ -14,15 +14,26 @@ function DeadlinesList() {
   ];
 
   return (
-    <div>
-      <h2>Upcoming Deadlines</h2>
-      <ul>
-        {deadlines.map((deadline) => (
-          <li key={deadline.id}>
-            {deadline.name}: {new Date(deadline.date).toLocaleDateString()}
-          </li>
-        ))}
-      </ul>
+    <div className="p-4 flex">
+      <div className="w-1/3">
+        <h2 className="text-2xl font-bold mb-4">Deadlines</h2>
+        <table className="w-full bg-white border border-gray-300">
+          <thead>
+            <tr className="bg-gray-800 text-white">
+              <th className="py-2 px-4 border">Deadline Name</th>
+              <th className="py-2 px-4 border">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deadlines.map((deadline) => (
+              <tr key={deadline.id} className="text-center">
+                <td className="py-2 px-4 border">{deadline.name}</td>
+                <td className="py-2 px-4 border">{new Date(deadline.date).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

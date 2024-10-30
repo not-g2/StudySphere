@@ -1,6 +1,6 @@
 import React from 'react';
 
-function dashheader() {
+function Dashheader() {
   return (
     <header className="flex justify-between items-center p-4 bg-gray-800 text-white">
       <div className="flex gap-4">
@@ -14,4 +14,4 @@ function dashheader() {
   );
 }
 
-export default dashheader;
+export default Dashheader;
