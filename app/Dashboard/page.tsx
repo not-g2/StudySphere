@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import DeadlinesList from '@/components/deadlines';
 import Dashheader from '@/components/dashheader';
