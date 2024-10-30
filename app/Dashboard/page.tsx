@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
 import DeadlinesList from '@/components/deadlines';
-import Dashheader from '@/components/dashheader';
 import Leaderboard from '@/components/leaderboard'; // Import the Leaderboard component
 import Calendar from '../../components/calender';
 import '../output.css';
@@ -9,7 +8,6 @@ import '../output.css';
 function Page() {
   return (
     <div >
-      <Dashheader />
       <div className="p-4 flex">
         {/* DeadlinesList with 28% width */}
         <div className="w-28/100 p-4">

@@ -4,10 +4,16 @@ import React, { useState } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { Avatar, Button } from '@mui/material';
 import Dropdown from '../components/dropdown';
+import { useRouter } from 'next/navigation';
 
 const Header: React.FC = () => {
   const { data: session } = useSession();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const router = useRouter();
+
+  const handleGo = (path: string) => {
+    router.push(path);
+  };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -23,9 +29,10 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="flex items-center justify-between p-4 bg-c1 text-red-800">
-      <div className="flex-grow">
-        <div>Hw</div>
+    <header className="flex items-center justify-between p-4 bg-c1 text-white">
+      <div className="flex space-x-4">
+        <div onClick={() => handleGo('/')}>Home</div>
+        <div onClick={() => handleGo('/Dashboard')}>Dashboard</div>
       </div>
       <div className="flex space-x-4">
         {!session ? (
@@ -33,7 +40,6 @@ const Header: React.FC = () => {
             <Button variant="contained" onClick={() => signIn()}>
               Sign In
             </Button>
-            <Button variant="contained">Sign Up</Button>
           </div>
         ) : (
           <div>
