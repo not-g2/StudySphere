@@ -1,32 +1,53 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { getSession, signOut, useSession } from 'next-auth/react';
-import { Button, Container, Typography, Avatar , Box, Stack, TextField} from '@mui/material';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useRef, useState } from "react";
+import { getSession, signOut, useSession } from "next-auth/react";
+import {
+  Button,
+  Container,
+  Typography,
+  Avatar,
+  Box,
+  Stack,
+  TextField,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const ProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [name, setName] = useState(session?.user?.name || '');
-  const [email, setEmail] = useState(session?.user?.email || '');
-  const [image, setImage] = useState(session?.user?.image || '');
+  const [name, setName] = useState(session?.user?.name || "");
+  const [email, setEmail] = useState(session?.user?.email || "");
+  const [image, setImage] = useState(session?.user?.image || "");
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      setName(session?.user?.name || '');
-      setEmail(session?.user?.email || '');
-      setImage(session?.user?.image || '');
+    if (status === "authenticated") {
+      setName(session?.user?.name || "");
+      setEmail(session?.user?.email || "");
+      setImage(session?.user?.image || "");
     }
 
-    if (status === 'unauthenticated') {
-      router.push('/')
+    if (status === "unauthenticated") {
+      router.push("/");
     }
   }, [status]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Updated Profile:', { name, email, image });
+    console.log("Updated Profile:", { name, email, image });
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setImage(imageUrl);
+    }
   };
 
   return (
@@ -41,14 +62,22 @@ const ProfilePage: React.FC = () => {
         p={4}
       >
         <Avatar
-          src={image || '/default-profile.png'}
+          src={image || "/default-profile.png"}
           alt="Profile Picture"
-          sx={{ width: 120, height: 120, mb: 2 }}
+          sx={{ width: 120, height: 120, mb: 2, cursor: "pointer" }}
+          onClick={handleImageClick}
+        />
+        <input
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          ref={fileInputRef}
+          onChange={handleImageChange}
         />
         <Typography variant="h5" component="h1" gutterBottom>
-          Welcome, {session?.user?.name || 'User'}
+          Welcome, {session?.user?.name || "User"}
         </Typography>
-        <form onSubmit={handleUpdateProfile} style={{ width: '100%' }}>
+        <form onSubmit={handleUpdateProfile} style={{ width: "100%" }}>
           <TextField
             label="Name"
             value={name}
@@ -57,7 +86,8 @@ const ProfilePage: React.FC = () => {
             margin="normal"
             variant="outlined"
           />
-          <TextField disabled
+          <TextField
+            disabled
             label="Email"
             type="email"
             value={email}
@@ -67,7 +97,7 @@ const ProfilePage: React.FC = () => {
             variant="outlined"
           />
           <TextField
-            margin='normal'
+            margin="normal"
             label="Phone Number"
             type="tel"
             placeholder="(+91) 12345-67890"
