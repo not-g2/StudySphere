@@ -609,6 +609,10 @@ video {
   margin-bottom: 1.5rem;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -633,12 +637,8 @@ video {
   margin-top: 2rem;
 }
 
-.ml-1 {
-  margin-left: 0.25rem;
-}
-
-.ml-2 {
-  margin-left: 0.5rem;
+.mt-3 {
+  margin-top: 0.75rem;
 }
 
 .block {
@@ -723,6 +723,10 @@ video {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.justify-items-center {
+  justify-items: center;
 }
 
 .gap-6 {
@@ -830,6 +834,10 @@ video {
 
 .text-center {
   text-align: center;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .text-2xl {

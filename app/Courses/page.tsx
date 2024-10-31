@@ -1,15 +1,15 @@
+"use client";
 import {
   Container,
   Grid,
   Card,
   CardContent,
   Typography,
-  Button,
-  Box,
   CardMedia,
 } from "@mui/material";
 
 import pic from "../../public/teach1.jpeg";
+import { useRouter } from "next/navigation";
 
 const classesData = [
   {
@@ -21,20 +21,6 @@ const classesData = [
   },
   {
     id: 10,
-    title: "Mathematics",
-    description: "Algebra and Geometry",
-    teacher: "Mr. Smith",
-    imageUrl: pic.src,
-  },
-  {
-    id: 11,
-    title: "Mathematics",
-    description: "Algebra and Geometry",
-    teacher: "Mr. Smith",
-    imageUrl: pic.src,
-  },
-  {
-    id: 12,
     title: "Mathematics",
     description: "Algebra and Geometry",
     teacher: "Mr. Smith",
@@ -63,16 +49,55 @@ const classesData = [
   },
 ];
 
+interface classItem {
+  id: number;
+  title: string;
+  description: string;
+  teacher: string;
+  imageUrl: string;
+}
+
 const ClassesPage = () => {
+  const router = useRouter();
+
+  const handleCardClick = (classId: number) => {
+    router.push(`/Courses/${classId}`);
+  };
+
   return (
-    <Container className="ml-2">
-      <Typography variant="h4" gutterBottom className="mt-2">
+    <Container
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        minHeight: "100%",
+      }}
+    >
+      <Typography variant="h4" gutterBottom className="mt-2" align="center">
         Your Classes
       </Typography>
-      <Grid container spacing={15} justifyContent="center">
+      <Grid container spacing={4} justifyContent="center">
         {classesData.map((classItem) => (
-          <Grid item key={classItem.id} xs={12} sm={6} md={4} lg={3}>
-            <Card sx={{ width: 300, height: 200 }}>
+          <Grid
+            item
+            key={classItem.id}
+            xs={12}
+            sm={6}
+            md={4}
+            lg={4}
+            display="flex"
+            justifyContent="center"
+          >
+            <Card
+              sx={{
+                width: 400,
+                height: 200,
+                border: 3,
+                borderColor: "#011001",
+                cursor: "pointer",
+              }}
+              onClick={() => handleCardClick(classItem.id)}
+            >
               <Grid container sx={{ height: "100%" }}>
                 {/* Left side with text content */}
                 <Grid item xs={6} sx={{ padding: 2 }}>
@@ -84,11 +109,6 @@ const ClassesPage = () => {
                     <Typography variant="caption" color="textSecondary">
                       {classItem.teacher}
                     </Typography>
-                    <Box mt={1}>
-                      <Button variant="contained" color="primary" size="small">
-                        Open Class
-                      </Button>
-                    </Box>
                   </CardContent>
                 </Grid>
                 {/* Right side with circular image */}
@@ -106,10 +126,12 @@ const ClassesPage = () => {
                     image={classItem.imageUrl}
                     alt={`${classItem.title} cover`}
                     sx={{
-                      width: "100px",
-                      height: "100px",
+                      width: "150px",
+                      height: "150px",
                       objectFit: "cover",
                       borderRadius: "50%",
+                      borderColor: "#010101",
+                      border: "3px double",
                     }}
                   />
                 </Grid>
