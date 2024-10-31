@@ -1,9 +1,11 @@
 "use client";
 
 import Header from "../components/homeheader";
+import AdminHeader from "../components/adminheader";
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
-import './output.css'
+import "./output.css";
+import { usePathname } from "next/navigation";
 
 export default function RootLayout({
   children,
@@ -12,11 +14,14 @@ export default function RootLayout({
   children: ReactNode;
   session: any;
 }) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/Admin");
+
   return (
     <html lang="en">
       <body>
         <SessionProvider session={session}>
-          <Header />
+          {isAdminRoute ? <AdminHeader /> : <Header />}
           {children}
         </SessionProvider>
       </body>
