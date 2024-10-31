@@ -10,26 +10,24 @@ const leaders = [
 
 function Leaderboard() {
   return (
-    <div className="p-4 flex">
-      <div className="w-1/3">
-        <h2 className="text-2xl font-bold mb-4">Leaderboard</h2>
-        <table className="w-full bg-white border border-gray-300">
-          <thead>
-            <tr className="bg-gray-800 text-white">
-              <th className="py-2 px-4 border">Name</th>
-              <th className="py-2 px-4 border">Points</th>
+    <div className="flex flex-col items-center py-8 max-w-md mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-center text-white">Leaderboard</h2>
+      <table className="w-full border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+        <thead>
+          <tr className="bg-gray-700 text-white">
+            <th className="px-4 py-2 font-semibold text-left">Name</th>
+            <th className="px-4 py-2 font-semibold text-left">Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {leaders.map((leader) => (
+            <tr key={leader.id} className="border-t text-white bg-black">
+              <td className="px-4 py-2 text-center">{leader.name}</td>
+              <td className="px-4 py-2 text-center">{leader.points}</td>
             </tr>
-          </thead>
-          <tbody>
-            {leaders.map((leader) => (
-              <tr key={leader.id} className="text-center">
-                <td className="py-2 px-4 border">{leader.name}</td>
-                <td className="py-2 px-4 border">{leader.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

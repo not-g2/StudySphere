@@ -19,3 +19,24 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 } */
+
+.fc .fc-daygrid-day-frame {
+  @apply border border-b1; /* Uses Tailwind's custom border color */
+}
+
+/* Apply gray-400 color to the date numbers */
+.fc .fc-daygrid-day-number {
+  @apply text-gray-200;
+}
+
+.fc .fc-day-other .fc-daygrid-day-number {
+  @apply text-white; /* Adjust to desired gray color */
+}
+
+/* Style for the current date cell */
+.fc .fc-day-today {
+  background-color: #3b82f6 !important; /* Tailwind’s blue-500 color */
+  color: white !important;
+  border-radius: 0.5rem; /* Optional: adds rounded corners */
+}
+
