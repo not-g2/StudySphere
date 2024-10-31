@@ -7,7 +7,7 @@ import '../output.css';
 
 function Page() {
   return (
-    <div >
+    <div className='bg-c2'>
       <div className="p-4 flex">
         {/* DeadlinesList with 28% width */}
         <div className="w-28/100 p-4">

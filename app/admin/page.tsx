@@ -3,6 +3,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Course = {
   id: number;
@@ -12,12 +13,18 @@ type Course = {
 };
 
 const MyCourses: React.FC = () => {
+  const router = useRouter();
+
   // Placeholder courses
   const [courses] = useState<Course[]>([
     { id: 1, title: 'Math 101', description: 'An introduction to mathematics.', instructor: 'John Doe' },
     { id: 2, title: 'Physics 101', description: 'Basic concepts of physics.', instructor: 'Jane Smith' },
     { id: 3, title: 'Chemistry 101', description: 'Fundamentals of chemistry.', instructor: 'Albert Brown' },
   ]);
+
+  const handleCourseClick = (id: number) => {
+    router.push(`/admin/courses/${id}`);
+  };
 
   return (
     <div className="p-4 min-h-screen bg-c2">
@@ -27,7 +34,8 @@ const MyCourses: React.FC = () => {
           {courses.map((course) => (
             <div
               key={course.id}
-              className="bg-c4 rounded-lg shadow-md p-6 flex flex-col justify-between"
+              onClick={() => handleCourseClick(course.id)}
+              className="bg-c4 rounded-lg shadow-md p-6 flex flex-col justify-between cursor-pointer"
             >
               <div>
                 <h3 className="text-xl font-bold text-gray-800">{course.title}</h3>

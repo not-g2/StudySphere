@@ -5,6 +5,7 @@
 import React, { useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import GDriveUpload from '../../../../components/gdrive';
 
 type Course = {
   id: number;
@@ -129,6 +130,9 @@ const CoursePage: React.FC = () => {
             Submit Assignment
           </button>
         </div>
+
+        {/* Google Drive Link Upload Section */}
+        <GDriveUpload />
 
         {/* Link to All Assignments */}
         <div className="mt-8">

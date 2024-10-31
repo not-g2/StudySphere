@@ -18,13 +18,13 @@ const StudentList: React.FC = () => {
   const courseId = params.id; // Retrieve the course ID from the URL
 
   return (
-    <div className="p-4 min-h-screen bg-gray-100">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Students for Assignment {assignmentId}</h2>
+    <div className="p-4 min-h-screen bg-c2">
+      <h2 className="text-c4 text-2xl font-semibold mb-6 text-center">Students for Assignment {assignmentId}</h2>
       <ul className="max-w-md mx-auto space-y-4">
         {students.map((student) => (
-          <li key={student.id} className="bg-white shadow-md rounded-lg p-4">
+          <li key={student.id} className="bg-c3 shadow-md rounded-lg p-4">
             {/* Include courseId and assignmentId in the link path */}
-            <Link href={`/admin/courses/${courseId}/assignments/assignment/${assignmentId}/student/${student.id}`} className="text-blue-600 hover:underline">
+            <Link href={`/admin/courses/${courseId}/assignments/assignment/${assignmentId}/student/${student.id}`} className="text-c5 hover:underline">
               {student.name}
             </Link>
           </li>

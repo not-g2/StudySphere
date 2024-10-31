@@ -16,20 +16,20 @@ const AssignmentPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 min-h-screen bg-gray-100 flex flex-col items-center">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Assignment {assignmentId} for Student {studentId}</h2>
-      <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full">
-        <p className="text-gray-700 mb-4">
+    <div className="p-4 min-h-screen bg-c2 flex flex-col items-center">
+      <h2 className="text-c4 text-2xl font-semibold mb-6 text-center">Assignment {assignmentId} for Student {studentId}</h2>
+      <div className="bg-c3 shadow-md rounded-lg p-6 max-w-md w-full">
+        <p className="text-c5 mb-4">
           <strong>Assignment ID:</strong> {assignmentId}
         </p>
-        <p className="text-gray-700 mb-4">
+        <p className="text-c5 mb-4">
           <strong>Student ID:</strong> {studentId}
         </p>
         <a
           href="https://example.com/assignment-link" // Replace with actual assignment link
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:underline mb-4 inline-block"
+          className="text-c1 hover:underline mb-4 inline-block"
         >
           View Assignment
         </a>
@@ -40,7 +40,7 @@ const AssignmentPage: React.FC = () => {
             onChange={toggleApproved}
             className="mr-2 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <label className="text-gray-700">Mark as Corrected</label>
+          <label className="text-c5">Mark as Corrected</label>
         </div>
       </div>
     </div>
