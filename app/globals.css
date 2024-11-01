@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 /* :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -39,4 +43,3 @@ body {
   color: white !important;
   border-radius: 0.5rem; /* Optional: adds rounded corners */
 }
-

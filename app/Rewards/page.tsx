@@ -76,22 +76,42 @@ const RewardsDisplay = () => {
   };
 
   return (
-    <Grid container spacing={2} padding={4}>
+    <Grid
+      container
+      spacing={1}
+      paddingLeft={1}
+      paddingTop={1}
+      margin={0}
+      style={{ backgroundColor: "#1b1a55", width: "100%" }}
+    >
       {Rewards.map((reward, index) => (
-        <Grid item xs={12} sm={6} md={2} key={index} sx={{ margin: 0 }}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+          lg={2}
+          key={index}
+          sx={{ marginBottom: 1 }}
+        >
           <Card
             onClick={() => handleSubmit(reward)}
             sx={{
-              maxWidth: 220,
-              backgroundColor: "#EEEEEE",
+              width: "90%",
+              backgroundColor: "#000000",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               paddingTop: 1,
-              cursor: "pointer", // Change cursor to pointer for better UX
+              borderRadius: 3,
+              borderImage: "linear-gradient(45deg, #1b1a55, #070f2b) 1", // Gradient border
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Subtle shadow
+              transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
               "&:hover": {
-                boxShadow: 4, // Optional: Adds shadow effect on hover
+                transform: "scale(1.02)", // Slight scaling effect on hover
+                boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.3)", // Stronger shadow on hover
               },
+              cursor: "pointer",
             }}
           >
             <CardMedia
@@ -99,21 +119,29 @@ const RewardsDisplay = () => {
               height="140"
               image={reward.picture}
               alt={reward.title}
-              sx={{ width: 200, height: 200, borderRadius: 2 }}
+              sx={{
+                width: 200,
+                height: 200,
+                borderRadius: 3,
+                border: "1px solid",
+              }}
             />
             <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
+              <Typography
+                gutterBottom
+                variant="h5"
+                component="div"
+                color="#FFFFFF"
+              >
                 {reward.title}
               </Typography>
-              <Typography variant="body2" color="#0D1B2A">
+              <Typography variant="body2" color="#FFFFFF">
                 {reward.desc}
               </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" color="primary">
+              <Typography color="#FFFFFF">
                 Redeem for {reward.cost} points
-              </Button>
-            </CardActions>
+              </Typography>
+            </CardContent>
           </Card>
         </Grid>
       ))}
