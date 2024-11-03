@@ -1,17 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/multer.middleware');
+const upload = require('../middleware/multerMiddleware');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 
 // Route for uploading profile pictures
 router.post('/upload/profile', upload.single('image'), async (req, res) => {
     try {
-        const path = req.file.path;
-        const result = await uploadToCloudinary(path, "profile-pictures"); // Store in 'profile-pictures' folder
+        const result = req.file; // Multer will give you the Cloudinary response in req.file
         res.status(200).json({
             success: true,
             message: 'Profile picture uploaded successfully',
-            data: result,
+            data: {
+                url: result.path, // or result.secure_url depending on your storage config
+                publicId: result.filename, // or however you want to manage it
+            },
         });
     } catch (error) {
         console.error('Error uploading profile picture:', error);
@@ -19,20 +21,5 @@ router.post('/upload/profile', upload.single('image'), async (req, res) => {
     }
 });
 
-// Route for uploading course pictures
-router.post('/upload/course', upload.single('image'), async (req, res) => {
-    try {
-        const path = req.file.path;
-        const result = await uploadToCloudinary(path, "course-pictures"); // Store in 'course-pictures' folder
-        res.status(200).json({
-            success: true,
-            message: 'Course picture uploaded successfully',
-            data: result,
-        });
-    } catch (error) {
-        console.error('Error uploading course picture:', error);
-        res.status(500).json({ success: false, message: 'Failed to upload course picture' });
-    }
-});
 
 module.exports = router;
