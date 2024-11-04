@@ -5,7 +5,7 @@ const User = require('../models/userModel');
 const authMiddleware = require('../middleware/auth');  // Middleware to authenticate users
 
 // Upload profile picture
-router.post('/profile/upload', authMiddleware, upload.single('profilePic'), async (req, res) => {
+router.post('/profile/upload', authMiddleware, upload.single('profilePic'), async (req, res) => {   
     try {
         const user = await User.findById(req.user.id);
         if (!user) {

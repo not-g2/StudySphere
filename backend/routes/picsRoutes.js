@@ -1,25 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const {upload} = require('../utils/cloudinary');
-const { uploadToCloudinary } = require('../utils/cloudinary');
+const {upload} = require('../utils/cloudinary');  // Import upload middleware
 const User = require('../models/userModel');
-// Route for uploading profile pictures
-router.post('/upload/profile', upload.single('image'), async (req, res) => {
+const authMiddleware = require('../middleware/auth');  // Middleware to authenticate users
+
+// Upload profile picture
+router.post('/profile/upload', authMiddleware, upload.single('profilePic'), async (req, res) => {
     try {
-        const result = req.file; // Multer will give you the Cloudinary response in req.file
-        res.status(200).json({
-            success: true,
-            message: 'Profile picture uploaded successfully',
-            data: {
-                url: result.path, // or result.secure_url depending on your storage config
-                publicId: result.filename, // or however you want to manage it
-            },
-        });
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Update the user's profilePic field with the Cloudinary URL
+        user.profilePic = req.file.path;  // Multer provides `req.file.path` after successful upload
+        await user.save();
+
+        res.json({ msg: 'Profile picture updated successfully', profilePic: user.profilePic });
     } catch (error) {
-        console.error('Error uploading profile picture:', error);
-        res.status(500).json({ success: false, message: 'Failed to upload profile picture' });
+        console.error(error);
+        res.status(500).json({ msg: 'Internal Server Error' });
     }
 });
-
 
 module.exports = router;
