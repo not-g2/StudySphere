@@ -15,6 +15,7 @@ router.post('/profile/upload', authMiddleware, upload.single('profilePic'), asyn
 
         // Update the user's profilePic field with the Cloudinary URL
         user.profilePic = req.file.path;  // Multer provides `req.file.path` after successful upload
+        user.image.url = user.profilePic;
         await user.save();
 
         res.json({ msg: 'Profile picture updated successfully', profilePic: user.profilePic });
