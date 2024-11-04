@@ -7,8 +7,9 @@ const authMiddleware = require('../middleware/auth');  // Middleware to authenti
 // Upload profile picture
 router.post('/profile/upload', authMiddleware, upload.single('profilePic'), async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.userID);
         if (!user) {
+            console.log(req.user.userID);
             return res.status(404).json({ msg: 'User not found' });
         }
 
