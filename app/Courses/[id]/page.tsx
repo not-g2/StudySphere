@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import professorImage from "../../../public/teach1.jpeg"; // Sample path to the professor's picture
 import bannerImage from "../../../public/reward1.jpeg"; // Sample path to the banner background
-import Popup from "../../../components/announcmentpopup";
+import AnnouncementPopup from "../../../components/announcmentpopup";
+import AssignmentPopup from "../../../components/assignmentpopup";
 import { useState } from "react";
 
 // Sample data for assignments and announcements
@@ -23,6 +24,8 @@ const assignments = [
     dueDate: "2024-11-05",
     course: "Mathematics",
     status: "Upcoming",
+    desc: "Explore and Investigate the following and submit a report by clearly mentioned your name and registration number in MSWord Internet Banking Security Mechanisms, Password Management and Related Security Algorithms UPI Security Mechanisms. Justify and give your perspective which UPI is safe or not.",
+    link: "example.com",
   },
   {
     id: 2,
@@ -30,6 +33,8 @@ const assignments = [
     dueDate: "2024-11-01",
     course: "History",
     status: "Due Today",
+    desc: "smgthh smth",
+    link: "example.com",
   },
 ];
 
@@ -71,10 +76,23 @@ interface Announcement {
   content: string;
 }
 
+interface Assignment {
+  id: number;
+  title: string;
+  dueDate: string;
+  course: string;
+  desc: string;
+  link: string;
+}
+
 const DashboardPage = () => {
   const [open, setOpen] = useState(false);
+  const [openAssm, setOpenAssm] = useState(false);
   const [currentAnnouncement, setCurrentAnnouncement] =
     useState<Announcement | null>(null);
+  const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(
+    null
+  );
 
   const handleClickOpen = (announcement: Announcement) => {
     setCurrentAnnouncement(announcement);
@@ -86,9 +104,18 @@ const DashboardPage = () => {
     setCurrentAnnouncement(null);
   };
 
+  const handleClickOpenAssm = (assignment: Assignment) => {
+    setCurrentAssignment(assignment);
+    setOpenAssm(true);
+  };
+
+  const handleCloseAssm = () => {
+    setOpenAssm(false);
+    setCurrentAssignment(null);
+  };
+
   return (
     <Box sx={{ padding: 4, backgroundColor: "#f5f5f5" }}>
-      {/* Top Banner */}
       <Box
         sx={{
           position: "relative",
@@ -103,20 +130,18 @@ const DashboardPage = () => {
           color: "#ffffff",
         }}
       >
-        {/* Subject Title */}
         <Typography variant="h4" sx={{ fontWeight: "bold" }}>
           Course: Mathematics
         </Typography>
 
-        {/* Professor's Picture */}
         <Avatar
           alt="Professor Name"
           src={professorImage.src}
           sx={{
             position: "absolute",
             right: 20,
-            width: 80,
-            height: 80,
+            width: 120,
+            height: 120,
             border: "3px solid white",
             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
           }}
@@ -124,7 +149,6 @@ const DashboardPage = () => {
       </Box>
 
       <Grid container spacing={4} mt={2}>
-        {/* Assignments Due Section */}
         <Grid item xs={12} md={8}>
           <Typography variant="h5" gutterBottom>
             Assignments Due
@@ -157,19 +181,31 @@ const DashboardPage = () => {
                   Course: {assignment.course}
                 </Typography>
               </CardContent>
-              <Button size="small" variant="contained" color="primary">
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={() => handleClickOpenAssm(assignment)}
+              >
                 View Details
               </Button>
             </Card>
           ))}
         </Grid>
-
-        {/* Announcements Section */}
         <Grid item xs={12} md={4}>
           <Typography variant="h5" gutterBottom>
             Announcements
           </Typography>
-          <Box sx={{ maxHeight: 400, overflowY: "auto", paddingRight: 1 }}>
+          <Box
+            sx={{
+              maxHeight: 400,
+              overflowY: "auto",
+              paddingRight: 1,
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+            }}
+          >
             {announcements.map((announcement) => (
               <Card
                 key={announcement.id}
@@ -193,12 +229,58 @@ const DashboardPage = () => {
               </Card>
             ))}
           </Box>
+
+          <Box sx={{ marginTop: 10 }}>
+            <Typography variant="h5" gutterBottom>
+              Chapters
+            </Typography>
+            <Box
+              sx={{
+                maxHeight: 400,
+                overflowY: "auto",
+                paddingRight: 1,
+                "&::-webkit-scrollbar": {
+                  display: "none",
+                },
+              }}
+            >
+              {announcements.map((announcement) => (
+                <Card
+                  key={announcement.id}
+                  sx={{
+                    marginBottom: 1,
+                    borderRadius: 2,
+                    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                    backgroundColor: "#ffffff",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    window.open("https://example.com", "_blank");
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      {announcement.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Posted on: {announcement.datePosted}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          </Box>
         </Grid>
       </Grid>
-      <Popup
+      <AnnouncementPopup
         open={open}
         handleClose={handleClose}
         announcement={currentAnnouncement}
+      />
+      <AssignmentPopup
+        open={openAssm}
+        handleClose={handleCloseAssm}
+        assignment={currentAssignment}
       />
     </Box>
   );

@@ -1,37 +1,47 @@
-// assignments/assignment/[aid]/page.tsx
-
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
+import StudentAssignment from "@/components/studentassignment";
 
 const students = [
   { id: 1, name: "Alice Johnson" },
   { id: 2, name: "Bob Smith" },
   { id: 3, name: "Charlie Brown" },
+  { id: 4, name: "Diana Prince" },
+  { id: 5, name: "Ethan Hunt" },
 ];
 
 const StudentList: React.FC = () => {
   const params = useParams();
-  const assignmentId = params.aid;
-  const courseId = params.id; // Retrieve the course ID from the URL
+  const assignmentId = params.aid as string;
+  const courseId = (params.id as string) || "";
+
+  const [approvalStatus, setApprovalStatus] = useState<{ [key: number]: boolean }>({});
+
+  const toggleApproval = (studentId: number) => {
+    setApprovalStatus((prevState) => ({
+      ...prevState,
+      [studentId]: !prevState[studentId],
+    }));
+  };
 
   return (
     <div className="p-4 min-h-screen bg-c2">
       <h2 className="text-c4 text-2xl font-semibold mb-6 text-center">
         Students for Assignment {assignmentId}
       </h2>
-      <ul className="max-w-md mx-auto space-y-4">
+      {/* Grid container for responsive layout */}
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
         {students.map((student) => (
-          <li key={student.id} className="bg-c3 shadow-md rounded-lg p-4">
-            {/* Include courseId and assignmentId in the link path */}
-            <Link
-              href={`/Admin/courses/${courseId}/assignments/assignment/${assignmentId}/student/${student.id}`}
-              className="text-c5 hover:underline"
-            >
-              {student.name}
-            </Link>
+          <li key={student.id}>
+            <StudentAssignment
+              studentId={student.id}
+              studentName={student.name}
+              assignmentId={assignmentId}
+              approved={approvalStatus[student.id] || false}
+              toggleApproved={() => toggleApproval(student.id)}
+            />
           </li>
         ))}
       </ul>

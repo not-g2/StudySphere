@@ -24,7 +24,7 @@ const AddChallenge: React.FC<AddChallengeProps> = ({ onAdd }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border border-gray-700 rounded-lg shadow-lg bg-black text-white">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 border border-gray-700 rounded-lg shadow-lg bg-c3 text-white">
       <div>
         <label className="block font-medium mb-1">Challenge Name:</label>
         <input
@@ -32,7 +32,7 @@ const AddChallenge: React.FC<AddChallengeProps> = ({ onAdd }) => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter challenge name"
-          className="border border-gray-600 bg-gray-800 text-white p-2 w-full rounded-md"
+          className="border border-gray-600 bg-c1 text-white p-2 w-full rounded-md"
           required
         />
       </div>
@@ -42,7 +42,7 @@ const AddChallenge: React.FC<AddChallengeProps> = ({ onAdd }) => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Enter a description"
-          className="border border-gray-600 bg-gray-800 text-white p-2 w-full rounded-md"
+          className="border border-gray-600 bg-c1 text-white p-2 w-full rounded-md"
           required
         />
       </div>
@@ -52,11 +52,11 @@ const AddChallenge: React.FC<AddChallengeProps> = ({ onAdd }) => {
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="border border-gray-600 bg-gray-800 text-white p-2 w-full rounded-md"
+          className="border border-gray-600 bg-c1 text-white p-2 w-full rounded-md"
           required
         />
       </div>
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded-md w-full">
+      <button type="submit" className="bg-gray-400 text-white p-2 rounded-md w-full">
         Add Challenge
       </button>
     </form>

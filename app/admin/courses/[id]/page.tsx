@@ -163,7 +163,7 @@ const CoursePage: React.FC = () => {
 
         {/* Link to All Assignments */}
         <div className="mt-8">
-          <Link href={`/Admin/courses/${id}/assignments`}>
+          <Link href={`/admin/courses/${id}/assignments`}>
             <button className="w-full bg-c4 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
               View All Assignments
             </button>

@@ -23,7 +23,7 @@ const AssignmentList: React.FC = () => {
         {assignments.map((assignment) => (
           <li key={assignment.id} className="bg-c3 shadow-md rounded-lg p-4">
             {/* Include the courseId in the link path */}
-            <Link href={`/Admin/courses/${courseId}/assignments/assignment/${assignment.id}`} className="text-c5 hover:underline">
+            <Link href={`/admin/courses/${courseId}/assignments/assignment/${assignment.id}`} className="text-c5 hover:underline">
               {assignment.title}
             </Link>
           </li>

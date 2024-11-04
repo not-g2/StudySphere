@@ -1,4 +1,4 @@
-// app/components/MyCourses.tsx
+
 
 "use client";
 
@@ -38,7 +38,7 @@ const MyCourses: React.FC = () => {
   ]);
 
   const handleCourseClick = (id: number) => {
-    router.push(`/Admin/courses/${id}`);
+    router.push(`/admin/courses/${id}`);
   };
 
   return (
