@@ -18,13 +18,13 @@ const ProfilePage: React.FC = () => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [name, setName] = useState(session?.user?.name || "");
+  const [name, setName] = useState(session?.user?.email || "");
   const [email, setEmail] = useState(session?.user?.email || "");
   const [image, setImage] = useState(session?.user?.image || "");
 
   useEffect(() => {
     if (status === "authenticated") {
-      setName(session?.user?.name || "");
+      setName(session?.user?.email || "");
       setEmail(session?.user?.email || "");
       setImage(session?.user?.image || "");
     }
@@ -54,12 +54,15 @@ const ProfilePage: React.FC = () => {
 
   const uploadImage = async (file: File) => {
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("profilePic", file);
+
+    const token = session?.accessToken;
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/images/upload/profile",
+        "http://localhost:8000/api/images/profile/upload",
         {
+          headers: { Authorization: `Bearer ${token}` },
           method: "POST",
           body: formData,
         }
@@ -102,7 +105,7 @@ const ProfilePage: React.FC = () => {
           onChange={handleImageChange}
         />
         <Typography variant="h5" component="h1" gutterBottom>
-          Welcome, {session?.user?.name || "User"}
+          Welcome, {session?.user?.email || "User"}
         </Typography>
         <form onSubmit={handleUpdateProfile} style={{ width: "100%" }}>
           <TextField
