@@ -9,11 +9,17 @@ const JWT = require('jsonwebtoken');
 router.post('/signup' , async (req , res) => {
     try{
         const {email , password } = req.body;
-
+        // console.log(email);
+        // console.log(password);
+        // console.log(req);
         if(!email || !password){
             return res.status(400).json({
                 msg : "Email and pasword are required!"
             })
+        }
+
+        if (!process.env.JWT_secret) {
+            throw new Error("JWT secret is not defined");
         }
 
         // check if user already exists

@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-    name:{type: String , required : true},
-    userName:{type : String, required : true},
-    email:{type : String, required : true , unique: true,match: [/.+\@.+\..+/, 'Please fill a valid email address']},
+    name:{type: String },
+    userName:{type : String},
+    email:{type : String, required : true , unique: true},
     password:{type : String , required : true},
     academicGoals:[{type : mongoose.Schema.Types.ObjectId , ref : 'Goal'}],
     courses : [{type : mongoose.Schema.Types.ObjectId , ref : 'Course'}],
@@ -16,14 +16,14 @@ const UserSchema = new mongoose.Schema({
     image:{
         publicId:{
             type: String,
-            required: true,
+            //required: true,
         },
         url: {
             type: String,
-            required: true,
+            //required: true,
         }
     },
-    phoneNumber : {type : String , minlength :10 , maxlength : 10 , match: [/^\d{10}$/, 'Please enter a valid 10-digit phone number']},
+    phoneNumber : {type : String , minlength :10 , maxlength : 10 },
     createdAt : {type : Date , default : Date.now}
 });
 

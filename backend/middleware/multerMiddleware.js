@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/cloudinary');  // Import upload middleware
+const {upload} = require('../utils/cloudinary');  // Import upload middleware
 const User = require('../models/userModel');
 const authMiddleware = require('../middleware/auth');  // Middleware to authenticate users
 

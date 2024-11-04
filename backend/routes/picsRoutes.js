@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/multerMiddleware');
+const {upload} = require('../utils/cloudinary');
 const { uploadToCloudinary } = require('../utils/cloudinary');
-
+const User = require('../models/userModel');
 // Route for uploading profile pictures
 router.post('/upload/profile', upload.single('image'), async (req, res) => {
     try {

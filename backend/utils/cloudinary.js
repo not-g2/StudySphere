@@ -10,15 +10,27 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Configure Cloudinary storage for Multer
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'my-profile',  // Folder for profile images
+        allowed_formats: ['jpg', 'jpeg', 'png'],
+    },
+});
 
-//this function uploads the image it receives from the frontend to Cloudinary (specifically to the my-profile folder, so that the images stay in one place) through the cloudinary.uploader.upload() method, and then returns a secure_url (a CDN link to that image), and a public_id.
-const uploadToCloudinary = async (path, folder = "my-profile") => {
+// Initialize Multer with Cloudinary storage
+const upload = multer({ storage });
+
+// Utility function to upload directly to Cloudinary without Multer
+const uploadToCloudinary = async (filePath, folder = 'my-profile') => {
     try {
-      const data = await cloudinary.uploader.upload(path, { folder: folder });
-      return { url: data.secure_url, publicId: data.public_id };
-    } catch (err) {
-      console.log(err);
-      throw err;
+        const result = await cloudinary.uploader.upload(filePath, { folder: folder });
+        return { url: result.secure_url, publicId: result.public_id };
+    } catch (error) {
+        console.error("Error uploading to Cloudinary:", error);
+        throw error;
     }
-  };
-  module.exports = { uploadToCloudinary }
+};
+
+module.exports = { upload, uploadToCloudinary };
