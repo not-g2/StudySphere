@@ -3,12 +3,13 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 declare module "next-auth" {
+  //Removed token put back if things break
   interface Session {
     user: {
       id: string;
       email: string;
-      token?: string;
       image?: string;
+      name?: string;
     };
     accessToken?: string;
   }
