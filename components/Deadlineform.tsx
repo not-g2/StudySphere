@@ -33,7 +33,7 @@ const DeadlineForm: React.FC<DeadlineFormProps> = ({ onAddDeadline }) => {
   };
 
   return (
-    <div className="bg-black shadow-md rounded-lg p-6 w-full max-w-md mx-auto">
+    <div className="bg-c5 shadow-md rounded-lg p-6 w-full max-w-md mx-auto">
       <h2 className="text-xl font-semibold mb-4 text-white">Add New Deadline</h2>
       <form onSubmit={handleSubmit}>
         {/* Name Field */}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Grid, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import LevelXPDisplay from '@/components/levelandexp';
 import AddChallenge from '@/components/addchallenge';
 import ChallengeTable from '@/components/challengetable';
@@ -18,28 +18,28 @@ const ChallengePage: React.FC = () => {
     { name: 'Example Challenge 2', description: 'This is the second example challenge.', endDate: '2024-12-15' },
   ]);
 
-  const addChallenge = (challenge: Challenge) => {
+  const addChallenge = (challenge: Challenge): void => {
     setChallenges([...challenges, challenge]);
   };
 
   return (
-    <Box className="bg-c2 min-h-screen p-4">
-      <Grid container spacing={4}>
+    <Box className="bg-c2 min-h-screen p-4" display="flex" flexDirection="column" alignItems="flex-start">
+      <Box display="flex" justifyContent="space-between" width="100%" gap={4}>
         {/* Left Column - Level and XP Display */}
-        <Grid item xs={12} md={3}>
+        <Box flex="1" maxWidth="25%">
           <LevelXPDisplay level={5} xp={1500} />
-        </Grid>
+        </Box>
 
         {/* Center Column - Add Challenge Form */}
-        <Grid item xs={12} md={5}>
+        <Box flex="1" maxWidth="50%">
           <AddChallenge onAdd={addChallenge} />
-        </Grid>
+        </Box>
 
         {/* Right Column - Challenge Table */}
-        <Grid item xs={12} md={4}>
+        <Box flex="1" maxWidth="25%">
           <ChallengeTable challenges={challenges} />
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Box>
   );
 };

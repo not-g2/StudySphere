@@ -1,6 +1,6 @@
 "use client";
 import {
-  Container,
+  Box,
   Grid,
   Card,
   CardContent,
@@ -14,13 +14,6 @@ import { useRouter } from "next/navigation";
 const classesData = [
   {
     id: 1,
-    title: "Mathematics",
-    description: "Algebra and Geometry",
-    teacher: "Mr. Smith",
-    imageUrl: pic.src,
-  },
-  {
-    id: 10,
     title: "Mathematics",
     description: "Algebra and Geometry",
     teacher: "Mr. Smith",
@@ -49,14 +42,6 @@ const classesData = [
   },
 ];
 
-interface classItem {
-  id: number;
-  title: string;
-  description: string;
-  teacher: string;
-  imageUrl: string;
-}
-
 const ClassesPage = () => {
   const router = useRouter();
 
@@ -65,18 +50,25 @@ const ClassesPage = () => {
   };
 
   return (
-    <Container
+    <Box
+      className="bg-c2 text-white p-4 flex flex-col items-start"
       sx={{
+        minHeight: "100vh",
+        width: "100vw", // Full viewport width
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        minHeight: "100%",
       }}
     >
-      <Typography variant="h4" gutterBottom className="mt-2" align="center">
+      <Typography
+        variant="h4"
+        gutterBottom
+        align="center"
+        className="text-white mt-2 mb-4"
+      >
         Your Classes
       </Typography>
-      <Grid container spacing={4} justifyContent="center">
+      <Grid container spacing={4} justifyContent="flex-start">
         {classesData.map((classItem) => (
           <Grid
             item
@@ -84,29 +76,30 @@ const ClassesPage = () => {
             xs={12}
             sm={6}
             md={4}
-            lg={4}
+            lg={3} // Each card will take up 3 columns out of 12 on large screens, equating to 25%
             display="flex"
             justifyContent="center"
           >
             <Card
+              className="bg-c5 text-white"
               sx={{
-                width: 400,
-                height: 200,
-                border: 3,
-                borderColor: "#011001",
+                width: "100%", // Ensures card takes full width of its grid container
+                height: "300px", // Adjust height as needed
                 cursor: "pointer",
               }}
               onClick={() => handleCardClick(classItem.id)}
             >
               <Grid container sx={{ height: "100%" }}>
                 {/* Left side with text content */}
-                <Grid item xs={6} sx={{ padding: 2 }}>
+                <Grid item xs={7} sx={{ padding: 2 }}>
                   <CardContent sx={{ padding: 0 }}>
-                    <Typography variant="h6">{classItem.title}</Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="h5" color="inherit" sx={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+                      {classItem.title}
+                    </Typography>
+                    <Typography variant="body1" color="inherit" sx={{ fontSize: "1rem" }}>
                       {classItem.description}
                     </Typography>
-                    <Typography variant="caption" color="textSecondary">
+                    <Typography variant="caption" color="inherit" sx={{ fontSize: "0.9rem" }}>
                       {classItem.teacher}
                     </Typography>
                   </CardContent>
@@ -114,7 +107,7 @@ const ClassesPage = () => {
                 {/* Right side with circular image */}
                 <Grid
                   item
-                  xs={6}
+                  xs={5}
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -126,12 +119,11 @@ const ClassesPage = () => {
                     image={classItem.imageUrl}
                     alt={`${classItem.title} cover`}
                     sx={{
-                      width: "150px",
-                      height: "150px",
+                      width: "120px",
+                      height: "120px",
                       objectFit: "cover",
                       borderRadius: "50%",
-                      borderColor: "#010101",
-                      border: "3px double",
+                      border: "2px solid #010101",
                     }}
                   />
                 </Grid>
@@ -140,7 +132,7 @@ const ClassesPage = () => {
           </Grid>
         ))}
       </Grid>
-    </Container>
+    </Box>
   );
 };
 

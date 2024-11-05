@@ -10,8 +10,8 @@ import {
   Box,
   Avatar,
 } from "@mui/material";
-import professorImage from "../../../public/teach1.jpeg"; // Sample path to the professor's picture
-import bannerImage from "../../../public/reward1.jpeg"; // Sample path to the banner background
+import professorImage from "../../../public/teach1.jpeg";
+import bannerImage from "../../../public/reward1.jpeg";
 import AnnouncementPopup from "../../../components/announcmentpopup";
 import AssignmentPopup from "../../../components/assignmentpopup";
 import { useState } from "react";
@@ -48,20 +48,6 @@ const announcements = [
   },
   {
     id: 2,
-    title: "Holiday Schedule",
-    datePosted: "2024-10-18",
-    content:
-      "The school will be closed for holidays from December 20 to January 5. During this period, all classes, extracurricular activities, and administrative offices will be unavailable. We encourage students to take this time to relax, recharge, and spend time with family and friends. Please ensure that any assignments or projects due during this break are submitted beforehand, and reach out to your instructors if you have any concerns",
-  },
-  {
-    id: 3,
-    title: "New Semester Guidelines",
-    datePosted: "2024-10-20",
-    content:
-      "Please review the new guidelines for the upcoming semester. These guidelines are designed to enhance the learning experience and ensure that all students are aware of important policies. It is crucial that you familiarize yourself with these changes, as they may impact your coursework and participation in class activities. Should you have any questions or require clarification, feel free to reach out to your instructor or academic advisor.",
-  },
-  {
-    id: 4,
     title: "Holiday Schedule",
     datePosted: "2024-10-18",
     content:
@@ -115,7 +101,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <Box sx={{ padding: 4, backgroundColor: "#f5f5f5" }}>
+    <Box className="bg-c2" sx={{ padding: 4 }}>
       <Box
         sx={{
           position: "relative",
@@ -150,34 +136,32 @@ const DashboardPage = () => {
 
       <Grid container spacing={4} mt={2}>
         <Grid item xs={12} md={8}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom className="text-white">
             Assignments Due
           </Typography>
           {assignments.map((assignment) => (
             <Card
               key={assignment.id}
+              className="bg-c5 text-white"
               sx={{
                 marginBottom: 2,
                 padding: 2,
                 borderRadius: 2,
                 boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                backgroundColor: "#ffffff",
               }}
             >
               <CardContent>
                 <Badge
                   badgeContent={assignment.status}
-                  color={
-                    assignment.status === "Due Today" ? "error" : "primary"
-                  }
+                  color={assignment.status === "Due Today" ? "error" : "primary"}
                 />
                 <Typography variant="h6" gutterBottom>
                   {assignment.title}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: "#d3d3d3" }}>
                   Due Date: {assignment.dueDate}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: "#d3d3d3" }}>
                   Course: {assignment.course}
                 </Typography>
               </CardContent>
@@ -193,7 +177,7 @@ const DashboardPage = () => {
           ))}
         </Grid>
         <Grid item xs={12} md={4}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom className="text-white">
             Announcements
           </Typography>
           <Box
@@ -209,11 +193,11 @@ const DashboardPage = () => {
             {announcements.map((announcement) => (
               <Card
                 key={announcement.id}
+                className="bg-c5 text-white"
                 sx={{
                   marginBottom: 1,
                   borderRadius: 2,
                   boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                  backgroundColor: "#ffffff",
                   cursor: "pointer",
                 }}
                 onClick={() => handleClickOpen(announcement)}
@@ -222,7 +206,7 @@ const DashboardPage = () => {
                   <Typography variant="h6" gutterBottom>
                     {announcement.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: "#d3d3d3" }}>
                     Posted on: {announcement.datePosted}
                   </Typography>
                 </CardContent>
@@ -231,7 +215,7 @@ const DashboardPage = () => {
           </Box>
 
           <Box sx={{ marginTop: 10 }}>
-            <Typography variant="h5" gutterBottom>
+            <Typography variant="h5" gutterBottom className="text-white">
               Chapters
             </Typography>
             <Box
@@ -247,11 +231,11 @@ const DashboardPage = () => {
               {announcements.map((announcement) => (
                 <Card
                   key={announcement.id}
+                  className="bg-c5 text-white"
                   sx={{
                     marginBottom: 1,
                     borderRadius: 2,
                     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: "#ffffff",
                     cursor: "pointer",
                   }}
                   onClick={() => {
@@ -262,7 +246,7 @@ const DashboardPage = () => {
                     <Typography variant="h6" gutterBottom>
                       {announcement.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: "#d3d3d3" }}>
                       Posted on: {announcement.datePosted}
                     </Typography>
                   </CardContent>

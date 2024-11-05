@@ -24,7 +24,7 @@ const AddChallenge: React.FC<AddChallengeProps> = ({ onAdd }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border border-gray-700 rounded-lg shadow-lg bg-c3 text-white">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 border border-gray-700 rounded-lg shadow-lg bg-c5 text-white">
       <div>
         <label className="block font-medium mb-1">Challenge Name:</label>
         <input

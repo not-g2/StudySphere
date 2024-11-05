@@ -4,9 +4,7 @@ import {
   Card,
   CardMedia,
   CardContent,
-  CardActions,
   Typography,
-  Button,
   Grid,
 } from "@mui/material";
 import pic1 from "../../public/reward1.jpeg";
@@ -82,7 +80,8 @@ const RewardsDisplay = () => {
       paddingLeft={1}
       paddingTop={1}
       margin={0}
-      style={{ backgroundColor: "#1b1a55", width: "100%" }}
+      className="bg-c2" // Apply background color c2 to the main container
+      sx={{ width: "100%", height: "100vh" }} // Ensure full viewport height
     >
       {Rewards.map((reward, index) => (
         <Grid
@@ -96,20 +95,20 @@ const RewardsDisplay = () => {
         >
           <Card
             onClick={() => handleSubmit(reward)}
+            className="bg-c5" // Apply color c5 to each card
             sx={{
               width: "90%",
-              backgroundColor: "#000000",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               paddingTop: 1,
               borderRadius: 3,
-              borderImage: "linear-gradient(45deg, #1b1a55, #070f2b) 1", // Gradient border
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Subtle shadow
-              transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
+              borderImage: "linear-gradient(45deg, #1b1a55, #070f2b) 1",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
               "&:hover": {
-                transform: "scale(1.02)", // Slight scaling effect on hover
-                boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.3)", // Stronger shadow on hover
+                transform: "scale(1.02)",
+                boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.3)",
               },
               cursor: "pointer",
             }}

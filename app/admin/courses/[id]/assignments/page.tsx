@@ -18,12 +18,12 @@ const AssignmentList: React.FC = () => {
 
   return (
     <div className="p-4 min-h-screen bg-c2">
-      <h2 className="text-2xl font-semibold mb-6 text-center text-c4">Assignments</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-center text-white">Assignments</h2>
       <ul className="max-w-md mx-auto space-y-4">
         {assignments.map((assignment) => (
-          <li key={assignment.id} className="bg-c3 shadow-md rounded-lg p-4">
+          <li key={assignment.id} className="bg-c5 shadow-md rounded-lg p-4">
             {/* Include the courseId in the link path */}
-            <Link href={`/admin/courses/${courseId}/assignments/assignment/${assignment.id}`} className="text-c5 hover:underline">
+            <Link href={`/admin/courses/${courseId}/assignments/assignment/${assignment.id}`} className="text-white hover:underline">
               {assignment.title}
             </Link>
           </li>

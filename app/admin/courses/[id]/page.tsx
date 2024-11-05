@@ -1,5 +1,3 @@
-// app/courses_admin/[id]/page.tsx
-
 "use client";
 
 import React, { useState, useRef } from "react";
@@ -97,26 +95,26 @@ const CoursePage: React.FC = () => {
 
   return (
     <div className="bg-c2 min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="bg-c3 p-8 rounded shadow-md max-w-lg w-full text-center">
-        <h1 className="text-2xl font-bold mb-2 text-c1">{course.title}</h1>
-        <p className="mb-4 text-c1">{course.description}</p>
-        <p className="text-c1">
+      <div className="bg-c5 p-8 rounded shadow-md max-w-lg w-full text-center">
+        <h1 className="text-2xl font-bold mb-2 text-white">{course.title}</h1>
+        <p className="mb-4 text-white">{course.description}</p>
+        <p className="text-white">
           <strong>Instructor:</strong> {course.instructor}
         </p>
 
         {/* Announcement Section */}
         <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Make an Announcement</h2>
+          <h2 className="text-xl font-semibold mb-2 text-white">Make an Announcement</h2>
           <textarea
             value={announcement}
             onChange={handleAnnouncementChange}
             placeholder="Write an announcement..."
             rows={4}
-            className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-c1 placeholder-c1"
+            className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-white"
           ></textarea>
           <button
             onClick={postAnnouncement}
-            className="w-full bg-c4 text-c1 py-2 px-4 rounded hover:bg-opacity-80 transition"
+            className="text-white w-full bg-t2 py-2 px-4 rounded hover:bg-opacity-80 transition"
           >
             Post Announcement
           </button>
@@ -124,7 +122,7 @@ const CoursePage: React.FC = () => {
 
         {/* Assignment Upload Section */}
         <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-2">Upload Assignment</h2>
+          <h2 className="text-xl font-semibold mb-2 text-white">Upload Assignment</h2>
           {/* Hidden native file input */}
           <input
             ref={fileInputRef}
@@ -136,7 +134,7 @@ const CoursePage: React.FC = () => {
           <button
             type="button"
             onClick={handleChooseFileClick}
-            className="w-full bg-c4 text-white py-2 px-4 rounded mb-4 hover:bg-opacity-80 transition"
+            className="w-full bg-t2 text-white py-2 px-4 rounded mb-4 hover:bg-opacity-80 transition"
           >
             {selectedFile ? selectedFile.name : "Choose File"}
           </button>
@@ -146,13 +144,13 @@ const CoursePage: React.FC = () => {
             type="date"
             value={dueDate}
             onChange={handleDueDateChange}
-            className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-c1 placeholder-c1"
+            className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-c1"
             placeholder="Select due date"
           />
 
           <button
             onClick={submitAssignment}
-            className="w-full bg-c4 text-white py-2 px-4 rounded hover:bg-opacity-80 transition"
+            className="w-full bg-t2 text-white py-2 px-4 rounded hover:bg-opacity-80 transition"
           >
             Submit Assignment
           </button>
@@ -164,7 +162,7 @@ const CoursePage: React.FC = () => {
         {/* Link to All Assignments */}
         <div className="mt-8">
           <Link href={`/admin/courses/${id}/assignments`}>
-            <button className="w-full bg-c4 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
+            <button className="w-full bg-t2 text-white py-2 px-4 rounded hover:bg-opacity-80 transition">
               View All Assignments
             </button>
           </Link>

@@ -16,19 +16,19 @@ const StudentAssignment: React.FC<StudentAssignmentProps> = ({
   toggleApproved,
 }) => {
   return (
-    <li className="bg-c3 shadow-md rounded-lg p-4">
-      <h3 className="text-c5 font-semibold mb-2">{studentName}</h3>
-      <p className="text-c5 mb-2">
+    <li className="bg-c5 shadow-md rounded-lg p-4">
+      <h3 className="text-white font-semibold mb-2">{studentName}</h3>
+      <p className="text-white mb-2">
         <strong>Assignment ID:</strong> {assignmentId}
       </p>
-      <p className="text-c5 mb-2">
+      <p className="text-white mb-2">
         <strong>Student ID:</strong> {studentId}
       </p>
       <a
         href="https://example.com/assignment-link"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-c1 hover:underline mb-4 inline-block"
+        className="text-white hover:underline mb-4 inline-block"
       >
         View Assignment
       </a>
@@ -39,7 +39,7 @@ const StudentAssignment: React.FC<StudentAssignmentProps> = ({
           onChange={toggleApproved}
           className="mr-2 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
         />
-        <label className="text-c5">Mark as Corrected</label>
+        <label className="text-white">Mark as Corrected</label>
       </div>
     </li>
   );
