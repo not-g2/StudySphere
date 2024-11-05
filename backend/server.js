@@ -6,6 +6,7 @@ const uploadPicRoutes = require('./routes/picsRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userProfileRoutes = require('./routes/userProfileRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 const connectDB = require('./config/db');
 
 
@@ -18,7 +19,7 @@ app.use('/api/images',uploadPicRoutes);
 app.use('/api/auth',authRoutes);
 app.use('/api/desc',userProfileRoutes); // desc is for description
 app.use('/api/assgn',assignmentRoutes);
-
+app.use('/api/courses',courseRoutes);
 
 app.listen(8000,()=>{
     console.log("server is running on port 8000");

@@ -5,17 +5,17 @@ const CourseSchema = new mongoose.Schema({
     section : {type : String},
     description : {type : String , required : true},
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    assignments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Assignment' }],
+    //assignments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Assignment' }],
     chapters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' }],
     createdAt: { type: Date, default: Date.now },
     coursePic : {
         publicId:{
             type: String,
-            required: true,
+            //required: true,
         },
         url: {
             type: String,
-            required: true,
+            //required: true,
         }
     }
 })
