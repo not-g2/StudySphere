@@ -18,25 +18,109 @@ const ProfilePage: React.FC = () => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [name, setName] = useState(session?.user?.email || "");
-  const [email, setEmail] = useState(session?.user?.email || "");
-  const [image, setImage] = useState(session?.user?.image || "");
+  const [name, setName] = useState("User");
+  const [email, setEmail] = useState("");
+  const [image, setImage] = useState("");
+  const [phoneNumber, setphoneNumber] = useState("");
+
+  const [imageFile, setimageFile] = useState<File | null>(null);
+
+  const formDataDetails = new FormData();
+  const formDataImage = new FormData();
 
   useEffect(() => {
-    if (status === "authenticated") {
-      setName(session?.user?.email || "");
-      setEmail(session?.user?.email || "");
-      setImage(session?.user?.image || "");
-    }
+    const GetProfile = async () => {
+      if (status === "authenticated") {
+        const token = session?.accessToken;
 
-    if (status === "unauthenticated") {
-      router.push("/");
-    }
+        try {
+          const response = await fetch(
+            "http://localhost:8000/api/desc/profile",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              method: "GET",
+            }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            setName(data.name || "");
+            setEmail(data.email || "");
+            setImage(data.image?.url || "");
+            setphoneNumber(data.phoneNumber || "");
+          } else {
+            console.error("Failed to get details");
+          }
+        } catch (error) {
+          console.error("Error Getting profile Details:", error);
+        }
+      } else if (status === "unauthenticated") {
+        router.push("/");
+      }
+    };
+
+    GetProfile();
   }, [status, session]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
+    const formDataToJson = (formData: FormData) => {
+      const obj: { [key: string]: any } = {};
+      formData.forEach((value, key) => {
+        obj[key] = value;
+      });
+      return JSON.stringify(obj);
+    };
+
     e.preventDefault();
-    console.log("Updated Profile:", { name, email, image });
+    const token = session?.accessToken;
+
+    formDataDetails.set("name", name);
+    formDataDetails.set("phoneNumber", phoneNumber);
+
+    if (imageFile) {
+      formDataImage.set("profilePic", imageFile); // Append the image file
+    } else {
+      formDataImage.set("profilePic", "");
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/desc/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        method: "PUT",
+        body: formDataToJson(formDataDetails),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+      } else {
+        console.error("Failed to upload Profile Deatils");
+      }
+    } catch (error) {
+      console.error("Error uploading Profile:", error);
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/desc/profile/upload",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Keep Authorization header only
+          },
+          method: "POST",
+          body: formDataImage, // `formDataImage` should be a FormData object
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+      } else {
+        console.error("Failed to upload Profile Image");
+      }
+    } catch (error) {
+      console.error("Error uploading Profile:", error);
+    }
   };
 
   const handleImageClick = () => {
@@ -48,35 +132,7 @@ const ProfilePage: React.FC = () => {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setImage(imageUrl);
-      uploadImage(file);
-    }
-  };
-
-  const uploadImage = async (file: File) => {
-    const formData = new FormData();
-    formData.append("profilePic", file);
-
-    const token = session?.accessToken;
-
-    try {
-      const response = await fetch(
-        "http://localhost:8000/api/images/profile/upload",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Image uploaded successfully:", data);
-        setImage(data.imageUrl || image);
-      } else {
-        console.error("Failed to upload image");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
+      setimageFile(file);
     }
   };
 
@@ -105,7 +161,7 @@ const ProfilePage: React.FC = () => {
           onChange={handleImageChange}
         />
         <Typography variant="h5" component="h1" gutterBottom>
-          Welcome, {session?.user?.email || "User"}
+          Welcome, {name || "User"}
         </Typography>
         <form onSubmit={handleUpdateProfile} style={{ width: "100%" }}>
           <TextField
@@ -133,6 +189,8 @@ const ProfilePage: React.FC = () => {
             placeholder="(+91) 12345-67890"
             fullWidth
             variant="outlined"
+            value={phoneNumber}
+            onChange={(e) => setphoneNumber(e.target.value)}
             inputProps={{
               maxLength: 10, // Optional max length for phone number format (e.g., (123) 456-7890)
             }}

@@ -54,7 +54,6 @@ const SignUpPage: React.FC = () => {
         sameSite: "Strict",
       });
 
-      // Redirect to the login or home page upon success
       router.push("/");
     } catch (err) {
       setError((err as Error).message);
@@ -62,61 +61,101 @@ const SignUpPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box
+    <Box
+      sx={{
+        backgroundColor: "#001D3D",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Container
+        maxWidth="xs"
         sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          backgroundColor: "#001D3D",
+          color: "#FFFFFF",
+          width: "100%",
+          p: 3,
+          borderRadius: 2,
         }}
       >
-        <Typography component="h1" variant="h5">
-          Sign Up
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                value={form.password}
-                onChange={handleChange}
-              />
-            </Grid>
-          </Grid>
-          {error && (
-            <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-              {error}
-            </Typography>
-          )}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
+        <Box
+          sx={{
+            marginTop: 8,
+          }}
+        >
+          <Typography component="h1" variant="h5" sx={{ color: "#FFFFFF" }}>
             Sign Up
-          </Button>
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ mt: 3, color: "#FFFFFF" }}
+          >
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  sx={{
+                    "& .MuiInputBase-input": { color: "#FFFFFF" }, // Text color
+                    "& .MuiInputLabel-root": { color: "#FFFFFF" }, // Label color
+                    "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
+                      { borderColor: "#FFFFFF" }, // Border color
+                    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
+                      { borderColor: "#FFFFFF" }, // Hover border color
+                    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                      { borderColor: "#FFFFFF" }, // Focused border color
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  sx={{
+                    "& .MuiInputBase-input": { color: "#FFFFFF" }, // Text color
+                    "& .MuiInputLabel-root": { color: "#FFFFFF" }, // Label color
+                    "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
+                      { borderColor: "#FFFFFF" }, // Border color
+                    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
+                      { borderColor: "#FFFFFF" }, // Hover border color
+                    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                      { borderColor: "#FFFFFF" }, // Focused border color
+                  }}
+                />
+              </Grid>
+            </Grid>
+            {error && (
+              <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+                {error}
+              </Typography>
+            )}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign Up
+            </Button>
+          </Box>
         </Box>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

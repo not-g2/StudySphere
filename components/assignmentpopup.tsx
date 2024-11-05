@@ -87,10 +87,11 @@ const PopupForm: React.FC<PopupFormProps> = ({
           width: "800px", // Set fixed width
           height: "600px", // Set fixed height
           overflow: "hidden", // Prevent overflow
+          backgroundColor: "#001D3D",
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: "Bold", fontSize: 35 }}>
+      <DialogTitle sx={{ fontWeight: "Bold", fontSize: 35, color: "#FFFFFF" }}>
         {assignment?.title}
         <Typography sx={{ fontStyle: "italic" }}>
           Due Date: {assignment?.dueDate}
@@ -98,7 +99,9 @@ const PopupForm: React.FC<PopupFormProps> = ({
       </DialogTitle>
 
       <DialogContent>
-        <Typography sx={{marginBottom: 2}}>{assignment?.desc}</Typography>
+        <Typography sx={{ marginBottom: 2, color: "#FFFFFF" }}>
+          {assignment?.desc}
+        </Typography>
         <Box display="flex" flexDirection="column" alignItems="flex-start">
           <input
             id="upload-input"
@@ -146,8 +149,12 @@ const PopupForm: React.FC<PopupFormProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-        <Button onClick={handleSubmit}>Submit</Button>
+        <Button sx={{ color: "#FFFFFF" }} onClick={handleClose}>
+          Close
+        </Button>
+        <Button sx={{ color: "#FFFFFF" }} onClick={handleSubmit}>
+          Submit
+        </Button>
       </DialogActions>
     </Dialog>
   );
