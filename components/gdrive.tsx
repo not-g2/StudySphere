@@ -1,5 +1,3 @@
-// app/components/GDriveUpload.tsx
-
 "use client";
 
 import React, { useState } from 'react';
@@ -26,24 +24,24 @@ const GDriveUpload: React.FC = () => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-2">Upload Google Drive Link</h2>
+      <h2 className="text-xl font-semibold mb-2 text-white">Upload Google Drive Link</h2>
       <input
         type="number"
         placeholder="Enter Chapter Number"
         value={chapterNumber}
         onChange={handleChapterChange}
-        className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-c1 placeholder-c1"
+        className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-white" // Set text and placeholder to white
       />
       <input
         type="url"
         placeholder="Enter Google Drive Link"
         value={gdriveLink}
         onChange={handleLinkChange}
-        className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-c1 placeholder-c1"
+        className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-white" // Set text and placeholder to white
       />
       <button
         onClick={submitGDriveLink}
-        className="w-full bg-c4 text-white py-2 px-4 rounded hover:bg-opacity-80 transition"
+        className="w-full bg-t2 text-white py-2 px-4 rounded hover:bg-opacity-80 transition"
       >
         Submit Link
       </button>

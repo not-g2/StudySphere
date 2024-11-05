@@ -28,21 +28,20 @@ const StudentList: React.FC = () => {
 
   return (
     <div className="p-4 min-h-screen bg-c2">
-      <h2 className="text-c4 text-2xl font-semibold mb-6 text-center">
+      <h2 className="text-white text-2xl font-semibold mb-6 text-center">
         Students for Assignment {assignmentId}
       </h2>
       {/* Grid container for responsive layout */}
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
         {students.map((student) => (
-          <li key={student.id}>
-            <StudentAssignment
-              studentId={student.id}
-              studentName={student.name}
-              assignmentId={assignmentId}
-              approved={approvalStatus[student.id] || false}
-              toggleApproved={() => toggleApproval(student.id)}
-            />
-          </li>
+          <StudentAssignment
+            key={student.id}
+            studentId={student.id}
+            studentName={student.name}
+            assignmentId={assignmentId}
+            approved={approvalStatus[student.id] || false}
+            toggleApproved={() => toggleApproval(student.id)}
+          />
         ))}
       </ul>
     </div>

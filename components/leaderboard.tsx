@@ -14,14 +14,14 @@ function Leaderboard() {
       <h2 className="text-2xl font-bold mb-6 text-center text-white">Leaderboard</h2>
       <table className="w-full border border-gray-300 rounded-lg shadow-lg overflow-hidden">
         <thead>
-          <tr className="bg-gray-700 text-white">
-            <th className="px-4 py-2 font-semibold text-left">Name</th>
-            <th className="px-4 py-2 font-semibold text-left">Points</th>
+          <tr className="bg-t2 text-white">
+            <th className="text-white px-4 py-2 font-semibold text-center">Name</th>
+            <th className="text-white px-4 py-2 font-semibold text-center">Points</th>
           </tr>
         </thead>
         <tbody>
           {leaders.map((leader) => (
-            <tr key={leader.id} className="border-t text-white bg-black">
+            <tr key={leader.id} className="border-t text-white bg-c5">
               <td className="px-4 py-2 text-center">{leader.name}</td>
               <td className="px-4 py-2 text-center">{leader.points}</td>
             </tr>

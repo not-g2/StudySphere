@@ -23,8 +23,8 @@ const MyCalendar = () => {
   };
 
   return (
-    <div className="p-6 bg-black rounded-lg shadow-lg ">
-      <h1 className="text-2xl font-bold text-gray-400 mb-4">Schedule Calendar</h1>
+    <div className="p-6 bg-c5 rounded-lg shadow-lg ">
+      <h1 className="text-2xl font-bold text-white mb-4">Schedule Calendar</h1>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -35,16 +35,17 @@ const MyCalendar = () => {
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth',
+          right: '', // Removes the "Month" button
         }}
         height="auto"
         dayMaxEvents={true}
         eventContent={(eventInfo) => (
-          <div className="whitespace-normal break-words text-gray-400">
+          <div className="whitespace-normal break-words text-white">
             {eventInfo.event.title}
           </div>
         )}
       />
+
     </div>
   );
 };

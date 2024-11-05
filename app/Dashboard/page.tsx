@@ -38,9 +38,9 @@ function Page() {
         </div>
         
         {/* DeadlineForm with 3 columns (25%) */}
-        <div className="col-span-3 p-4 h-full">
+        {/* <div className="col-span-3 p-4 h-full">
           <DeadlineForm onAddDeadline={handleAddDeadline} />
-        </div>
+        </div> */}
         
         {/* Calendar spans the full width below the other components */}
         <div className="col-span-12 p-4 h-full">

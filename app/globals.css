@@ -43,3 +43,8 @@ body {
   color: white !important;
   border-radius: 0.5rem; /* Optional: adds rounded corners */
 }
+
+/* FullCalendar header title styling */
+.fc .fc-toolbar-title {
+  @apply text-white; /* Sets the text color of the month and year to white */
+}

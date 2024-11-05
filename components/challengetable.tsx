@@ -13,12 +13,12 @@ interface ChallengeTableProps {
 const ChallengeTable: React.FC<ChallengeTableProps> = ({ challenges }) => {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full border border-gray-700 rounded-lg bg-c3 text-white">
-        <thead className="bg-c5 text-black">
+      <table className="min-w-full border border-gray-700 rounded-lg bg-c5 text-white">
+        <thead className="bg-t2 text-black">
           <tr>
-            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold">Name</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold">Description</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold">End Date</th>
+            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold text-white">Name</th>
+            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold text-white">Description</th>
+            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold text-white">End Date</th>
           </tr>
         </thead>
         <tbody>

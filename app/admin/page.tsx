@@ -43,7 +43,7 @@ const MyCourses: React.FC = () => {
 
   return (
     <div className="p-4 min-h-screen bg-c2">
-      <h2 className="text-2xl font-semibold mb-4 text-center text-c5">
+      <h2 className="text-2xl font-semibold mb-4 text-center text-white">
         Your Courses
       </h2>
       {courses.length > 0 ? (
@@ -52,15 +52,15 @@ const MyCourses: React.FC = () => {
             <div
               key={course.id}
               onClick={() => handleCourseClick(course.id)}
-              className="bg-c4 rounded-lg shadow-md p-6 flex flex-col justify-between cursor-pointer"
+              className="bg-c5 rounded-lg shadow-md p-6 flex flex-col justify-between cursor-pointer"
             >
               <div>
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className="text-xl font-bold text-white">
                   {course.title}
                 </h3>
-                <p className="text-c5 mt-2">{course.description}</p>
+                <p className="text-white mt-2">{course.description}</p>
               </div>
-              <p className="mt-4 text-c5">
+              <p className="mt-4 text-white">
                 <strong>Instructor:</strong> {course.instructor}
               </p>
             </div>
