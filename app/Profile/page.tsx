@@ -49,10 +49,10 @@ const ProfilePage: React.FC = () => {
             setImage(data.image?.url || "");
             setphoneNumber(data.phoneNumber || "");
           } else {
-            console.error("Failed to upload image");
+            console.error("Failed to get details");
           }
         } catch (error) {
-          console.error("Error uploading image:", error);
+          console.error("Error Getting profile Details:", error);
         }
       } else if (status === "unauthenticated") {
         router.push("/");
