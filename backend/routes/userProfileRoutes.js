@@ -7,7 +7,7 @@ const authMiddleware = require('../middleware/auth');  // Middleware to authenti
 // Get user profile by user ID
 router.get('/profile', authMiddleware, async (req, res) => {
     try {
-        const user = await User.findById(req.user.userID).select('name email phoneNumber');
+        const user = await User.findById(req.user.userID).select('name email phoneNumber image');
 
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
