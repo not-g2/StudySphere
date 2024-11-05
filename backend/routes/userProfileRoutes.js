@@ -58,6 +58,7 @@ router.post('/profile/upload', authMiddleware, upload.single('profilePic'), asyn
         }
 
         user.profilePic = req.file.path;  // Assuming `upload.single()` has set the path
+        user.image.url = req.file.path;
         await user.save();
 
         res.json({ msg: 'Profile picture updated', profilePic: user.profilePic });

@@ -8,8 +8,8 @@ const AssignmentSchema = new mongoose.Schema({
     status: { type: String, enum: ['pending', 'submitted', 'graded'], default: 'pending' },
     createdAt: { type: Date, default: Date.now },
     profApproval : {type : Boolean , default : false},
-    deadLine : {type :  Date , required : true},
-    createdBy : {type : mongoose.Schema.Types.ObjectId , ref : 'User'}
+    createdBy : {type : mongoose.Schema.Types.ObjectId , ref : 'User'},
+    gDriveLink : {type : String}
 });
 
 module.exports = mongoose.model('Assignment',AssignmentSchema);
