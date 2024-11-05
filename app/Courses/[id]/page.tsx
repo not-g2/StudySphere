@@ -10,8 +10,8 @@ import {
   Box,
   Avatar,
 } from "@mui/material";
-import professorImage from "../../../public/teach1.jpeg";
-import bannerImage from "../../../public/reward1.jpeg";
+import professorImage from "../../../public/teach1.jpg";
+import bannerImage from "../../../public/mbanner.png";
 import AnnouncementPopup from "../../../components/announcmentpopup";
 import AssignmentPopup from "../../../components/assignmentpopup";
 import { useState } from "react";

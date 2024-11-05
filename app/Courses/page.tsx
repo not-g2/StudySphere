@@ -8,7 +8,7 @@ import {
   CardMedia,
 } from "@mui/material";
 
-import pic from "../../public/teach1.jpeg";
+import pic from "../../public/teach1.jpg";
 import { useRouter } from "next/navigation";
 
 const classesData = [
