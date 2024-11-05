@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const userProfileRoutes = require('./routes/userProfileRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const connectDB = require('./config/db');
 
 
@@ -20,7 +21,7 @@ app.use('/api/auth',authRoutes);
 app.use('/api/desc',userProfileRoutes); // desc is for description
 app.use('/api/assgn',assignmentRoutes);
 app.use('/api/courses',courseRoutes);
-
+app.use('/api/adminauth/',adminRoutes);
 app.listen(8000,()=>{
     console.log("server is running on port 8000");
 })
