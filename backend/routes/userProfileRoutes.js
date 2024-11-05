@@ -19,15 +19,27 @@ router.get('/profile', authMiddleware, async (req, res) => {
     }
 });
 
-// Update user profile details
+
 router.put('/profile', authMiddleware, async (req, res) => {
     try {
-        const { name, bio, course, year } = req.body;
+        const { name, image, phoneNumber } = req.body;
+
+        // Create an update object only with fields that are provided
+        let updateFields = {};
+        if (name !== undefined) updateFields.name = name;
+        if (image !== undefined) updateFields.image = image;
+        if (phoneNumber !== undefined) updateFields.phoneNumber = phoneNumber;
+
+        // Check if there are any fields to update
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).json({ msg: 'No fields provided to update' });
+        }
+
         const updatedProfile = await User.findByIdAndUpdate(
-            req.user.id,
-            { $set: { name, bio, course, year } },
+            req.user.userID,
+            { $set: updateFields },
             { new: true }
-        ).select('-password'); // Exclude password field
+        ).select('name image phoneNumber');
 
         res.json(updatedProfile);
     } catch (error) {
@@ -35,6 +47,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
         res.status(500).json({ msg: 'Server Error' });
     }
 });
+
 
 // Upload profile picture
 router.post('/profile/upload', authMiddleware, upload.single('profilePic'), async (req, res) => {

@@ -4,6 +4,7 @@ const cors = require('cors');//we need cors to handle any Cross-Origin Resource 
 
 const uploadPicRoutes = require('./routes/picsRoutes');
 const authRoutes = require('./routes/authRoutes');
+const userProfileRoutes = require('./routes/userProfileRoutes');
 const connectDB = require('./config/db');
 
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use('/api/images',uploadPicRoutes);
 app.use('/api/auth',authRoutes);
+app.use('/api/desc',userProfileRoutes); // desc is for description
 
 
 
