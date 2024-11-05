@@ -15,7 +15,7 @@ export default function RootLayout({
   session: any;
 }) {
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith("/Admin");
+  const isAdminRoute = pathname.startsWith("/admin");
 
   return (
     <html lang="en">

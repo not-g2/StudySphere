@@ -32,7 +32,7 @@ const Header: React.FC = () => {
     <header className="flex items-center justify-between p-4 bg-c1 text-white">
       <div className="flex space-x-4">
         <div
-          onClick={() => handleGo("/Admin")}
+          onClick={() => handleGo("/admin")}
           className="cursor-pointer hover:underline"
         >
           Home
