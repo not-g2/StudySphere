@@ -52,7 +52,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
 // Upload profile picture
 router.post('/profile/upload', authMiddleware, upload.single('profilePic'), async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.userID);
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
