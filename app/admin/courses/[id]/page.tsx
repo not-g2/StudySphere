@@ -104,7 +104,9 @@ const CoursePage: React.FC = () => {
 
         {/* Announcement Section */}
         <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2 text-white">Make an Announcement</h2>
+          <h2 className="text-xl font-semibold mb-2 text-white">
+            Make an Announcement
+          </h2>
           <textarea
             value={announcement}
             onChange={handleAnnouncementChange}
@@ -122,7 +124,9 @@ const CoursePage: React.FC = () => {
 
         {/* Assignment Upload Section */}
         <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-2 text-white">Upload Assignment</h2>
+          <h2 className="text-xl font-semibold mb-2 text-white">
+            Upload Assignment
+          </h2>
           {/* Hidden native file input */}
           <input
             ref={fileInputRef}
@@ -159,11 +163,16 @@ const CoursePage: React.FC = () => {
         {/* Google Drive Link Upload Section */}
         <GDriveUpload />
 
-        {/* Link to All Assignments */}
-        <div className="mt-8">
+        {/* Links to All Assignments and Attendance */}
+        <div className="mt-8 space-y-4">
           <Link href={`/admin/courses/${id}/assignments`}>
             <button className="w-full bg-t2 text-white py-2 px-4 rounded hover:bg-opacity-80 transition">
               View All Assignments
+            </button>
+          </Link>
+          <Link href={`/admin/courses/${id}/attendance`}>
+            <button className="w-full bg-t2 text-white py-2 px-4 rounded hover:bg-opacity-80 transition">
+              Attendance
             </button>
           </Link>
         </div>

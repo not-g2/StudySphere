@@ -42,16 +42,16 @@ router.get('/func',authMiddleware, async (req, res) => {
       }
 })
 
-// // Route 2: Get All Assignments for a Course
-// router.get('/course/:courseId', async (req, res) => {
-//     try {
-//         const assignments = await Assignment.find({ course: req.params.courseId });
-//         res.json(assignments);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Server Error' });
-//     }
-// });
+// Route 2: Get All Assignments for a Course
+router.get('/course/:courseId', async (req, res) => {
+    try {
+        const assignments = await Assignment.find({ course: req.params.courseId });
+        res.json(assignments);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
 
 // // Route 3: Update Assignment Status
 // router.put('/:id/status', async (req, res) => {

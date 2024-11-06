@@ -51,12 +51,12 @@ const AttendancePage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 min-h-screen bg-gray-100 flex flex-col items-center">
-      <h2 className="text-2xl font-semibold mb-4">Attendance</h2>
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
+    <div className="p-4 min-h-screen bg-c2 flex flex-col items-center">
+      <h2 className="text-2xl font-semibold mb-4 text-white">Attendance</h2>
+      <div className="bg-c5 p-6 rounded shadow-md w-full max-w-md">
         {/* Date Picker */}
         <div className="mb-6">
-          <label className="block text-gray-700 font-medium mb-2">Select Date</label>
+          <label className="block text-white font-medium mb-2">Select Date</label>
           <input
             type="date"
             value={date}
@@ -75,7 +75,7 @@ const AttendancePage: React.FC = () => {
                 onChange={() => toggleAttendance(student)}
                 className="mr-3 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label className="text-gray-700">{student}</label>
+              <label className="text-white">{student}</label>
             </li>
           ))}
         </ul>
@@ -90,8 +90,8 @@ const AttendancePage: React.FC = () => {
       </button>
 
       <div className="mt-4">
-        <h3 className="text-lg font-semibold">Summary for {date || "Selected Date"}</h3>
-        <p className="text-gray-600">
+        <h3 className="text-lg font-semibold text-white">Summary for {date || "Selected Date"}</h3>
+        <p className="text-gray-400">
           {Object.values(attendance).filter(Boolean).length} of {students.length} present
         </p>
       </div>
