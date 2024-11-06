@@ -6,9 +6,9 @@ const Announcement = require("../models/announcementSchema");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 const Assignment = require("../models/assignmentSchema");
-const Course = require('../models/courseModel');
-const User = require('../models/userModel');
-const { uploadPDF } = require('../utils/cloudinaryConfigPdfs');
+const Course = require("../models/courseModel");
+const User = require("../models/userModel");
+const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
 const { upload } = require("../utils/cloudinary"); // Import upload middleware
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
@@ -98,7 +98,7 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
             title,
             description,
             course,
-            admin: [req.user.userID],
+            admin: req.user.userID,
         });
 
         await newannoucement.save();
@@ -128,15 +128,17 @@ router.post(
             } = req.body;
 
             if (!title || !dueDate || !course) {
-                return res
-                    .status(400)
-                    .json({ message: "Title, due date, and course are required" });
+                return res.status(400).json({
+                    message: "Title, due date, and course are required",
+                });
             }
 
             // Check if PDF file was uploaded
             const pdfLink = req.file ? req.file.path : null;
             if (!pdfLink) {
-                return res.status(400).json({ message: "PDF file is required" });
+                return res
+                    .status(400)
+                    .json({ message: "PDF file is required" });
             }
 
             // Check if the course exists in the database
@@ -170,7 +172,5 @@ router.post(
     }
 );
 
-router.get('/fetchassgn',authMiddleware,async(req,res)=>{
-    
-});
+router.get("/fetchassgn", authMiddleware, async (req, res) => {});
 module.exports = router;
