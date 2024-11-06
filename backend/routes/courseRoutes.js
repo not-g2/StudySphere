@@ -45,4 +45,16 @@ router.get("/:adminID", authMiddleware, async (req, res) => {
     }
 });
 
+//The Backend guy will take care of it
+// router.post("/create/chapter", authMiddleware, async(req, res) => {
+//     const {chapterNo, glink, courseID} = req.body;
+//     try {
+//         const course = await Course.findByIdAndUpdate(courseID, )
+//     }
+//     catch(error) {
+//         console.error(error);
+//         res.status(500).json({message: "Failed to Upload Chapter"})
+//     }
+// })
+
 module.exports = router;
