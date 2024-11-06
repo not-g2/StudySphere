@@ -22,6 +22,8 @@ app.use('/api/desc',userProfileRoutes); // desc is for description
 app.use('/api/assgn',assignmentRoutes);
 app.use('/api/courses',courseRoutes);
 app.use('/api/adminauth/',adminRoutes);
+
+require('./cron/cron');
 app.listen(8000,()=>{
     console.log("server is running on port 8000");
 })

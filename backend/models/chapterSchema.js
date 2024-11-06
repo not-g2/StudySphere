@@ -7,6 +7,6 @@ const ChapterSchema = new mongoose.Schema({
     status: { type: String, enum: ['in-progress', 'completed'], default: 'in-progress' },
     createdAt: { type: Date, default: Date.now },
     deadLine : {type :  Date , required : true}
-})
+});
 
 module.exports = mongoose.model('Chapter',ChapterSchema);

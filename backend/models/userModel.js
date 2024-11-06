@@ -24,7 +24,15 @@ const UserSchema = new mongoose.Schema({
         }
     },
     phoneNumber : {type : String , minlength :10 , maxlength : 10 },
-    createdAt : {type : Date , default : Date.now}
+    createdAt : {type : Date , default : Date.now},
+    // Attendance tracking
+    attendance: [
+        {
+            courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+            date: { type: Date, required: true },
+            status: { type: String, enum: ['present', 'absent'], default: 'absent' }
+        }
+    ]
 });
 
 module.exports = mongoose.model('User', UserSchema);
