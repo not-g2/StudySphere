@@ -20,6 +20,22 @@ function Page() {
   };
 
   return (
+    // const [deadlines, setDeadlines] = useState<Deadline[]>([]);
+    // const [leaderboard, setLeaderboard] = useState<string[]>([]);
+
+    // useEffect(() => {
+    //   fetch('/api/data')
+    //     .then(response => response.json())
+    //     .then(data => {
+    //       setDeadlines(data.deadlines);
+    //       setLeaderboard(data.leaderboard);
+    //     })
+    //     .catch(error => console.error('Error fetching data:', error));
+    // }, []);
+
+    // const handleAddDeadline = (deadline: Deadline) => {
+    //   console.log(deadline);
+    // };
     <div className="bg-c2 min-h-screen">
       <div className="grid grid-cols-12 gap-4 p-4 h-full">
         {/* DeadlinesList with 3 columns (25%) */}

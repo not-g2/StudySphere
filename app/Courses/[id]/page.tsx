@@ -116,7 +116,7 @@ const DashboardPage = () => {
           color: "#ffffff",
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold"}}>
           Course: Mathematics
         </Typography>
 
