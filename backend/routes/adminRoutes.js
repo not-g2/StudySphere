@@ -5,8 +5,8 @@ const authMiddleware = require("../middleware/auth");
 const Announcement = require("../models/announcementSchema");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
-const Assignment = require('../models/assignmentSchema');
-const {upload} = require('../utils/cloudinary');  // Import upload middleware
+const Assignment = require("../models/assignmentSchema");
+const { upload } = require("../utils/cloudinary"); // Import upload middleware
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
 router.post("/login", async (req, res) => {
@@ -109,37 +109,61 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
 });
 
 // admin uploads a new assignment
-router.post('/post/assgn',authMiddleware,upload.single('pdfFile'),async(req,res)=>{
-    try{
-        const {title,description,course,dueDate,createdAt,createdBy} = req.body;
+router.post(
+    "/post/assgn",
+    authMiddleware,
+    upload.single("pdfFile"),
+    async (req, res) => {
+        try {
+            const {
+                title,
+                description,
+                course,
+                dueDate,
+                createdAt,
+                createdBy,
+            } = req.body;
 
-        if(!title || !dueDate){
-            return res.status(400).json({ message: 'Title and due date are required' });
+            if (!title || !dueDate) {
+                return res
+                    .status(400)
+                    .json({ message: "Title and due date are required" });
+            }
+
+            // Check if PDF file was uploaded
+            const pdfLink = req.file ? req.file.path : null;
+            console.log(
+                title,
+                description,
+                course,
+                dueDate,
+                createdAt,
+                createdBy
+            );
+            // Create a new assignment document
+            const newAssignment = new Assignment({
+                title,
+                description,
+                course,
+                dueDate,
+                createdBy,
+                createdAt,
+                pdfLink,
+            });
+
+            const savedAssignment = await newAssignment.save();
+            res.status(201).json({
+                message: "Assignment created successfully",
+                assignment: savedAssignment,
+            });
+        } catch (error) {
+            res.status(500).json({
+                message: "Server Error",
+                error: error.message,
+            });
         }
-        
-        // Check if PDF file was uploaded
-        const pdfLink = req.file ? req.file.path : null;
-        
-
-        // Create a new assignment document
-        const newAssignment = new Assignment({
-            title,
-            description,
-            course,
-            dueDate,
-            createdBy,  
-            createdAt,
-            pdfLink
-        });
-
-        const savedAssignment = await newAssignment.save();
-        res.status(201).json({ message: 'Assignment created successfully', assignment: savedAssignment });
-    }catch(error){
-        res.status(500).json({ message: 'Server Error', error: error.message });
     }
-});
+);
 
-router.get('/fetchassgn',authMiddleware,async(req,res)=>{
-    
-});
+router.get("/fetchassgn", authMiddleware, async (req, res) => {});
 module.exports = router;

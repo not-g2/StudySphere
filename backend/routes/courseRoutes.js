@@ -45,6 +45,22 @@ router.get("/:adminID", authMiddleware, async (req, res) => {
     }
 });
 
+router.get("/getcourse/:courseID", authMiddleware, async (req, res) => {
+    const courseID = req.params.courseID;
+    try {
+        const course = await Course.findById(courseID);
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json({ message: "Course Found", course });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Failed to get course" });
+    }
+});
+
 //The Backend guy will take care of it
 // router.post("/create/chapter", authMiddleware, async(req, res) => {
 //     const {chapterNo, glink, courseID} = req.body;
