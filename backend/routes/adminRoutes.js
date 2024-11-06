@@ -98,7 +98,7 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
             title,
             description,
             course,
-            admin: [req.user.userID],
+            admin: req.user.userID,
         });
 
         await newannoucement.save();
