@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import DueDateModal from "@/components/DueDateModal"; // Adjust the path as necessary
 
 type Assignment = {
   _id: string;
@@ -10,11 +11,11 @@ type Assignment = {
   description?: string;
   course: string;
   dueDate: string;
-  status: 'pending' | 'submitted' | 'graded';
+  status: "pending" | "submitted" | "graded";
   createdAt: string;
   profApproval: boolean;
   createdBy: string;
-  gDriveLink?: string;
+  pdfLink?: string;
 };
 
 const AssignmentList: React.FC = () => {
@@ -23,59 +24,94 @@ const AssignmentList: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
 
   useEffect(() => {
-    if (status !== 'authenticated' || !token) {
+    if (status !== "authenticated" || !token) {
       setLoading(false);
       return;
     }
 
     const fetchAssignments = async () => {
       try {
-        console.log(token);
-        const response = await fetch('http://localhost:8000/api/assgn/course/672a0dcdbddb3f6f6c16ee46', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          method: 'GET',
-        });
-    
-        const contentType = response.headers.get('content-type');
-    
-        if (!response.ok) {
-          let errorMessage = `Failed to fetch assignments: ${response.status} ${response.statusText}`;
-    
-          if (contentType && contentType.includes('application/json')) {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorMessage;
-          } else {
-            const errorText = await response.text();
-            console.error('Server Error Response:', errorText);
+        const response = await fetch(
+          "http://localhost:8000/api/assgn/course/672a0dcdbddb3f6f6c16ee46",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            method: "GET",
           }
-    
-          throw new Error(errorMessage);
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || "Failed to fetch assignments");
         }
-    
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          setAssignments(data);
-        } else {
-          const textData = await response.text();
-          console.error('Unexpected non-JSON response:', textData);
-          throw new Error('Server returned an unexpected response format.');
-        }
+
+        const data = await response.json();
+        setAssignments(data);
       } catch (err) {
         const error = err as Error;
-        console.error('Fetch error:', error.message);
         setError(error.message);
       } finally {
         setLoading(false);
       }
     };
-    
 
     fetchAssignments();
   }, [status, token]);
+
+  const handleUpdateDueDate = async (id: string, newDate: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/assgn/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ dueDate: newDate }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update due date.");
+      }
+
+      setAssignments((prev) =>
+        prev.map((assignment) =>
+          assignment._id === id ? { ...assignment, dueDate: newDate } : assignment
+        )
+      );
+      alert("Due date updated successfully.");
+    } catch (error) {
+      console.error("Error updating due date:", error);
+      alert("There was an error updating the due date. Please try again.");
+    }
+  };
+
+  const handleDeleteAssignment = async (id: string) => {
+    const confirmDelete = confirm("Are you sure you want to delete this assignment?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:8000/api/assgn/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete assignment.");
+      }
+
+      setAssignments((prev) => prev.filter((assignment) => assignment._id !== id));
+      alert("Assignment deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting assignment:", error);
+      alert("There was an error deleting the assignment. Please try again.");
+    }
+  };
 
   if (loading) {
     return <p className="text-center text-black">Loading assignments...</p>;
@@ -95,26 +131,59 @@ const AssignmentList: React.FC = () => {
       <ul className="max-w-md mx-auto space-y-4">
         {assignments.map((assignment) => (
           <li key={assignment._id} className="bg-c5 p-4 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-2">
+              <button
+                onClick={() => setSelectedAssignment(assignment)}
+                className="text-sm bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition"
+              >
+                Update Due Date
+              </button>
+              <button
+                onClick={() => handleDeleteAssignment(assignment._id)}
+                className="text-sm bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition"
+              >
+                Delete
+              </button>
+            </div>
             <Link
               href={`/admin/courses/${assignment.course}/assignments/assignment/${assignment._id}`}
               className="text-white hover:underline"
             >
               {assignment.title}
             </Link>
-            <p className="text-sm text-gray-300">Due: {new Date(assignment.dueDate).toLocaleDateString()}</p>
+            <p className="text-sm text-gray-300">
+              Due: {new Date(assignment.dueDate).toLocaleDateString()}
+            </p>
             <p className="text-sm text-gray-300">Status: {assignment.status}</p>
-            <p className="text-sm text-gray-300">Professor Approval: {assignment.profApproval ? 'Approved' : 'Pending'}</p>
-            {assignment.description && <p className="text-sm text-gray-300">Description: {assignment.description}</p>}
-            {assignment.gDriveLink && (
+            <p className="text-sm text-gray-300">
+              Professor Approval: {assignment.profApproval ? "Approved" : "Not Approved"}
+            </p>
+            {assignment.description && (
+              <p className="text-sm text-gray-300">Description: {assignment.description}</p>
+            )}
+            {assignment.pdfLink && (
               <p className="text-sm">
-                <a href={assignment.gDriveLink} className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
-                  Google Drive Link
+                <a
+                  href={assignment.pdfLink}
+                  className="text-blue-400 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  PDF Link
                 </a>
               </p>
             )}
           </li>
         ))}
       </ul>
+
+      {selectedAssignment && (
+        <DueDateModal
+          assignmentTitle={selectedAssignment.title}
+          onClose={() => setSelectedAssignment(null)}
+          onUpdateDueDate={(newDate) => handleUpdateDueDate(selectedAssignment._id, newDate)}
+        />
+      )}
     </div>
   );
 };
