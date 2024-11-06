@@ -1,12 +1,17 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const ChapterSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String },
-    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
-    status: { type: String, enum: ['in-progress', 'completed'], default: 'in-progress' },
+    course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+    status: {
+        type: String,
+        enum: ["in-progress", "completed"],
+        default: "in-progress",
+    },
     createdAt: { type: Date, default: Date.now },
-    deadLine : {type :  Date , required : true}
-})
+    deadLine: { type: Date, required: true },
+    chapterPdf: { type: String },
+});
 
-module.exports = mongoose.model('Chapter',ChapterSchema);
+module.exports = mongoose.model("Chapter", ChapterSchema);
