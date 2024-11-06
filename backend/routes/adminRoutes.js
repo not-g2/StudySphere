@@ -115,7 +115,7 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
 router.post(
     "/post/assgn",
     authMiddleware,
-    pdfStorage.single("pdfFile"),
+    uploadPdf.single("pdfFile"), // Use uploadPdf instead of pdfStorage
     async (req, res) => {
         try {
             const {
@@ -130,7 +130,7 @@ router.post(
             if (!title || !dueDate || !course) {
                 return res
                     .status(400)
-                    .json({ message: "Title and due date are required" });
+                    .json({ message: "Title, due date, and course are required" });
             }
 
             // Check if PDF file was uploaded
@@ -139,11 +139,12 @@ router.post(
                 return res.status(400).json({ message: "PDF file is required" });
             }
 
-             // Check if the course exists in the database
-             const courseExists = await Course.findById(course);
-             if (!courseExists) {
-                 return res.status(404).json({ message: "Course not found" });
-             }
+            // Check if the course exists in the database
+            const courseExists = await Course.findById(course);
+            if (!courseExists) {
+                return res.status(404).json({ message: "Course not found" });
+            }
+
             // Create a new assignment document
             const newAssignment = new Assignment({
                 title,
