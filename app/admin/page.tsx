@@ -1,9 +1,8 @@
-
-
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 type Course = {
   id: number;
@@ -14,28 +13,39 @@ type Course = {
 
 const MyCourses: React.FC = () => {
   const router = useRouter();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { data: session, status } = useSession();
+  const email = session?.user?.email;
 
-  // Placeholder courses
-  const [courses] = useState<Course[]>([
-    {
-      id: 1,
-      title: "Math 101",
-      description: "An introduction to mathematics.",
-      instructor: "John Doe",
-    },
-    {
-      id: 2,
-      title: "Physics 101",
-      description: "Basic concepts of physics.",
-      instructor: "Jane Smith",
-    },
-    {
-      id: 3,
-      title: "Chemistry 101",
-      description: "Fundamentals of chemistry.",
-      instructor: "Albert Brown",
-    },
-  ]);
+  useEffect(() => {
+    // Only fetch courses if the email is available
+    if (!email) {
+      setLoading(false); // Stop loading if email is not available
+      return;
+    }
+
+    // Define the async function to fetch courses
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch(`localhost:8000/api/assgn/course/672a0ddcbddb3f6f6c16ee48`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch courses.");
+        }
+
+        const data = await response.json();
+        setCourses(data.courses);
+      } catch (err) {
+        setError("Failed to load courses. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [email]);
 
   const handleCourseClick = (id: number) => {
     router.push(`/admin/courses/${id}`);
@@ -46,7 +56,12 @@ const MyCourses: React.FC = () => {
       <h2 className="text-2xl font-semibold mb-4 text-center text-white">
         Your Courses
       </h2>
-      {courses.length > 0 ? (
+      
+      {loading ? (
+        <p className="text-center text-white">Loading courses...</p>
+      ) : error ? (
+        <p className="text-center text-red-500">{error}</p>
+      ) : courses.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
             <div
