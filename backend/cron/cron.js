@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
 const Course = require('../models/courseModel');
-const Holiday = require('../models/holidayModel');
+const Holiday = require('../models/holidayDayModel');
 
 cron.schedule('0 0 * * *', async () => {
     try {

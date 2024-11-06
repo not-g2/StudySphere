@@ -3,21 +3,34 @@ const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 require('dotenv').config();
 
+// Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const pdfStorage = new CloudinaryStorage({
+// Configure Cloudinary storage for Multer
+const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'pdfs',  // Folder for PDFs
-        allowed_formats: ['pdf'],
-        resource_type: 'raw',  // Treat as generic files
+        folder: 'my-profile',  // Folder for profile images
+        allowed_formats: ['jpg', 'jpeg', 'png'],
     },
 });
 
-const uploadPdf = multer({ storage: pdfStorage });
+// Initialize Multer with Cloudinary storage
+const upload = multer({ storage });
 
-module.exports = { cloudinary, uploadPdf };
+// Utility function to upload directly to Cloudinary without Multer
+const uploadToCloudinary = async (filePath, folder = 'my-profile') => {
+    try {
+        const result = await cloudinary.uploader.upload(filePath, { folder: folder });
+        return { url: result.secure_url, publicId: result.public_id };
+    } catch (error) {
+        console.error("Error uploading to Cloudinary:", error);
+        throw error;
+    }
+};
+
+module.exports = { upload, uploadToCloudinary };

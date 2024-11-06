@@ -8,7 +8,7 @@ const JWT = require("jsonwebtoken");
 const Assignment = require("../models/assignmentSchema");
 const Course = require('../models/courseModel');
 const User = require('../models/userModel');
-const { pdfStorage } = require('../utils/cloudinaryConfigPdfs');
+const { uploadPDF } = require('../utils/cloudinaryConfigPdfs');
 const { upload } = require("../utils/cloudinary"); // Import upload middleware
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
@@ -115,7 +115,7 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
 router.post(
     "/post/assgn",
     authMiddleware,
-    uploadPdf.single("pdfFile"), // Use uploadPdf instead of pdfStorage
+    uploadPDF.single("pdfFile"), // Use uploadPdf instead of pdfStorage
     async (req, res) => {
         try {
             const {
