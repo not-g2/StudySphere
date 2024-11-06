@@ -8,6 +8,7 @@ const JWT = require("jsonwebtoken");
 const Assignment = require("../models/assignmentSchema");
 const Course = require('../models/courseModel');
 const User = require('../models/userModel');
+const { pdfStorage } = require('../utils/cloudinaryConfigPdfs');
 const { upload } = require("../utils/cloudinary"); // Import upload middleware
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
@@ -114,7 +115,7 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
 router.post(
     "/post/assgn",
     authMiddleware,
-    upload.single("pdfFile"),
+    pdfStorage.single("pdfFile"),
     async (req, res) => {
         try {
             const {
@@ -126,7 +127,7 @@ router.post(
                 createdBy,
             } = req.body;
 
-            if (!title || !dueDate) {
+            if (!title || !dueDate || !course) {
                 return res
                     .status(400)
                     .json({ message: "Title and due date are required" });
@@ -134,14 +135,15 @@ router.post(
 
             // Check if PDF file was uploaded
             const pdfLink = req.file ? req.file.path : null;
-            console.log(
-                title,
-                description,
-                course,
-                dueDate,
-                createdAt,
-                createdBy
-            );
+            if (!pdfLink) {
+                return res.status(400).json({ message: "PDF file is required" });
+            }
+
+             // Check if the course exists in the database
+             const courseExists = await Course.findById(course);
+             if (!courseExists) {
+                 return res.status(404).json({ message: "Course not found" });
+             }
             // Create a new assignment document
             const newAssignment = new Assignment({
                 title,
