@@ -3,6 +3,8 @@ const router = express.Router();
 const Admin = require('../models/adminModel');
 const authMiddleware = require('../middleware/auth');
 const Announcement = require('../models/announcementSchema');
+const Assignment = require('../models/assignmentSchema');
+const {upload} = require('../utils/cloudinary');  // Import upload middleware
 // Admins are hardcoded , we just need to verify them
 // login endpoint
 router.post('/login', async (req , res) => {
@@ -14,7 +16,7 @@ router.post('/login', async (req , res) => {
         }
 
         // Find user by email
-        const user = await User.findOne({ email });
+        const user = await Admin.findOne({ email });
         if (!user) {
             return res.status(401).json({ msg: "Invalid credentials!" });
         }
@@ -78,7 +80,7 @@ router.get('/fetch',authMiddleware, async (req,res)=>{
 });
 
 //admin posts an announcement
-router.post('/post/assgn',authMiddleware,async (req , res)=>{
+router.post('/post/announcement',authMiddleware,async (req , res)=>{
     try{
         const {title , description , course} = req.body;
 
@@ -102,4 +104,37 @@ router.post('/post/assgn',authMiddleware,async (req , res)=>{
     }
 });
 
+// admin uploads a new assignment
+router.post('/post/assgn',authMiddleware,upload.single('pdfFile'),async(req,res)=>{
+    try{
+        const {title,description,course,dueDate,createdAt,createdBy} = req.body;
+
+        if(!title || !dueDate){
+            return res.status(400).json({ message: 'Title and due date are required' });
+        }
+        
+        // Check if PDF file was uploaded
+        const pdfLink = req.file ? req.file.path : null;
+
+        // Create a new assignment document
+        const newAssignment = new Assignment({
+            title,
+            description,
+            course,
+            dueDate,
+            createdBy,  
+            createdAt,
+            pdfLink
+        });
+
+        const savedAssignment = await newAssignment.save();
+        res.status(201).json({ message: 'Assignment created successfully', assignment: savedAssignment });
+    }catch(error){
+        res.status(201).json({ message: 'Assignment created successfully', assignment: savedAssignment });
+    }
+});
+
+router.get('/fetchassgn',authMiddleware,async(req,res)=>{
+    
+});
 module.exports = router;
