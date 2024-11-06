@@ -41,19 +41,21 @@ router.get("/func", authMiddleware, async (req, res) => {
 
         // Return the sorted array of due dates
         res.json({ assignments });
-      } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch due dates' });
-      }
-})
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch due dates" });
+    }
+});
 
-// Route 2: Get All Assignments for a Course
-router.get('/course/:courseId', async (req, res) => {
+// Route 2: Get All Assignments for a Course(Works)
+router.get("/course/:courseId", async (req, res) => {
     try {
-        const assignments = await Assignment.find({ course: req.params.courseId });
+        const assignments = await Assignment.find({
+            course: req.params.courseId,
+        });
         res.json(assignments);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: "Server Error" });
     }
 });
 

@@ -119,6 +119,7 @@ router.post('/post/assgn',authMiddleware,upload.single('pdfFile'),async(req,res)
         
         // Check if PDF file was uploaded
         const pdfLink = req.file ? req.file.path : null;
+        
 
         // Create a new assignment document
         const newAssignment = new Assignment({
@@ -134,7 +135,7 @@ router.post('/post/assgn',authMiddleware,upload.single('pdfFile'),async(req,res)
         const savedAssignment = await newAssignment.save();
         res.status(201).json({ message: 'Assignment created successfully', assignment: savedAssignment });
     }catch(error){
-        res.status(201).json({ message: 'Assignment created successfully', assignment: savedAssignment });
+        res.status(500).json({ message: 'Server Error', error: error.message });
     }
 });
 
