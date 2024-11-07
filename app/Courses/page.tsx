@@ -14,30 +14,38 @@ import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
 type Session = {
-  user: {
-      id: string;
-      token: string;
-  };
-  email: string;
-  isAdmin: boolean;
+    user: {
+        id: string;
+        token: string;
+    };
+    email: string;
+    isAdmin: boolean;
 };
 
 interface classItem {
-  _id: string;
-  name: string;
-  description: string;
-  students: string[];
-  chapters: string[];
-  createdAt: string;
-  __v: number;
+    _id: string;
+    name: string;
+    description: string;
+    students: string[];
+    chapters: string[];
+    createdAt: string;
+    __v: number;
+    coursePic: {
+        publicId: {
+            type: string;
+        };
+        url: {
+            type: string;
+        };
+    };
 }
 
 const ClassesPage = () => {
     const router = useRouter();
-    const [classesData, setclassesData] = useState([]);
+    const [classesData, setclassesData] = useState<classItem[]>([]);
     const [session, setSession] = useState<Session | null>(null);
 
-    const handleCardClick = (classId: number) => {
+    const handleCardClick = (classId: string) => {
         router.push(`/Courses/${classId}`);
     };
     useEffect(() => {
@@ -113,7 +121,7 @@ const ClassesPage = () => {
                                 height: "300px",
                                 cursor: "pointer",
                             }}
-                            onClick={() => handleCardClick(classItem.id)}
+                            onClick={() => handleCardClick(classItem._id)}
                         >
                             <Grid container sx={{ height: "100%" }}>
                                 <Grid item xs={7} sx={{ padding: 2 }}>
@@ -126,7 +134,7 @@ const ClassesPage = () => {
                                                 fontWeight: "bold",
                                             }}
                                         >
-                                            {classItem.title}
+                                            {classItem.name}
                                         </Typography>
                                         <Typography
                                             variant="body1"
@@ -140,7 +148,7 @@ const ClassesPage = () => {
                                             color="inherit"
                                             sx={{ fontSize: "0.9rem" }}
                                         >
-                                            {classItem.teacher}
+                                            Teacher: Havent Figured it out
                                         </Typography>
                                     </CardContent>
                                 </Grid>
@@ -155,8 +163,8 @@ const ClassesPage = () => {
                                 >
                                     <CardMedia
                                         component="img"
-                                        image={classItem.imageUrl}
-                                        alt={`${classItem.title} cover`}
+                                        image={pic.src}
+                                        alt={`${classItem.name} cover`}
                                         sx={{
                                             width: "120px",
                                             height: "120px",
