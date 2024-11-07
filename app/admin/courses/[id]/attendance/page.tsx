@@ -2,28 +2,56 @@
 
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { useParams, useRouter } from 'next/navigation';
 
 interface Student {
   _id: string;
   name: string;
 }
 
-interface AttendancePageProps {
-  courseId: string;
-}
+const AttendancePage: React.FC = () => {
+  const router = useRouter();
+  const params = useParams();
+  const courseId = params.courseId || params.id; // Adjust based on your route parameter
+  console.log('Course ID:', courseId);
 
-const AttendancePage: React.FC<AttendancePageProps> = ({ courseId }) => {
+  const [session, setSession] = useState<any>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<{ [key: string]: boolean }>({});
   const [date, setDate] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  console.log(courseId);
+
+  // Function to get the session profile
+  const GetProfile = async () => {
+    const sessionData: string | undefined = Cookies.get("session");
+
+    if (sessionData && !session) {
+      setSession(JSON.parse(sessionData));
+    } else if (!sessionData) {
+      router.push("/auth/signin");
+    }
+  };
+
+  // Fetch the session on component mount
   useEffect(() => {
-    // Fetch students for the specified course
+    GetProfile();
+  }, []);
+
+  // Fetch students when session and courseId are available
+  useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const token = Cookies.get("token");
+        if (!session) {
+          console.log("Session not available yet.");
+          return;
+        }
+        const token = session.user.token;
+        if (!token) throw new Error("Token not found. Please log in again.");
+        if (!courseId) throw new Error("Course ID not found.");
+
+        console.log("Fetching students for course:", courseId);
+
         const response = await fetch(`http://localhost:8000/api/courses/${courseId}/students`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -35,7 +63,7 @@ const AttendancePage: React.FC<AttendancePageProps> = ({ courseId }) => {
         }
 
         const data = await response.json();
-        console.log(data);
+        console.log("Fetched students data:", data);
         setStudents(data.students);
         setAttendance(
           data.students.reduce((acc: { [key: string]: boolean }, student: Student) => {
@@ -49,8 +77,10 @@ const AttendancePage: React.FC<AttendancePageProps> = ({ courseId }) => {
       }
     };
 
-    fetchStudents();
-  }, [courseId]);
+    if (session && courseId) {
+      fetchStudents();
+    }
+  }, [session, courseId]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDate(e.target.value);
@@ -76,7 +106,23 @@ const AttendancePage: React.FC<AttendancePageProps> = ({ courseId }) => {
       return;
     }
 
-    const token = Cookies.get("token");
+    // Retrieve token from cookies in the same way as GetProfile
+    const sessionData: string | undefined = Cookies.get("session");
+
+    if (!sessionData) {
+      setError("Session not found. Please log in again.");
+      router.push("/auth/signin");
+      return;
+    }
+
+    const sessionFromCookie = JSON.parse(sessionData);
+    const token = sessionFromCookie.user.token;
+    console.log("Token from cookie:", token);
+
+    if (!token) {
+      setError("Authentication token not found. Please log in again.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -144,7 +190,7 @@ const AttendancePage: React.FC<AttendancePageProps> = ({ courseId }) => {
           ))}
         </ul>
       </div>
-      
+
       {/* Submit Button */}
       <button
         onClick={handleSubmit}
