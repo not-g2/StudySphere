@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DeadlinesList from "@/components/deadlines";
 import Leaderboard from "@/components/leaderboard";
 import MyCalendar from "@/components/Calendar";
@@ -7,6 +7,7 @@ import DeadlineForm from "@/components/Deadlineform";
 import Challengetable from "@/components/challenge";
 import "../output.css";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 // Define the type for deadline entries
 interface Deadline {
@@ -16,9 +17,21 @@ interface Deadline {
 }
 
 function Page() {
+    const [session, setSession] = useState<any>(null);
+    const router = useRouter();
     const handleAddDeadline = (deadline: Deadline) => {
         console.log(deadline);
     };
+
+    useEffect(() => {
+        const sessionData: string | undefined = Cookies.get("session");
+
+        if (sessionData && !session) {
+            setSession(JSON.parse(sessionData));
+        } else if (!sessionData) {
+            router.push("/auth/signin");
+        }
+    }, []);
 
     return (
         // const [deadlines, setDeadlines] = useState<Deadline[]>([]);

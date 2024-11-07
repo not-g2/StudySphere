@@ -38,7 +38,7 @@ const ProfilePage: React.FC = () => {
             if (sessionData && !session) {
                 setSession(JSON.parse(sessionData));
             } else if (!sessionData) {
-                console.log("No session cookie found");
+                router.push("/auth/signin");
             }
             if (session) {
                 const token = session?.user.token;
