@@ -4,6 +4,7 @@ const User = require("../models/userModel"); // Import User model
 const authMiddleware = require("../middleware/auth"); // Middleware to authenticate users
 const Course = require("../models/courseModel");
 const Admin = require("../models/adminModel");
+const Assignment = require("../models/assignmentSchema");
 
 router.post("/create/:adminId", authMiddleware, async (req, res) => {
     const { name, description, students } = req.body;
@@ -94,7 +95,7 @@ router.get("/getcourse/:courseID", authMiddleware, async (req, res) => {
 });
 
 // Route to get all student names in a specific course
-router.get('/:courseId/students', async (req, res) => {
+router.get('/:courseId/students',authMiddleware, async (req, res) => {
     try {
         const course = await Course.findById(req.params.courseId)
             .populate({ path: 'students', select: 'name' }); // '_id' is included by default
@@ -110,6 +111,25 @@ router.get('/:courseId/students', async (req, res) => {
         }));
 
         res.status(200).json({ students: studentData });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Route to fetch all assignments for a particular course
+router.get('/:courseId/assignments', async (req, res) => {
+    try {
+        const { courseId } = req.params;
+
+        // Find all assignments where the course field matches the courseId
+        const assignments = await Assignment.find({ course: courseId }).select('dueDate description');
+
+        // Check if any assignments were found
+        if (!assignments || assignments.length === 0) {
+            return res.status(404).json({ error: 'No assignments found for this course' });
+        }
+
+        res.status(200).json({ assignments });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }
