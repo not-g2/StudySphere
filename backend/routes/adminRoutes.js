@@ -5,11 +5,15 @@ const authMiddleware = require("../middleware/auth");
 const Announcement = require("../models/announcementSchema");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
-const Assignment = require('../models/assignmentSchema');
+const Assignment = require("../models/assignmentSchema");
+const Course = require("../models/courseModel");
+const User = require("../models/userModel");
+const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
+//const Assignment = require('../models/assignmentSchema');
 const Course = require('../models/courseModel');
 const User = require('../models/userModel');
-const {upload} = require('../utils/cloudinary');  // Import upload middleware
-const Assignment = require("../models/assignmentSchema");
+//const {upload} = require('../utils/cloudinary');  // Import upload middleware
+//const Assignment = require("../models/assignmentSchema");
 const { upload } = require("../utils/cloudinary"); // Import upload middleware
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
@@ -36,15 +40,19 @@ router.post("/login", async (req, res) => {
         }
 
         // Generate JWT token
-        const token = JWT.sign({ userID: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
-        });
+        const token = JWT.sign(
+            { userID: user._id },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h",
+            }
+        );
 
         // Send response
         res.status(200).json({
             msg: "Login successful",
             token,
-            user: { id: user._id, email: user.email },
+            user: { id: user._id, email: user.email, isAdmin: true },
         });
     } catch (error) {
         console.error(error);
@@ -99,7 +107,7 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
             title,
             description,
             course,
-            admin: [req.user.userID],
+            admin: req.user.userID,
         });
 
         await newannoucement.save();
@@ -172,7 +180,6 @@ router.post(
         }
     }
 );
-
 
 router.get('/fetchassgn',authMiddleware,async(req,res)=>{
     

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import GDriveUploadSection from "../../../../components/gdrive";
+import GDriveUploadSection from "@/components/gdrive";
 import { useSession } from "next-auth/react";
 import CourseDetails from "@/components/CourseDetails";
 import AnnouncementSection from "@/components/AnnouncementSection";
@@ -13,18 +13,51 @@ import CourseLinks from "@/components/CourseLinks";
 const CoursePage: React.FC = () => {
   const { data: session } = useSession();
   const params = useParams();
-  const id = params.id; // Get the course ID from the URL
+  const courseId = params.id; // Use course ID from the URL
 
-  const courses = [
-    { id: 1, title: "Math 101", description: "An introduction to mathematics.", instructor: "John Doe" },
-    { id: 2, title: "Physics 101", description: "Basic concepts of physics.", instructor: "Jane Smith" },
-    { id: 3, title: "Chemistry 101", description: "Fundamentals of chemistry.", instructor: "Albert Brown" },
-  ];
+  const [course, setCourse] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const token = session?.accessToken;
 
-  const course = courses.find((course) => course.id === Number(id));
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/courses/getcourse/${courseId}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch course details.");
+        }
+
+        const data = await response.json();
+        setCourse(data.course); // Access the nested "course" object
+      } catch (err) {
+        setError("Failed to load course details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchCourse();
+    }
+  }, [courseId, token]);
+
+  if (loading) {
+    return <p className="text-center text-white">Loading course details...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500">{error}</p>;
+  }
 
   if (!course) {
-    return <p>Course not found</p>;
+    return <p className="text-center text-gray-700">Course not found.</p>;
   }
 
   return (
@@ -32,9 +65,9 @@ const CoursePage: React.FC = () => {
       <div className="bg-c5 p-8 rounded shadow-md max-w-lg w-full text-center">
         <CourseDetails course={course} />
         <AnnouncementSection />
-        <AssignmentUpload courseId={course.id} token={session?.accessToken} />
+        <AssignmentUpload courseId={course._id} token={token} />
         <GDriveUploadSection />
-        <CourseLinks courseId={id} />
+        <CourseLinks courseId={course._id} />
       </div>
     </div>
   );

@@ -1,15 +1,76 @@
+"use client";
+
 import React, { useState } from "react";
+import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const AnnouncementSection: React.FC = () => {
+  const [title, setTitle] = useState("");
   const [announcement, setAnnouncement] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const token = session?.accessToken;
+  const params = useParams();
+  const courseId = params.id;
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+  };
 
   const handleAnnouncementChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAnnouncement(e.target.value);
   };
 
+  const postAnnouncement = async () => {
+    if (!token) {
+      alert("You are not authorized.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/adminauth/post/announcement", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: title,
+          description: announcement,
+          course: courseId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to post announcement.");
+      }
+
+      const data = await response.json();
+      alert(`Announcement posted: ${data.announcement.title}`);
+      setTitle("");
+      setAnnouncement("");
+    } catch (err) {
+      setError("Failed to post the announcement. Please try again later.");
+      console.error("Error posting announcement:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="mt-6">
       <h2 className="text-xl font-semibold mb-2 text-white">Make an Announcement</h2>
+      <input
+        type="text"
+        value={title}
+        onChange={handleTitleChange}
+        placeholder="Announcement Title"
+        className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-white"
+      />
       <textarea
         value={announcement}
         onChange={handleAnnouncementChange}
@@ -18,11 +79,13 @@ const AnnouncementSection: React.FC = () => {
         className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-white"
       ></textarea>
       <button
-        onClick={() => alert(`Announcement posted: ${announcement}`)}
+        onClick={postAnnouncement}
+        disabled={loading}
         className="text-white w-full bg-t2 py-2 px-4 rounded hover:bg-opacity-80 transition"
       >
-        Post Announcement
+        {loading ? "Posting..." : "Post Announcement"}
       </button>
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 };

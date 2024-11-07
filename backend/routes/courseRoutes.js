@@ -45,6 +45,27 @@ router.get("/:adminID", authMiddleware, async (req, res) => {
     }
 });
 
+router.get("/student/:id", authMiddleware, async (req, res) => {
+    const userID = req.params.id;
+    try {
+        const user = await User.findById(userID).populate("courses");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const coursesList = user.courses;
+
+        res.status(200).json({
+            message: "Courses joined by student",
+            coursesList,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Failed to get courses" });
+    }
+});
+
 router.get("/getcourse/:courseID", authMiddleware, async (req, res) => {
     const courseID = req.params.courseID;
     try {

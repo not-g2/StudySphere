@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 
-const AssignmentUpload: React.FC<{ courseId: number; token: string | undefined }> = ({ courseId, token }) => {
+const AssignmentUpload: React.FC<{ courseId: string; token: string | undefined }> = ({ courseId, token }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -19,19 +19,25 @@ const AssignmentUpload: React.FC<{ courseId: number; token: string | undefined }
       return;
     }
 
+    const createdBy = "672b171ab92e240998f0668b"; // Replace with actual user ID if needed
+
     try {
-      const response = await fetch("http://localhost:8000/api/assgn/", {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("course", courseId);
+      formData.append("dueDate", dueDate);
+      formData.append("createdBy", createdBy);
+      if (selectedFile) {
+        formData.append("pdfFile", selectedFile);
+      }
+
+      const response = await fetch("http://localhost:8000/api/adminauth/post/assgn", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          title,
-          description,
-          course: courseId,
-          dueDate,
-        }),
+        body: formData,
       });
 
       if (!response.ok) throw new Error("Failed to create assignment.");
