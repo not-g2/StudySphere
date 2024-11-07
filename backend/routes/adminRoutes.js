@@ -9,6 +9,7 @@ const Assignment = require("../models/assignmentSchema");
 const Course = require("../models/courseModel");
 const User = require("../models/userModel");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
+const mongoose = require('mongoose');
 
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
@@ -238,8 +239,8 @@ router.post("/post/mark", authMiddleware, async (req, res) => {
     }
 });
 
-// summary on attendance
-router.get("/:userId", authMiddleware, async (req, res) => {
+//summary on attendance
+router.get("/summary/:userId", authMiddleware, async (req, res) => {
     try {
         const { userId } = req.params;
 
@@ -274,5 +275,23 @@ router.get("/:userId", authMiddleware, async (req, res) => {
     }
 });
 
+router.get("/profile", authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.userID; 
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ msg: "Invalid user ID format" });
+        }
+        const admin = await Admin.findById(req.user.userID).select(
+            "name email"
+        );
 
+        if (!admin) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+        res.json(admin);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Server Error" });
+    }
+});
 module.exports = router;
