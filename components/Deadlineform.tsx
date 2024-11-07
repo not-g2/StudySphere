@@ -34,12 +34,12 @@ const DeadlineForm: React.FC<DeadlineFormProps> = ({ onAddDeadline }) => {
 
   return (
     <div className="bg-c5 shadow-md rounded-lg p-6 w-full max-w-md mx-auto">
-      <h2 className="text-xl font-semibold mb-4 text-white">Add New Deadline</h2>
+      <h2 className="text-xl font-semibold mb-4 text-white">Add Reminder</h2>
       <form onSubmit={handleSubmit}>
         {/* Name Field */}
         <div className="mb-4">
           <label className="block text-gray-400 font-bold mb-2" htmlFor="name">
-            Deadline Name
+            Reminder Name
           </label>
           <input
             type="text"

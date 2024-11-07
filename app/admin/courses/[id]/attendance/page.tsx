@@ -13,7 +13,6 @@ const AttendancePage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const courseId = params.courseId || params.id; // Adjust based on your route parameter
-  console.log('Course ID:', courseId);
 
   const [session, setSession] = useState<any>(null);
   const [students, setStudents] = useState<Student[]>([]);
@@ -117,7 +116,6 @@ const AttendancePage: React.FC = () => {
 
     const sessionFromCookie = JSON.parse(sessionData);
     const token = sessionFromCookie.user.token;
-    console.log("Token from cookie:", token);
 
     if (!token) {
       setError("Authentication token not found. Please log in again.");
@@ -137,7 +135,7 @@ const AttendancePage: React.FC = () => {
     try {
       await Promise.all(
         attendanceData.map(async (record) => {
-          const response = await fetch("http://localhost:8000/api/post/mark", {
+          const response = await fetch("http://localhost:8000/api/adminauth/post/mark", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

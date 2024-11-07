@@ -612,6 +612,18 @@ video {
   grid-column: span 3 / span 3;
 }
 
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+
+.col-span-6 {
+  grid-column: span 6 / span 6;
+}
+
+.col-start-4 {
+  grid-column-start: 4;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -655,6 +667,10 @@ video {
 
 .mt-8 {
   margin-top: 2rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
 }
 
 .block {
