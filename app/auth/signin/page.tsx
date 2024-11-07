@@ -62,7 +62,11 @@ const SignInPage = () => {
             .then((data) => {
                 if (data.token) {
                     storeSessionData(data);
-                    router.push("/");
+                    if (isAdmin) {
+                        router.push("/admin");
+                    } else {
+                        router.push("/");
+                    }
                 } else {
                     setError("Login failed: " + data.msg);
                 }
