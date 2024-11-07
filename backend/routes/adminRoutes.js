@@ -181,9 +181,7 @@ router.post(
     }
 );
 
-router.get('/fetchassgn',authMiddleware,async(req,res)=>{
-    
-});
+
 
 // marking attendance
 router.post('/post/mark', authMiddleware, async (req, res) => {
@@ -257,4 +255,6 @@ router.get('/:userId', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 });
+
+
 module.exports = router;

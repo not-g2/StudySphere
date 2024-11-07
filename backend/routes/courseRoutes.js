@@ -5,6 +5,7 @@ const authMiddleware = require("../middleware/auth"); // Middleware to authentic
 const Course = require("../models/courseModel");
 const Admin = require("../models/adminModel");
 
+// create a course
 router.post("/create", authMiddleware, async (req, res) => {
     const { name, description, students } = req.body;
     try {
@@ -24,6 +25,7 @@ router.post("/create", authMiddleware, async (req, res) => {
     }
 });
 
+// courses that the admin has
 router.get("/:adminID", authMiddleware, async (req, res) => {
     const adminID = req.params.adminID;
     try {
@@ -45,6 +47,7 @@ router.get("/:adminID", authMiddleware, async (req, res) => {
     }
 });
 
+// courses joined by a student
 router.get("/student/:id", authMiddleware, async (req, res) => {
     const userID = req.params.id;
     try {
@@ -66,6 +69,7 @@ router.get("/student/:id", authMiddleware, async (req, res) => {
     }
 });
 
+// checking if a course exists or not
 router.get("/getcourse/:courseID", authMiddleware, async (req, res) => {
     const courseID = req.params.courseID;
     try {
@@ -79,6 +83,26 @@ router.get("/getcourse/:courseID", authMiddleware, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Failed to get course" });
+    }
+});
+
+// Route to get all student names in a specific course
+router.get('/:courseId/students', async (req, res) => {
+    try {
+        // Find the course by ID and populate the 'students' field, only selecting the 'name' field of each student
+        const course = await Course.findById(req.params.courseId)
+            .populate({ path: 'students', select: 'name' });
+
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        // Extract the student names
+        const studentNames = course.students.map(student => student.name);
+
+        res.status(200).json({ students: studentNames });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
