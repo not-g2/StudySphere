@@ -5,8 +5,7 @@ const authMiddleware = require("../middleware/auth"); // Middleware to authentic
 const Course = require("../models/courseModel");
 const Admin = require("../models/adminModel");
 
-// create a course
-router.post("/create", authMiddleware, async (req, res) => {
+router.post("/create/:adminId", authMiddleware, async (req, res) => {
     const { name, description, students } = req.body;
     try {
         const course = new Course({
@@ -15,6 +14,14 @@ router.post("/create", authMiddleware, async (req, res) => {
             students,
         });
         await course.save();
+        const admin = await Admin.findById(req.params.adminId);
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        admin.course.push(course._id);
+        await admin.save();
+
         res.status(201).json({
             message: "Course created successfully",
             course,
