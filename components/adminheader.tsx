@@ -55,7 +55,7 @@ const Header: React.FC = () => {
 
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/desc/profile",
+                    "http://localhost:8000/api/adminauth/profile",
                     {
                         headers: { Authorization: `Bearer ${token}` },
                         method: "GET",
