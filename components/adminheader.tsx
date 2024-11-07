@@ -49,6 +49,10 @@ const Header: React.FC = () => {
         const GetProfile = async () => {
             const token = session.user.token;
 
+            if (!token) {
+                return;
+            }
+
             try {
                 const response = await fetch(
                     "http://localhost:8000/api/desc/profile",
@@ -71,6 +75,24 @@ const Header: React.FC = () => {
 
         GetProfile();
     }, [session]);
+
+    useEffect(() => {
+        const handleCookieChange = () => {
+            const sessionData: string | undefined = Cookies.get("session");
+            if (sessionData) {
+                const parsedSession = JSON.parse(sessionData);
+                setSession(parsedSession);
+            }
+        };
+
+        // Set up an interval to check for changes in cookies
+        const intervalId = setInterval(handleCookieChange, 1000);
+
+        // Clean up the interval on unmount
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, []);
 
     return (
         <header className="flex items-center justify-between p-4 bg-c1 text-white">
