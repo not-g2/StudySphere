@@ -9,7 +9,7 @@ const Assignment = require("../models/assignmentSchema");
 const Course = require("../models/courseModel");
 const User = require("../models/userModel");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
@@ -173,20 +173,15 @@ router.post(
     }
 );
 
-
-
 // marking attendance
 router.post("/post/mark", authMiddleware, async (req, res) => {
     try {
         const { userId, courseId, date, status } = req.body;
 
         if (!userId || !courseId || !date || !status) {
-            return res
-                .status(400)
-                .json({
-                    message:
-                        "User ID, course ID, date, and status are required",
-                });
+            return res.status(400).json({
+                message: "User ID, course ID, date, and status are required",
+            });
         }
 
         // Check if the student is enrolled in the specified course
@@ -217,12 +212,10 @@ router.post("/post/mark", authMiddleware, async (req, res) => {
         );
 
         if (alreadyMarked) {
-            return res
-                .status(400)
-                .json({
-                    message:
-                        "Attendance for this course and date is already marked",
-                });
+            return res.status(400).json({
+                message:
+                    "Attendance for this course and date is already marked",
+            });
         }
 
         // Add the attendance record for the specified course and date
@@ -277,7 +270,7 @@ router.get("/summary/:userId", authMiddleware, async (req, res) => {
 
 router.get("/profile", authMiddleware, async (req, res) => {
     try {
-        const userId = req.user.userID; 
+        const userId = req.user.userID;
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ msg: "Invalid user ID format" });
         }
@@ -291,7 +284,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
         res.json(admin);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ msg: "Server Error" });
-    }
+        res.status(500).json({ msg: "Server Error" });
+    }
 });
 module.exports = router;
