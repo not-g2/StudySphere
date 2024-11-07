@@ -9,6 +9,11 @@ const Assignment = require("../models/assignmentSchema");
 const Course = require("../models/courseModel");
 const User = require("../models/userModel");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
+//const Assignment = require('../models/assignmentSchema');
+const Course = require('../models/courseModel');
+const User = require('../models/userModel');
+//const {upload} = require('../utils/cloudinary');  // Import upload middleware
+//const Assignment = require("../models/assignmentSchema");
 const { upload } = require("../utils/cloudinary"); // Import upload middleware
 // Admins are hardcoded , we just need to verify them
 // login endpoint (Works)
@@ -176,5 +181,80 @@ router.post(
     }
 );
 
-router.get("/fetchassgn", authMiddleware, async (req, res) => {});
+router.get('/fetchassgn',authMiddleware,async(req,res)=>{
+    
+});
+
+// marking attendance
+router.post('/post/mark', authMiddleware, async (req, res) => {
+    try {
+        const { userId, courseId, date, status } = req.body;
+
+        if (!userId || !courseId || !date || !status) {
+            return res.status(400).json({ message: 'User ID, course ID, date, and status are required' });
+        }
+
+        // Check if the student is enrolled in the specified course
+        const course = await Course.findById(courseId).populate('students');
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        const isEnrolled = course.students.some(student => student._id.toString() === userId);
+        if (!isEnrolled) {
+            return res.status(400).json({ message: 'Student is not enrolled in this course' });
+        }
+
+        // Find the user and check for existing attendance for the same course and date
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const alreadyMarked = user.attendance.some(record =>
+            record.courseId.toString() === courseId &&
+            record.date.toDateString() === new Date(date).toDateString()
+        );
+
+        if (alreadyMarked) {
+            return res.status(400).json({ message: 'Attendance for this course and date is already marked' });
+        }
+
+        // Add the attendance record for the specified course and date
+        user.attendance.push({ courseId, date, status });
+        await user.save();
+
+        res.status(200).json({ message: `Student marked as ${status} for course`, user });
+    } catch (error) {
+        console.error("Error marking attendance:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// summary on attendance
+router.get('/:userId', authMiddleware, async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await User.findById(userId).populate('attendance.courseId', 'name');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Group attendance by course
+        const attendanceSummary = user.attendance.reduce((summary, record) => {
+            const courseName = record.courseId.name;
+            if (!summary[courseName]) {
+                summary[courseName] = [];
+            }
+            summary[courseName].push({ date: record.date, status: record.status });
+            return summary;
+        }, {});
+
+        res.status(200).json({ name: user.name, attendance: attendanceSummary });
+    } catch (error) {
+        console.error("Error fetching user attendance:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
 module.exports = router;
