@@ -96,18 +96,20 @@ router.get("/getcourse/:courseID", authMiddleware, async (req, res) => {
 // Route to get all student names in a specific course
 router.get('/:courseId/students', async (req, res) => {
     try {
-        // Find the course by ID and populate the 'students' field, only selecting the 'name' field of each student
         const course = await Course.findById(req.params.courseId)
-            .populate({ path: 'students', select: 'name' });
+            .populate({ path: 'students', select: 'name' }); // '_id' is included by default
 
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });
         }
 
-        // Extract the student names
-        const studentNames = course.students.map(student => student.name);
+        // Format each student with both '_id' and 'name'
+        const studentData = course.students.map(student => ({
+            _id: student._id,
+            name: student.name
+        }));
 
-        res.status(200).json({ students: studentNames });
+        res.status(200).json({ students: studentData });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }

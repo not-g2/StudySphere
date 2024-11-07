@@ -6,8 +6,9 @@ const SubmissionSchema = new mongoose.Schema({
     studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Student ID
     submittedDate: { type: Date, default: Date.now },
     status: { type: String, enum: ['pending', 'submitted', 'graded'], default: 'submitted' },
-    grade: { type: Number },  // Optional grading field
+    grade: { type: Number },  // Optional grading field (this will be out of 100)
     feedback: { type: String },  // Feedback given by professor
     fileLink: { type: String }, // Link to the student’s submitted file
+    submissionDate : {type : Date , default : Date.now()}
 });
 module.exports = mongoose.model('Submission', SubmissionSchema);

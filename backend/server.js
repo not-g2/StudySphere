@@ -10,6 +10,7 @@ const courseRoutes = require("./routes/courseRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
 const submissionRoutes = require('./routes/submissionRoutes');
+const userRoutes = require('./routes/userRoutes');
 const connectDB = require("./config/db");
 
 connectDB();
@@ -25,6 +26,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/adminauth/", adminRoutes);
 app.use("/api/announce", announcementRoutes);
 app.use('/api/submissions', submissionRoutes);
+app.use("/api/users",userRoutes);
 
 require("./cron/cron");
 app.listen(8000, () => {
