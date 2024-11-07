@@ -1,67 +1,120 @@
 "use client";
 
-import React, { useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import React, { useEffect, useState } from "react";
 import { Avatar, Button } from "@mui/material";
 import Dropdown from "../components/dropdown";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import LogoutPage from "./signout";
 
 const Header: React.FC = () => {
-  const { data: session } = useSession();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const router = useRouter();
+    const [open, setOpen] = useState(false);
+    const [session, setSession] = useState<any>(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [userImage, setuserImage] = useState<string | null>(null);
+    const router = useRouter();
 
-  const handleGo = (path: string) => {
-    router.push(path);
-  };
+    const handleGo = (path: string) => {
+        router.push(path);
+    };
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
-  const handleSignOut = () => {
-    signOut();
-    handleClose();
-  };
+    const handleSignOut = () => {
+        setOpen(true);
+    };
 
-  return (
-    <header className="flex items-center justify-between p-4 bg-c1 text-white">
-      <div className="flex space-x-4">
-        <div
-          onClick={() => handleGo("/admin")}
-          className="cursor-pointer hover:underline"
-        >
-          Home
-        </div>
-      </div>
+    useEffect(() => {
+        const sessionData: string | undefined = Cookies.get("session");
 
-      <div className="flex items-center space-x-4">
-        {!session ? (
-          <Button variant="contained" color="primary" onClick={() => signIn()}>
-            Sign In
-          </Button>
-        ) : (
-          <div className="relative flex items-center">
-            <Avatar
-              src={session.user?.image ?? "/default-profile.png"}
-              alt="Profile Picture"
-              onClick={handleClick}
-              sx={{ width: 40, height: 40, cursor: "pointer" }}
-              className="hover:shadow-lg"
-            />
-            <Dropdown
-              anchorEl={anchorEl}
-              handleClose={handleClose}
-              handleSignOut={handleSignOut}
-            />
-          </div>
-        )}
-      </div>
-    </header>
-  );
+        if (sessionData) {
+            const parsedSession = JSON.parse(sessionData);
+            setSession(parsedSession);
+        } else {
+            console.log("No session cookie found");
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!session) {
+            return;
+        }
+
+        const GetProfile = async () => {
+            const token = session.user.token;
+
+            try {
+                const response = await fetch(
+                    "http://localhost:8000/api/desc/profile",
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                        method: "GET",
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setuserImage(data.image?.url || "");
+                } else {
+                    console.error("Failed to fetch profile image");
+                }
+            } catch (error) {
+                console.error("Error fetching profile image:", error);
+            }
+        };
+
+        GetProfile();
+    }, [session]);
+
+    return (
+        <header className="flex items-center justify-between p-4 bg-c1 text-white">
+            <div className="flex space-x-4">
+                <div
+                    onClick={() => handleGo("/admin")}
+                    className="cursor-pointer hover:underline"
+                >
+                    Home
+                </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+                {!session ? (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => router.push("/auth/signin")}
+                    >
+                        Sign In
+                    </Button>
+                ) : (
+                    <div className="relative flex items-center">
+                        <Avatar
+                            src={userImage ?? "/default-profile.png"}
+                            alt="Profile Picture"
+                            onClick={handleClick}
+                            sx={{ width: 40, height: 40, cursor: "pointer" }}
+                            className="hover:shadow-lg"
+                        />
+                        <Dropdown
+                            anchorEl={anchorEl}
+                            handleClose={handleClose}
+                            handleSignOut={handleSignOut}
+                        />
+                        <LogoutPage
+                            open={open}
+                            setOpen={setOpen}
+                            setSession={setSession}
+                        />
+                    </div>
+                )}
+            </div>
+        </header>
+    );
 };
 export default Header;

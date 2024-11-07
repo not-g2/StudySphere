@@ -46,7 +46,6 @@ const Header: React.FC = () => {
             return;
         }
 
-        // Fetch the profile image after session is updated
         const GetProfile = async () => {
             const token = session.user.token;
 
