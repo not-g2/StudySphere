@@ -1,11 +1,24 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import Cookies from "js-cookie";
 
-const AssignmentUpload: React.FC<{ courseId: string; token: string | undefined }> = ({ courseId, token }) => {
+const AssignmentUpload: React.FC<{ courseId: string }> = ({ courseId }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [token, setToken] = useState<string | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    // Retrieve token from cookies
+    const sessionData = Cookies.get("session");
+    if (sessionData) {
+      const parsedSession = JSON.parse(sessionData);
+      setToken(parsedSession.user.token);
+    } else {
+      console.log("No session cookie found");
+    }
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

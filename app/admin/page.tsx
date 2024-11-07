@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import Cookies from "js-cookie";
 
 type Course = {
   _id: string;
@@ -16,23 +16,28 @@ const MyCourses: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { data: session } = useSession();
-  const email = session?.user?.email;
-  const token = session?.accessToken;
-
+  const [session, setSession] = useState<any>(null);
   const [newCourseName, setNewCourseName] = useState("");
   const [newCourseDescription, setNewCourseDescription] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!email) {
-      setLoading(false);
-      return;
-    }
+    const getSessionAndToken = () => {
+      const sessionData = Cookies.get("session");
+      if (sessionData) {
+        const parsedSession = JSON.parse(sessionData);
+        setSession(parsedSession);
+        setToken(parsedSession.user.token);
+      } else {
+        console.log("No session cookie found");
+      }
+    };
 
     const fetchCourses = async () => {
+      if (!token) return;
       try {
         const response = await fetch("http://localhost:8000/api/courses/672b171ab92e240998f0668b", {
           headers: {
@@ -54,8 +59,9 @@ const MyCourses: React.FC = () => {
       }
     };
 
+    getSessionAndToken();
     fetchCourses();
-  }, [email, token]);
+  }, [token]);
 
   const handleCourseClick = (id: string) => {
     router.push(`/admin/courses/${id}`);

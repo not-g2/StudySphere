@@ -1,53 +1,117 @@
-// app/attendance/page.tsx
-
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
-const AttendancePage: React.FC = () => {
-  // Placeholder list of names
-  const [students] = useState<string[]>([
-    'Alice Johnson',
-    'Bob Smith',
-    'Charlie Brown',
-    'Diana Prince',
-    'Ethan Hunt',
-  ]);
+interface Student {
+  _id: string;
+  name: string;
+}
 
-  // State to track attendance and selected date
-  const [attendance, setAttendance] = useState<{ [key: string]: boolean }>(
-    students.reduce((acc, student) => {
-      acc[student] = false;
-      return acc;
-    }, {} as { [key: string]: boolean })
-  );
+interface AttendancePageProps {
+  courseId: string;
+}
+
+const AttendancePage: React.FC<AttendancePageProps> = ({ courseId }) => {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [attendance, setAttendance] = useState<{ [key: string]: boolean }>({});
   const [date, setDate] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  console.log(courseId);
+  useEffect(() => {
+    // Fetch students for the specified course
+    const fetchStudents = async () => {
+      try {
+        const token = Cookies.get("token");
+        const response = await fetch(`http://localhost:8000/api/courses/${courseId}/students`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  // Handle date change and reset attendance
+        if (!response.ok) {
+          throw new Error("Failed to fetch students.");
+        }
+
+        const data = await response.json();
+        console.log(data);
+        setStudents(data.students);
+        setAttendance(
+          data.students.reduce((acc: { [key: string]: boolean }, student: Student) => {
+            acc[student._id] = false;
+            return acc;
+          }, {})
+        );
+      } catch (err) {
+        setError("Failed to load students. Please try again later.");
+        console.error("Error fetching students:", err);
+      }
+    };
+
+    fetchStudents();
+  }, [courseId]);
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDate(e.target.value);
     // Reset attendance for the new date
     setAttendance(
       students.reduce((acc, student) => {
-        acc[student] = false;
+        acc[student._id] = false;
         return acc;
       }, {} as { [key: string]: boolean })
     );
   };
 
-  // Toggle attendance status for a student
-  const toggleAttendance = (student: string) => {
+  const toggleAttendance = (studentId: string) => {
     setAttendance((prevAttendance) => ({
       ...prevAttendance,
-      [student]: !prevAttendance[student],
+      [studentId]: !prevAttendance[studentId],
     }));
   };
 
-  // Handle submit button click
-  const handleSubmit = () => {
-    console.log("Attendance for:", date);
-    console.log(attendance);
-    alert(`Attendance for ${date} has been recorded!`);
+  const handleSubmit = async () => {
+    if (!date) {
+      alert("Please select a date.");
+      return;
+    }
+
+    const token = Cookies.get("token");
+
+    setLoading(true);
+    setError(null);
+
+    const attendanceData = students.map((student) => ({
+      userId: student._id,
+      courseId,
+      date,
+      status: attendance[student._id] ? "present" : "absent",
+    }));
+
+    try {
+      await Promise.all(
+        attendanceData.map(async (record) => {
+          const response = await fetch("http://localhost:8000/api/post/mark", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(record),
+          });
+          if (!response.ok) {
+            throw new Error(`Failed to mark attendance for ${record.userId}`);
+          }
+        })
+      );
+
+      alert(`Attendance for ${date} has been recorded!`);
+    } catch (err) {
+      setError("Failed to submit attendance. Please try again.");
+      console.error("Error submitting attendance:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,14 +132,14 @@ const AttendancePage: React.FC = () => {
         {/* Attendance List */}
         <ul className="space-y-4">
           {students.map((student) => (
-            <li key={student} className="flex items-center">
+            <li key={student._id} className="flex items-center">
               <input
                 type="checkbox"
-                checked={attendance[student]}
-                onChange={() => toggleAttendance(student)}
+                checked={attendance[student._id]}
+                onChange={() => toggleAttendance(student._id)}
                 className="mr-3 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label className="text-white">{student}</label>
+              <label className="text-white">{student.name}</label>
             </li>
           ))}
         </ul>
@@ -84,17 +148,13 @@ const AttendancePage: React.FC = () => {
       {/* Submit Button */}
       <button
         onClick={handleSubmit}
+        disabled={loading}
         className="mt-6 bg-c1 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
       >
-        Submit Attendance
+        {loading ? "Submitting..." : "Submit Attendance"}
       </button>
 
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold text-white">Summary for {date || "Selected Date"}</h3>
-        <p className="text-gray-400">
-          {Object.values(attendance).filter(Boolean).length} of {students.length} present
-        </p>
-      </div>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };
