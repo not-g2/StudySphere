@@ -12,9 +12,9 @@ const announcementRoutes = require("./routes/announcementRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
 const userRoutes = require("./routes/userRoutes");
 const chapterRoutes = require("./routes/chapterRoutes");
-const leaderboardRoutes = require('./routes/leaderboardRoutes');
-const rewardRoutes = require('./routes/rewardRoutes');
-const eventRoutes = require('./routes/eventRoutes');
+const leaderboardRoutes = require("./routes/leaderboardRoutes");
+const rewardRoutes = require("./routes/rewardRoutes");
+const eventRoutes = require("./routes/eventRoutes");
 const connectDB = require("./config/db");
 
 connectDB();
@@ -32,11 +32,11 @@ app.use("/api/announce", announcementRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chapter", chapterRoutes);
-app.use('/api/submissions', submissionRoutes);
-app.use("/api/users",userRoutes);
-app.use('/api/data',leaderboardRoutes);
-app.use('/api/rewd',rewardRoutes);
-app.use('/api/evnt',eventRoutes);
+app.use("/api/submissions", submissionRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/data", leaderboardRoutes);
+app.use("/api/rewd", rewardRoutes);
+app.use("/api/evnt", eventRoutes);
 
 require("./cron/cron");
 app.listen(8000, () => {
