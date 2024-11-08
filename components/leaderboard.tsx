@@ -1,35 +1,38 @@
-import React from 'react';
+// Leaderboard.tsx
 
-const leaders = [
-  { id: 1, name: 'Alice', points: 250 },
-  { id: 2, name: 'Bob', points: 200 },
-  { id: 3, name: 'Charlie', points: 150 },
-  { id: 4, name: 'Diana', points: 120 },
-  { id: 5, name: 'Eve', points: 100 },
+import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// Define the data type for leaderboard entries
+interface LeaderboardEntry {
+    name: string;
+    score: number;
+}
+
+// Sample leaderboard data
+const data: LeaderboardEntry[] = [
+    { name: 'Alice', score: 90 },
+    { name: 'Bob', score: 75 },
+    { name: 'Charlie', score: 85 },
+    { name: 'Diana', score: 70 },
+    { name: 'Ethan', score: 95 },
 ];
 
-function Leaderboard() {
-  return (
-    <div className="flex flex-col items-center py-8 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center text-white">Leaderboard</h2>
-      <table className="w-full border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-        <thead>
-          <tr className="bg-t2 text-white">
-            <th className="text-white px-4 py-2 font-semibold text-center">Name</th>
-            <th className="text-white px-4 py-2 font-semibold text-center">Points</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leaders.map((leader) => (
-            <tr key={leader.id} className="border-t text-white bg-c5">
-              <td className="px-4 py-2 text-center">{leader.name}</td>
-              <td className="px-4 py-2 text-center">{leader.points}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+const Leaderboard: React.FC = () => {
+    return (
+        <div className="p-4 bg-c5 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-white mb-4 text-center">Leaderboard</h2>
+            <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" domain={[0, 100]} />
+                    <YAxis dataKey="name" type="category" width={80} />
+                    <Tooltip />
+                    <Bar dataKey="score" fill="#00bfff" barSize={20} />
+                </BarChart>
+            </ResponsiveContainer>
+        </div>
+    );
+};
 
 export default Leaderboard;

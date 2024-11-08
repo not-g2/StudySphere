@@ -1,53 +1,161 @@
-// app/attendance/page.tsx
-
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
+import { useParams, useRouter } from 'next/navigation';
+
+interface Student {
+  _id: string;
+  name: string;
+}
 
 const AttendancePage: React.FC = () => {
-  // Placeholder list of names
-  const [students] = useState<string[]>([
-    'Alice Johnson',
-    'Bob Smith',
-    'Charlie Brown',
-    'Diana Prince',
-    'Ethan Hunt',
-  ]);
+  const router = useRouter();
+  const params = useParams();
+  const courseId = params.courseId || params.id; // Adjust based on your route parameter
 
-  // State to track attendance and selected date
-  const [attendance, setAttendance] = useState<{ [key: string]: boolean }>(
-    students.reduce((acc, student) => {
-      acc[student] = false;
-      return acc;
-    }, {} as { [key: string]: boolean })
-  );
+  const [session, setSession] = useState<any>(null);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [attendance, setAttendance] = useState<{ [key: string]: boolean }>({});
   const [date, setDate] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Handle date change and reset attendance
+  // Function to get the session profile
+  const GetProfile = async () => {
+    const sessionData: string | undefined = Cookies.get("session");
+
+    if (sessionData && !session) {
+      setSession(JSON.parse(sessionData));
+    } else if (!sessionData) {
+      router.push("/auth/signin");
+    }
+  };
+
+  // Fetch the session on component mount
+  useEffect(() => {
+    GetProfile();
+  }, []);
+
+  // Fetch students when session and courseId are available
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        if (!session) {
+          console.log("Session not available yet.");
+          return;
+        }
+        const token = session.user.token;
+        if (!token) throw new Error("Token not found. Please log in again.");
+        if (!courseId) throw new Error("Course ID not found.");
+
+        console.log("Fetching students for course:", courseId);
+
+        const response = await fetch(`http://localhost:8000/api/courses/${courseId}/students`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch students.");
+        }
+
+        const data = await response.json();
+        console.log("Fetched students data:", data);
+        setStudents(data.students);
+        setAttendance(
+          data.students.reduce((acc: { [key: string]: boolean }, student: Student) => {
+            acc[student._id] = false;
+            return acc;
+          }, {})
+        );
+      } catch (err) {
+        setError("Failed to load students. Please try again later.");
+        console.error("Error fetching students:", err);
+      }
+    };
+
+    if (session && courseId) {
+      fetchStudents();
+    }
+  }, [session, courseId]);
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDate(e.target.value);
     // Reset attendance for the new date
     setAttendance(
       students.reduce((acc, student) => {
-        acc[student] = false;
+        acc[student._id] = false;
         return acc;
       }, {} as { [key: string]: boolean })
     );
   };
 
-  // Toggle attendance status for a student
-  const toggleAttendance = (student: string) => {
+  const toggleAttendance = (studentId: string) => {
     setAttendance((prevAttendance) => ({
       ...prevAttendance,
-      [student]: !prevAttendance[student],
+      [studentId]: !prevAttendance[studentId],
     }));
   };
 
-  // Handle submit button click
-  const handleSubmit = () => {
-    console.log("Attendance for:", date);
-    console.log(attendance);
-    alert(`Attendance for ${date} has been recorded!`);
+  const handleSubmit = async () => {
+    if (!date) {
+      alert("Please select a date.");
+      return;
+    }
+
+    // Retrieve token from cookies in the same way as GetProfile
+    const sessionData: string | undefined = Cookies.get("session");
+
+    if (!sessionData) {
+      setError("Session not found. Please log in again.");
+      router.push("/auth/signin");
+      return;
+    }
+
+    const sessionFromCookie = JSON.parse(sessionData);
+    const token = sessionFromCookie.user.token;
+
+    if (!token) {
+      setError("Authentication token not found. Please log in again.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const attendanceData = students.map((student) => ({
+      userId: student._id,
+      courseId,
+      date,
+      status: attendance[student._id] ? "present" : "absent",
+    }));
+
+    try {
+      await Promise.all(
+        attendanceData.map(async (record) => {
+          const response = await fetch("http://localhost:8000/api/adminauth/post/mark", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(record),
+          });
+          if (!response.ok) {
+            throw new Error(`Failed to mark attendance for ${record.userId}`);
+          }
+        })
+      );
+
+      alert(`Attendance for ${date} has been recorded!`);
+    } catch (err) {
+      setError("Failed to submit attendance. Please try again.");
+      console.error("Error submitting attendance:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,33 +176,29 @@ const AttendancePage: React.FC = () => {
         {/* Attendance List */}
         <ul className="space-y-4">
           {students.map((student) => (
-            <li key={student} className="flex items-center">
+            <li key={student._id} className="flex items-center">
               <input
                 type="checkbox"
-                checked={attendance[student]}
-                onChange={() => toggleAttendance(student)}
+                checked={attendance[student._id]}
+                onChange={() => toggleAttendance(student._id)}
                 className="mr-3 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label className="text-white">{student}</label>
+              <label className="text-white">{student.name}</label>
             </li>
           ))}
         </ul>
       </div>
-      
+
       {/* Submit Button */}
       <button
         onClick={handleSubmit}
+        disabled={loading}
         className="mt-6 bg-c1 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
       >
-        Submit Attendance
+        {loading ? "Submitting..." : "Submit Attendance"}
       </button>
 
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold text-white">Summary for {date || "Selected Date"}</h3>
-        <p className="text-gray-400">
-          {Object.values(attendance).filter(Boolean).length} of {students.length} present
-        </p>
-      </div>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };

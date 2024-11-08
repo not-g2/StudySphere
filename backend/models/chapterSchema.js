@@ -10,7 +10,7 @@ const ChapterSchema = new mongoose.Schema({
         default: "in-progress",
     },
     createdAt: { type: Date, default: Date.now },
-    deadLine: { type: Date, required: true },
+    deadLine: { type: Date },
     chapterPdf: { type: String },
 });
 

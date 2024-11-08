@@ -1,18 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import Cookies from "js-cookie";
 
 const AnnouncementSection: React.FC = () => {
   const [title, setTitle] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { data: session } = useSession();
-  const token = session?.accessToken;
+  const [token, setToken] = useState<string | undefined>(undefined);
   const params = useParams();
   const courseId = params.id;
+
+  useEffect(() => {
+    // Retrieve token from cookies
+    const sessionData = Cookies.get("session");
+    if (sessionData) {
+      const parsedSession = JSON.parse(sessionData);
+      setToken(parsedSession.user.token);
+    } else {
+      console.log("No session cookie found");
+    }
+  }, []);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);

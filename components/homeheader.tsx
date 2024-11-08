@@ -160,7 +160,11 @@ const Header: React.FC = () => {
                             handleClose={handleClose}
                             handleSignOut={handleSignOut}
                         />
-                        <LogoutPage open={open} setOpen={setOpen} setSession={setSession}/>
+                        <LogoutPage
+                            open={open}
+                            setOpen={setOpen}
+                            setSession={setSession}
+                        />
                     </div>
                 )}
             </div>

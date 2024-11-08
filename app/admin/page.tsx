@@ -39,7 +39,7 @@ const MyCourses: React.FC = () => {
             const fetchCourses = async () => {
                 try {
                     const response = await fetch(
-                        "http://localhost:8000/api/courses/672b171ab92e240998f0668b",
+                        `http://localhost:8000/api/courses/${session.user.id}`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -70,46 +70,50 @@ const MyCourses: React.FC = () => {
     };
 
     const handleAddCourse = async () => {
-        if (!session) {
-            alert("You are not authorized.");
-            return;
-        }
-
-        setFormLoading(true);
-        setFormError(null);
-
-        try {
-            const response = await fetch(
-                "http://localhost:8000/api/courses/create",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session.user.token}`,
-                    },
-                    body: JSON.stringify({
-                        name: newCourseName,
-                        description: newCourseDescription,
-                        students: [],
-                    }),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to add course.");
-            }
-
-            const newCourse = await response.json();
-            setCourses((prevCourses) => [...prevCourses, newCourse]);
-            setNewCourseName("");
-            setNewCourseDescription("");
-            setShowForm(false);
-        } catch (err) {
-            setFormError("Failed to add course. Please try again.");
-        } finally {
-            setFormLoading(false);
-        }
-    };
+      if (!session) {
+          alert("You are not authorized.");
+          return;
+      }
+  
+      setFormLoading(true);
+      setFormError(null);
+  
+      try {
+          const adminId = session.user.id; // Ensure adminId is available in session
+          const response = await fetch(
+              `http://localhost:8000/api/courses/create/${adminId}`, // Include adminId in the URL
+              {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${session.user.token}`,
+                  },
+                  body: JSON.stringify({
+                      name: newCourseName,
+                      description: newCourseDescription,
+                      students: [],
+                  }),
+              }
+          );
+  
+          if (!response.ok) {
+              throw new Error("Failed to add course.");
+          }
+  
+          const newCourse = await response.json();
+          setCourses((prevCourses) => [...prevCourses, newCourse.course]);
+          setNewCourseName("");
+          setNewCourseDescription("");
+          setShowForm(false);
+      } catch (err) {
+          setFormError("Failed to add course. Please try again.");
+          console.error("Error adding course:", err);
+      } finally {
+          setFormLoading(false);
+      }
+  };
+  
+  
 
     return (
         <div className="p-4 min-h-screen bg-c2">
