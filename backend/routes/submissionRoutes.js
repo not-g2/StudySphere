@@ -3,6 +3,7 @@ const router =  express.Router();
 const Submission = require('../models/submissionSchema');
 const Assignment = require('../models/assignmentSchema');
 const User = require('../models/userModel');
+const rewardfunc = require('../utils/rewardFunc');
 
 // route for submitting an assignment
 router.post('/submit',async(req,res)=>{
@@ -16,6 +17,20 @@ router.post('/submit',async(req,res)=>{
         // Check if the student exists
         const student = await User.findById(studentId);
         if (!student) return res.status(404).json({ error: 'Student not found' });
+
+        student.auraPoints+=rewardfunc(assignment.dueDate,Date.now());
+
+        // calculate next level threshold
+        const nextLevelPoints = 100 * (student.level + 1) ** 2;
+
+        // Check if user qualifies for a level up
+        if (student.auraPoints >= nextLevelPoints) {
+            student.level += 1;  // Level up
+            console.log(`Congratulations! ${student.name} reached Level ${student.level}`);
+        }
+
+        // save the changes
+        await student.save();
 
         // Create a new submission
         const submission = new Submission({
@@ -48,19 +63,39 @@ router.get('/assignment/:id/submissions', async (req, res) => {
 
 // Route for marking a submission as checked by adding feedback
 router.put('/submission/:id/feedback', async (req, res) => {
-    const { feedback, grade } = req.body; // Feedback and optional grade
+    const { studentId,assignmentId, feedback, grade } = req.body; // Feedback and optional grade
 
     try {
         // Find the submission by ID
         const submission = await Submission.findById(req.params.id);
         if (!submission) return res.status(404).json({ error: 'Submission not found' });
 
+        const assignment = await Assignment.findById(assignmentId);
+        if (!assignment) return res.status(404).json({ error: 'Assignment not found' });
+        const student = await User.findById(studentId);
+        if (!student) return res.status(404).json({ error: 'Student not found' });
+
+        
         // Update the submission with feedback and optionally grade
         submission.feedback = feedback;
         if (grade !== undefined) {
             submission.grade = grade;
             submission.status = 'graded'; // Optionally update status if graded
         }
+
+        student.auraPoints+=rewardfunc(assignment.dueDate,Date.now());
+
+        // calculate next level threshold
+        const nextLevelPoints = 100 * (student.level + 1) ** 2;
+
+        // Check if user qualifies for a level up
+        if (student.auraPoints >= nextLevelPoints) {
+            student.level += 1;  // Level up
+            console.log(`Congratulations! ${student.name} reached Level ${student.level}`);
+        }
+
+        // save the changes
+        await student.save();
         
         await submission.save();
 

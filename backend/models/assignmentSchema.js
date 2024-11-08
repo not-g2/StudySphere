@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 // this will be managed by the admin
 const AssignmentSchema = new mongoose.Schema({
     title: { type: String, required: true },

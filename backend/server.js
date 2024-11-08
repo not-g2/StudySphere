@@ -11,6 +11,9 @@ const adminRoutes = require("./routes/adminRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
 const submissionRoutes = require('./routes/submissionRoutes');
 const userRoutes = require('./routes/userRoutes');
+const leaderboardRoutes = require('./routes/leaderboardRoutes');
+const rewardRoutes = require('./routes/rewardRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 const connectDB = require("./config/db");
 
 connectDB();
@@ -27,6 +30,9 @@ app.use("/api/adminauth/", adminRoutes);
 app.use("/api/announce", announcementRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use("/api/users",userRoutes);
+app.use('/api/data',leaderboardRoutes);
+app.use('/api/rewd',rewardRoutes);
+app.use('/api/evnt',eventRoutes);
 
 require("./cron/cron");
 app.listen(8000, () => {
