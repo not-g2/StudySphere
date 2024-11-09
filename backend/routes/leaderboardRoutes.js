@@ -10,7 +10,7 @@ router.get('/top-10-aura', authMiddleware,async (req, res) => {
         const topUsers = await User.find({})
             .sort({ auraPoints: -1 })
             .limit(10)
-            .select('name auraPoints'); // Select fields to display in the response
+            .select('name level'); // Select fields to display in the response
 
         res.status(200).json({
             message: 'Top 10 users based on auraPoints',

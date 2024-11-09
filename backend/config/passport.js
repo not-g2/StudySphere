@@ -3,33 +3,32 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const User = require("../models/userModel");
 
-passport.use(
-    new GoogleStrategy(
-        {
-            clientID: process.env.GOOGLE_ID,
-            clientSecret: process.env.GOOGLE_SECRET,
-            callbackURL: "http://localhost:8000/auth/callback/google",
-        },
-        async (accessToken, refreshToken, profile, done) => {
-            try {
-                // Check if user exists
-                let user = await User.findOne({ googleId: profile.id });
-                if (!user) {
-                    // Create new user if not found
-                    user = await User.create({
-                        googleId: profile.id,
-                        name: profile.displayName,
-                        email: profile.emails[0].value,
-                        password: "nopassword",
-                    });
-                }
-                done(null, user);
-            } catch (err) {
-                done(err, false);
-            }
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_ID,
+    clientSecret: process.env.GOOGLE_SECRET,
+    callbackURL: 'http://localhost:8000/auth/callback/google'
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        // Check if user exists
+        let user = await User.findOne({ googleId: profile.id });
+        if (!user) {
+            // Create new user if not found
+            user = await User.create({
+                googleId: profile.id,
+                name: profile.displayName,
+                email: profile.emails[0].value,
+                password : 'nopassword'
+            });
         }
-    )
-);
+        // Generate JWT token
+        const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, {
+            expiresIn: "1h",
+        });
+        done(null, user);
+    } catch (err) {
+        done(err, false);
+    }
+}));
 
 // passport.use(new GitHubStrategy({
 //     clientID: process.env.GITHUB_ID,
@@ -79,6 +78,10 @@ passport.use(new GitHubStrategy({
                 password : 'nopassword'
             });
         }
+        // Generate JWT token
+        const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, {
+            expiresIn: "1h",
+        });
         done(null, user);
     } catch (err) {
         done(err, false);
