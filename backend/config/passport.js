@@ -1,7 +1,7 @@
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const GitHubStrategy = require('passport-github2').Strategy;
-const User = require('../models/userModel'); 
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const GitHubStrategy = require("passport-github2").Strategy;
+const User = require("../models/userModel");
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_ID,
@@ -64,9 +64,9 @@ passport.use(new GitHubStrategy({
         // Check if profile.emails exists and has data
         let email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null;
 
-        if (!email) {
-            return done(new Error('No email found on GitHub profile'));
-        }
+                if (!email) {
+                    return done(new Error("No email found on GitHub profile"));
+                }
 
         // Check if user exists
         let user = await User.findOne({ githubId: profile.id });

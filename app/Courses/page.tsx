@@ -6,12 +6,13 @@ import {
     CardContent,
     Typography,
     CardMedia,
+    Button,
 } from "@mui/material";
-
 import pic from "../../public/teach1.jpg";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import ClassCodePopup from "../../components/classAdd";
 
 type Session = {
     user: {
@@ -44,10 +45,15 @@ const ClassesPage = () => {
     const router = useRouter();
     const [classesData, setclassesData] = useState<classItem[]>([]);
     const [session, setSession] = useState<Session | null>(null);
+    const [openClassCodePopup, setOpenClassCodePopup] = useState(false); // State for the popup
+    const [currentClassCode, setCurrentClassCode] = useState(""); // Store the current class code
 
-    const handleCardClick = (classId: string) => {
+    const handleCardClick = (classId: string, classCode: string) => {
+        setCurrentClassCode(classCode); // Set the class code when the card is clicked
+        setOpenClassCodePopup(true); // Open the popup
         router.push(`/Courses/${classId}`);
     };
+
     useEffect(() => {
         const GetClasses = async () => {
             const sessionData: string | undefined = Cookies.get("session");
@@ -72,7 +78,7 @@ const ClassesPage = () => {
                         const data = await response.json();
                         setclassesData(data.coursesList);
                     } else {
-                        console.error("Failed to get Classes deatils");
+                        console.error("Failed to get Classes details");
                     }
                 } catch (error) {
                     console.error("Error Getting Classes Details:", error);
@@ -81,7 +87,59 @@ const ClassesPage = () => {
         };
 
         GetClasses();
-    }, [session]);
+    }, [session, openClassCodePopup]);
+
+    const handleCloseClassCodePopup = () => {
+        setOpenClassCodePopup(false); // Close the popup
+    };
+
+    function onJoinClass(classCode: string) {
+        async function addStudentToCourse() {
+            const sessionData: string | undefined = Cookies.get("session");
+
+            if (sessionData && !session) {
+                setSession(JSON.parse(sessionData));
+            } else if (!sessionData) {
+                router.push("/auth/signin");
+            }
+            if (session) {
+                const token = session?.user.token;
+
+                const requestData = {
+                    studentId: session.user.id,
+                    courseCode: classCode,
+                };
+
+                try {
+                    const response = await fetch(
+                        "http://localhost:8000/api/courses/add-course",
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify(requestData),
+                        }
+                    );
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log("Student added to course:", data);
+                    } else {
+                        const errorData = await response.json();
+                        console.error(
+                            "Error adding student to course:",
+                            errorData
+                        );
+                    }
+                } catch (error) {
+                    console.error("Network error:", error);
+                }
+            }
+        }
+        addStudentToCourse();
+    }
 
     return (
         <Box
@@ -94,14 +152,29 @@ const ClassesPage = () => {
                 alignItems: "center",
             }}
         >
-            <Typography
-                variant="h4"
-                gutterBottom
-                align="center"
-                className="text-white mt-2 mb-4"
+            <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ width: "100vw" }}
             >
-                Your Classes
-            </Typography>
+                <Typography
+                    variant="h4"
+                    gutterBottom
+                    className="text-white mt-2 mb-4"
+                >
+                    Your Classes
+                </Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setOpenClassCodePopup(true)} // Open popup on button click
+                    sx={{ ml: 2, mr: 4 }}
+                >
+                    Join Class
+                </Button>
+            </Box>
+
             <Grid container spacing={4} justifyContent="flex-start">
                 {classesData.map((classItem) => (
                     <Grid
@@ -121,7 +194,9 @@ const ClassesPage = () => {
                                 height: "300px",
                                 cursor: "pointer",
                             }}
-                            onClick={() => handleCardClick(classItem._id)}
+                            onClick={() =>
+                                handleCardClick(classItem._id, classItem._id)
+                            } // Pass class code here
                         >
                             <Grid container sx={{ height: "100%" }}>
                                 <Grid item xs={7} sx={{ padding: 2 }}>
@@ -179,6 +254,11 @@ const ClassesPage = () => {
                     </Grid>
                 ))}
             </Grid>
+            <ClassCodePopup
+                open={openClassCodePopup}
+                handleClose={handleCloseClassCodePopup}
+                onJoinClass={onJoinClass}
+            />
         </Box>
     );
 };

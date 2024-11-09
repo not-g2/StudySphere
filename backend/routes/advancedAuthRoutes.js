@@ -28,9 +28,9 @@ router.get('/auth/github/callback', passport.authenticate('github', { session: f
 });
 
 // Logout route
-router.get('/logout', (req, res) => {
+router.get("/logout", (req, res) => {
     req.logout(() => {
-        res.redirect('/');
+        res.redirect("/");
     });
 });
 

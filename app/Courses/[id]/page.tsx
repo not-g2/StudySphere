@@ -18,7 +18,6 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useRouter, useParams } from "next/navigation";
 import { format, formatDate } from "date-fns";
-import { Token } from "@mui/icons-material";
 
 interface Announcement {
     _id: number;
@@ -399,6 +398,7 @@ const DashboardPage = () => {
                 assignment={currentAssignment}
                 studentId={session?.user.id}
             />
+            
         </Box>
     );
 };
