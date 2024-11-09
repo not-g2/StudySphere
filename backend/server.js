@@ -17,8 +17,10 @@ const chapterRoutes = require("./routes/chapterRoutes");
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const rewardRoutes = require("./routes/rewardRoutes");
 const eventRoutes = require("./routes/eventRoutes");
-const advancedAuthRoutes = require("./routes/advancedAuthRoutes");
-const goalRoutes = require("./routes/goalRoutes");
+const advancedAuthRoutes = require('./routes/advancedAuthRoutes');
+const goalRoutes = require('./routes/goalRoutes');
+const challengeRoute = require('./routes/challengeRoute');
+const timeTableRoute = require('./routes/timeTableRoutes');
 const connectDB = require("./config/db");
 const reminderRoutes = require("./routes/reminderRoutes");
 
@@ -54,6 +56,8 @@ app.use("/api/data", leaderboardRoutes);
 app.use("/api/rewd", rewardRoutes);
 app.use("/api/evnt", eventRoutes);
 app.use("/api/goals", goalRoutes);
+app.use('/api/challenge',challengeRoute);
+app.use('/api/tt',timeTableRoute);
 app.use("/api/reminder", reminderRoutes);
 
 require("./cron/cron");
