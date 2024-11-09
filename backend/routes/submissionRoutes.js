@@ -136,4 +136,28 @@ router.put("/submission/:id/feedback", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+router.get("/submissions/:studentId", async (req, res) => {
+    try {
+        const { studentId } = req.params;
+
+        const submissions = await Submission.find({ studentId }).populate(
+            "assignmentId"
+        );
+
+        if (!submissions) {
+            return res
+                .status(404)
+                .json({ message: "No submissions found for this student." });
+        }
+
+        res.status(200).json(submissions);
+    } catch (error) {
+        console.error("Error retrieving submissions:", error);
+        res.status(500).json({
+            message: "Server error, please try again later.",
+        });
+    }
+});
+
 module.exports = router;

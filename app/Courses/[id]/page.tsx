@@ -62,6 +62,7 @@ const DashboardPage = () => {
     const [assignments, setassignments] = useState<Assignment[]>([]);
     const [announcements, setannouncements] = useState<Announcement[]>([]);
     const [chapters, setchapters] = useState<Chapter[]>([]);
+    const [submissions, setSubmissions] = useState<any[]>([]);
 
     const handleClickOpen = (announcement: Announcement) => {
         setCurrentAnnouncement(announcement);
@@ -93,7 +94,7 @@ const DashboardPage = () => {
     };
 
     useEffect(() => {
-        const GetAssignments = async () => {
+        const fetchDashboardData = async () => {
             const sessionData: string | undefined = Cookies.get("session");
 
             if (sessionData && !session) {
@@ -101,9 +102,11 @@ const DashboardPage = () => {
             } else if (!sessionData) {
                 router.push("/auth/signin");
             }
+
             if (session) {
                 const token = session?.user.token;
 
+                // Fetch assignments
                 try {
                     const response = await fetch(
                         `http://localhost:8000/api/assgn/course/${courseID}`,
@@ -115,32 +118,14 @@ const DashboardPage = () => {
                     if (response.ok) {
                         const data = await response.json();
                         setassignments(data);
-                        console.log(assignments);
-                        console.log(data);
                     } else {
-                        console.error("Failed to get Assignment deatils");
+                        console.error("Failed to get Assignment details");
                     }
                 } catch (error) {
-                    console.error("Error Getting Assignment Details:", error);
+                    console.error("Error getting Assignment Details:", error);
                 }
-            }
-        };
 
-        GetAssignments();
-    }, [session]);
-
-    useEffect(() => {
-        const GetAnnouncements = async () => {
-            const sessionData: string | undefined = Cookies.get("session");
-
-            if (sessionData && !session) {
-                setSession(JSON.parse(sessionData));
-            } else if (!sessionData) {
-                router.push("/auth/signin");
-            }
-            if (session) {
-                const token = session?.user.token;
-
+                // Fetch announcements
                 try {
                     const response = await fetch(
                         `http://localhost:8000/api/announce/${courseID}`,
@@ -153,29 +138,13 @@ const DashboardPage = () => {
                         const data = await response.json();
                         setannouncements(data);
                     } else {
-                        console.error("Failed to get Announcement deatils");
+                        console.error("Failed to get Announcement details");
                     }
                 } catch (error) {
-                    console.error("Error Getting Announcement Details:", error);
+                    console.error("Error getting Announcement Details:", error);
                 }
-            }
-        };
 
-        GetAnnouncements();
-    }, [session]);
-
-    useEffect(() => {
-        const GetChapters = async () => {
-            const sessionData: string | undefined = Cookies.get("session");
-
-            if (sessionData && !session) {
-                setSession(JSON.parse(sessionData));
-            } else if (!sessionData) {
-                router.push("/auth/signin");
-            }
-            if (session) {
-                const token = session?.user.token;
-
+                // Fetch chapters
                 try {
                     const response = await fetch(
                         `http://localhost:8000/api/chapter/get/${courseID}`,
@@ -186,22 +155,78 @@ const DashboardPage = () => {
                     );
                     if (response.ok) {
                         const data = await response.json();
-                        console.log(data);
                         setchapters(data);
                     } else {
                         console.error("Failed to get Chapter details");
                     }
                 } catch (error) {
-                    console.error("Error Getting Chapter Details:", error);
+                    console.error("Error getting Chapter Details:", error);
+                }
+
+                // Fetch submissions
+                try {
+                    const response = await fetch(
+                        `http://localhost:8000/api/submissions/submissions/${session.user.id}`,
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            method: "GET",
+                        }
+                    );
+                    if (response.ok) {
+                        const data = await response.json();
+                        setSubmissions(data);
+                    } else {
+                        console.error("Failed to get Submission details");
+                    }
+                } catch (error) {
+                    console.error("Error getting Submission Details:", error);
                 }
             }
         };
 
-        GetChapters();
+        fetchDashboardData();
     }, [session]);
 
+    const isSubmitted = (assignmentId: number) => {
+        return submissions.some(
+            (submission) =>
+                submission.assignmentId._id === assignmentId &&
+                submission.status === "submitted"
+        );
+    };
+
+    const calculateTimeLeft = (dueDate: string) => {
+        const currentDate = new Date();
+        const targetDate = new Date(dueDate);
+    
+        const timeDifference = targetDate.getTime() - currentDate.getTime();
+    
+        // If the time difference is positive, calculate remaining time
+        if (timeDifference > 0) {
+            const daysLeft = Math.floor(timeDifference / (1000 * 3600 * 24)); // Calculate full days
+            const hoursLeft = Math.floor((timeDifference % (1000 * 3600 * 24)) / (1000 * 3600)); // Remaining hours after days
+    
+            // If less than a day is remaining, return the hours
+            if (daysLeft < 1) {
+                return `${hoursLeft} hours left`;
+            } else {
+                return `${daysLeft} days left`;
+            }
+        } else {
+            return "Expired"; // If due date is in the past
+        }
+    };
+
     return (
-        <Box className="bg-c2" sx={{ padding: 4 }}>
+        <Box
+            className="bg-c2"
+            sx={{
+                minHeight: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                padding: 4,
+            }}
+        >
             <Box
                 sx={{
                     position: "relative",
@@ -234,7 +259,7 @@ const DashboardPage = () => {
                 />
             </Box>
 
-            <Grid container spacing={4} mt={2}>
+            <Grid container spacing={4} mt={2} sx={{ flex: 1 }}>
                 <Grid item xs={12} md={8}>
                     <Typography
                         variant="h5"
@@ -267,22 +292,29 @@ const DashboardPage = () => {
                                         {formatdate(assignment.dueDate)}
                                     </Typography>
                                 </CardContent>
-                                <Button
-                                    size="small"
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() =>
-                                        handleClickOpenAssm(assignment)
-                                    }
-                                >
-                                    View Details
-                                </Button>
+                                {!isSubmitted(assignment._id) ? (
+                                    <Button
+                                        size="small"
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() =>
+                                            handleClickOpenAssm(assignment)
+                                        }
+                                    >
+                                        View Details
+                                    </Button>
+                                ) : (
+                                    <Typography sx={{ color: "green", marginLeft: 2 }}>
+                                        Submitted
+                                    </Typography>
+                                )}
                             </Card>
                         ))
                     ) : (
                         <Typography>No assignments available</Typography>
                     )}
                 </Grid>
+
                 <Grid item xs={12} md={4}>
                     <Typography
                         variant="h5"
@@ -387,6 +419,7 @@ const DashboardPage = () => {
                     </Box>
                 </Grid>
             </Grid>
+
             <AnnouncementPopup
                 open={open}
                 handleClose={handleClose}
@@ -398,7 +431,6 @@ const DashboardPage = () => {
                 assignment={currentAssignment}
                 studentId={session?.user.id}
             />
-            
         </Box>
     );
 };
