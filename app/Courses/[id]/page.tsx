@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useRouter, useParams } from "next/navigation";
 import { format, formatDate } from "date-fns";
+import { Token } from "@mui/icons-material";
 
 interface Announcement {
     _id: number;
@@ -219,7 +220,8 @@ const DashboardPage = () => {
                                         variant="body2"
                                         sx={{ color: "#d3d3d3" }}
                                     >
-                                        Due Date: {formatdate(assignment.dueDate)}
+                                        Due Date:{" "}
+                                        {formatdate(assignment.dueDate)}
                                     </Typography>
                                 </CardContent>
                                 <Button
@@ -346,6 +348,7 @@ const DashboardPage = () => {
                 open={openAssm}
                 handleClose={handleCloseAssm}
                 assignment={currentAssignment}
+                studentId={session?.user.id}
             />
         </Box>
     );
