@@ -18,6 +18,7 @@ const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const rewardRoutes = require("./routes/rewardRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const advancedAuthRoutes = require('./routes/advancedAuthRoutes');
+const goalRoutes = require('./routes/goalRoutes');
 const connectDB = require("./config/db");
 
 connectDB();
@@ -49,6 +50,7 @@ app.use("/api/chapter", chapterRoutes);
 app.use("/api/data", leaderboardRoutes);
 app.use("/api/rewd", rewardRoutes);
 app.use("/api/evnt", eventRoutes);
+app.use('/api/goals',goalRoutes);
 
 require("./cron/cron");
 app.listen(8000, () => {
