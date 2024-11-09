@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Event = require("../models/eventSchema"); // Adjust path as needed
+const Event = require("../models/eventSchema");
 const authMiddleware = require("../middleware/auth");
 
 // ASK THE FRONTEND DUDES IF THEY WANT TO USE AUTHMIDDLEWARE

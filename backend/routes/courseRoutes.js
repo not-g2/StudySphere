@@ -95,56 +95,89 @@ router.get("/getcourse/:courseID", authMiddleware, async (req, res) => {
 });
 
 // Route to get all student names in a specific course
-router.get('/:courseId/students',authMiddleware, async (req, res) => {
+router.get("/:courseId/students", authMiddleware, async (req, res) => {
     try {
-        const course = await Course.findById(req.params.courseId)
-            .populate({ path: 'students', select: 'name' }); // '_id' is included by default
+        const course = await Course.findById(req.params.courseId).populate({
+            path: "students",
+            select: "name",
+        }); // '_id' is included by default
 
         if (!course) {
-            return res.status(404).json({ error: 'Course not found' });
+            return res.status(404).json({ error: "Course not found" });
         }
 
         // Format each student with both '_id' and 'name'
-        const studentData = course.students.map(student => ({
+        const studentData = course.students.map((student) => ({
             _id: student._id,
-            name: student.name
+            name: student.name,
         }));
 
         res.status(200).json({ students: studentData });
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
 // Route to fetch all assignments for a particular course
-router.get('/:courseId/assignments', async (req, res) => {
+router.get("/:courseId/assignments", async (req, res) => {
     try {
         const { courseId } = req.params;
 
         // Find all assignments where the course field matches the courseId
-        const assignments = await Assignment.find({ course: courseId }).select('dueDate description');
+        const assignments = await Assignment.find({ course: courseId }).select(
+            "dueDate description"
+        );
 
         // Check if any assignments were found
         if (!assignments || assignments.length === 0) {
-            return res.status(404).json({ error: 'No assignments found for this course' });
+            return res
+                .status(404)
+                .json({ error: "No assignments found for this course" });
         }
 
         res.status(200).json({ assignments });
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
-//The Backend guy will take care of it
-// router.post("/create/chapter", authMiddleware, async(req, res) => {
-//     const {chapterNo, glink, courseID} = req.body;
-//     try {
-//         const course = await Course.findByIdAndUpdate(courseID, )
-//     }
-//     catch(error) {
-//         console.error(error);
-//         res.status(500).json({message: "Failed to Upload Chapter"})
-//     }
-// })
+//add a student to a Course
+router.put("/add-course", async (req, res) => {
+    const { studentId, courseCode } = req.body;
+
+    if (!studentId) {
+        return res.status(400).json({ message: "Student ID is required" });
+    }
+
+    try {
+        const course = await Course.findOne({ courseCode: courseCode });
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        if (course.students.includes(studentId)) {
+            return res.status(400).json({
+                message: "Student is already enrolled in this course",
+            });
+        }
+
+        course.students.push(studentId);
+
+        await course.save();
+
+        const student = await User.findById(studentId);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+        student.courses.push(course._id);
+        await student.save();
+
+        res.status(200).json({ message: "Student added to course", course });
+    } catch (err) {
+        console.error("Error adding student to course:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 module.exports = router;

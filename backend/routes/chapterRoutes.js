@@ -3,6 +3,7 @@ const authMiddleware = require("../middleware/auth");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
 const chapterModel = require("../models/chapterSchema"); // Import your model
 const router = express.Router();
+const generatePdfUrl = require("../utils/pdflinkhelper");
 
 router.post(
     "/create",
@@ -41,7 +42,15 @@ router.get("/get/:courseID", authMiddleware, async (req, res) => {
     try {
         const { courseID } = req.params;
         const chapters = await chapterModel.find({ course: courseID });
-        res.status(200).json(chapters);
+        const chaptersWithPdfUrl = chapters.map((chapter) => {
+            const pdfUrl = generatePdfUrl(`pdfs/${chapter._id}`);
+            return {
+                ...chapter.toObject(),
+                pdfUrl,
+            };
+        });
+
+        res.status(200).json(chaptersWithPdfUrl);
     } catch (error) {
         console.error("Error fetching chapters:", error);
         res.status(500).json({

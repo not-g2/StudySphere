@@ -14,34 +14,37 @@ import {
     IconButton,
     ListItemSecondaryAction,
     Avatar,
+    CardContent,
+    CardActions,
+    Card,
 } from "@mui/material";
 import { AttachFile, Delete } from "@mui/icons-material";
 import pdf from "../public/pdf.png";
-import word from "../public/word.png";
-import ppt from "../public/ppt.png";
-import excel from "../public/excel.png";
 import { format } from "date-fns";
+import Cookies from "js-cookie";
 
 interface Assignment {
     _id: number;
     title: string;
     dueDate: string;
     course: string;
-    desc: string;
+    description: string;
     link: string;
+    createdAt: string;
 }
 
 interface PopupFormProps {
     open: boolean;
     handleClose: () => void;
     assignment: Assignment | null;
+    studentId: string | undefined;
 }
 
 const formatdate = (date: string | undefined) => {
-    const formattedDate = format(
-        new Date("2024-11-06T07:38:09.881Z"),
-        "MMMM dd, yyyy HH:mm:ss"
-    );
+    if (!date) {
+        return;
+    }
+    const formattedDate = format(new Date(date), "MMMM dd, yyyy HH:mm:ss");
     return formattedDate;
 };
 
@@ -49,42 +52,93 @@ const PopupForm: React.FC<PopupFormProps> = ({
     open,
     handleClose,
     assignment,
+    studentId,
 }) => {
-    const handleSubmit = () => {};
+    const handleSubmit = () => {
+        submitAssignment();
+        handleClose();
+    };
 
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<File | null>(null);
 
     useEffect(() => {
-        setFiles([]);
+        setFiles(null);
     }, [assignment]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setFiles([...files, ...Array.from(e.target.files)]);
+        const maxSize = 10 * 1024 * 1024; // 10 MB
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+
+            // Check if the file is a PDF
+            if (file.type !== "application/pdf") {
+                alert(`${file.name} is not a PDF file.`);
+                return;
+            }
+
+            // Check if the file size is within the limit
+            if (file.size > maxSize) {
+                alert(`${file.name} exceeds the 10 MB limit.`);
+                return;
+            }
+
+            // Set the file as the only entry in the files array
+            setFiles(file);
         }
     };
 
-    const handleFileRemove = (index: number) => {
-        setFiles(files.filter((_, i) => i !== index));
+    const handleFileRemove = () => {
+        setFiles(null); // Clear the file
     };
 
-    const getFileAvatar = (file: File) => {
+    const getFileAvatar = (file: File | null) => {
+        if (!file) {
+            return;
+        }
         switch (file.type) {
             case "application/pdf":
                 return pdf.src;
-            case "application/msword":
-            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                return word.src;
-            case "application/vnd.ms-powerpoint":
-            case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-                return ppt.src;
-            case "application/vnd.ms-excel":
-            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                return excel.src;
             default:
                 return URL.createObjectURL(file);
         }
     };
+
+    async function submitAssignment() {
+        const sessionData = Cookies.get("session");
+        if (!sessionData) {
+            return;
+        }
+        const session = JSON.parse(sessionData);
+        if (!assignment || !files || !studentId) {
+            return;
+        }
+        try {
+            const formData = new FormData();
+            formData.append("assignmentId", assignment?._id.toString());
+            formData.append("studentId", studentId);
+            formData.append("pdfFile", files);
+            const token = session.user.token;
+            const response = await fetch(
+                "http://localhost:8000/api/submissions/submit",
+                {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}` },
+                    body: formData,
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Submission failed");
+            }
+
+            const result = await response.json();
+            console.log("Submission successful:", result);
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
 
     return (
         <Dialog
@@ -92,9 +146,9 @@ const PopupForm: React.FC<PopupFormProps> = ({
             onClose={handleClose}
             PaperProps={{
                 style: {
-                    width: "800px", // Set fixed width
-                    height: "600px", // Set fixed height
-                    overflow: "hidden", // Prevent overflow
+                    width: "800px",
+                    height: "600px",
+                    overflow: "hidden",
                     backgroundColor: "#001D3D",
                 },
             }}
@@ -110,7 +164,7 @@ const PopupForm: React.FC<PopupFormProps> = ({
 
             <DialogContent>
                 <Typography sx={{ marginBottom: 2, color: "#FFFFFF" }}>
-                    {assignment?.desc}
+                    {assignment?.description}
                 </Typography>
                 <Box
                     display="flex"
@@ -120,7 +174,6 @@ const PopupForm: React.FC<PopupFormProps> = ({
                     <input
                         id="upload-input"
                         type="file"
-                        multiple
                         style={{ display: "none" }}
                         onChange={handleFileChange}
                     />
@@ -130,36 +183,56 @@ const PopupForm: React.FC<PopupFormProps> = ({
                             component="span"
                             startIcon={<AttachFile />}
                         >
-                            Add files
+                            Add file
                         </Button>
                     </label>
-                    {files.length > 0 && (
-                        <List>
-                            {files.map((file, index) => (
-                                <ListItem key={index}>
-                                    <Avatar
-                                        src={getFileAvatar(file)}
-                                        sx={{
-                                            height: 20,
-                                            width: 20,
-                                            borderRadius: 0,
-                                            marginRight: 2,
-                                        }}
-                                    />
-                                    <ListItemText primary={file.name} />
-                                    <ListItemSecondaryAction>
-                                        <IconButton
-                                            edge="end"
-                                            onClick={() =>
-                                                handleFileRemove(index)
-                                            }
-                                        >
-                                            <Delete />
-                                        </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            ))}
-                        </List>
+                    {files && (
+                        <Card
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                padding: 2,
+                                boxShadow: 2,
+                                backgroundColor: "#012E5E",
+                                borderRadius: 2,
+                                marginTop: 3,
+                            }}
+                        >
+                            <Avatar
+                                src={getFileAvatar(files)}
+                                sx={{
+                                    height: 40,
+                                    width: 40,
+                                    borderRadius: 1,
+                                    marginRight: 2,
+                                }}
+                            />
+                            <CardContent
+                                sx={{
+                                    flex: "1 0 auto",
+                                    padding: "8px 16px",
+                                    "&:last-child": { paddingBottom: "8px" },
+                                }}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    noWrap
+                                    sx={{ color: "#FFFFFF" }}
+                                >
+                                    {files.name}
+                                </Typography>
+                            </CardContent>
+                            <CardActions>
+                                <IconButton
+                                    edge="end"
+                                    color="error"
+                                    onClick={handleFileRemove}
+                                    aria-label="delete file"
+                                >
+                                    <Delete />
+                                </IconButton>
+                            </CardActions>
+                        </Card>
                     )}
                 </Box>
             </DialogContent>
