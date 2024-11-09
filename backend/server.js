@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors"); //we need cors to handle any Cross-Origin Resource Sharing errors we may come across
+const passport = require('./config/passport');
+const session = require('express-session')
 
 const uploadPicRoutes = require("./routes/picsRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -15,13 +17,23 @@ const chapterRoutes = require("./routes/chapterRoutes");
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const rewardRoutes = require("./routes/rewardRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const advancedAuthRoutes = require('./routes/advancedAuthRoutes');
 const connectDB = require("./config/db");
 
 connectDB();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true
+}));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(advancedAuthRoutes);
 app.use("/api/images", uploadPicRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/desc", userProfileRoutes); // desc is for description
@@ -32,8 +44,8 @@ app.use("/api/announce", announcementRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chapter", chapterRoutes);
-app.use("/api/submissions", submissionRoutes);
-app.use("/api/users", userRoutes);
+//app.use("/api/submissions", submissionRoutes);
+//app.use("/api/users", userRoutes);
 app.use("/api/data", leaderboardRoutes);
 app.use("/api/rewd", rewardRoutes);
 app.use("/api/evnt", eventRoutes);
