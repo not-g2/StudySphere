@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors"); //we need cors to handle any Cross-Origin Resource Sharing errors we may come across
-const passport = require('./config/passport');
-const session = require('express-session')
+const passport = require("./config/passport");
+const session = require("express-session");
 
 const uploadPicRoutes = require("./routes/picsRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -17,19 +17,22 @@ const chapterRoutes = require("./routes/chapterRoutes");
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const rewardRoutes = require("./routes/rewardRoutes");
 const eventRoutes = require("./routes/eventRoutes");
-const advancedAuthRoutes = require('./routes/advancedAuthRoutes');
-const goalRoutes = require('./routes/goalRoutes');
+const advancedAuthRoutes = require("./routes/advancedAuthRoutes");
+const goalRoutes = require("./routes/goalRoutes");
 const connectDB = require("./config/db");
+const reminderRoutes = require("./routes/reminderRoutes");
 
 connectDB();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true
-}));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: true,
+    })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -50,7 +53,8 @@ app.use("/api/chapter", chapterRoutes);
 app.use("/api/data", leaderboardRoutes);
 app.use("/api/rewd", rewardRoutes);
 app.use("/api/evnt", eventRoutes);
-app.use('/api/goals',goalRoutes);
+app.use("/api/goals", goalRoutes);
+app.use("/api/reminder", reminderRoutes);
 
 require("./cron/cron");
 app.listen(8000, () => {
