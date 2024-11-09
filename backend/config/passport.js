@@ -20,6 +20,10 @@ passport.use(new GoogleStrategy({
                 password : 'nopassword'
             });
         }
+        // Generate JWT token
+        const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, {
+            expiresIn: "1h",
+        });
         done(null, user);
     } catch (err) {
         done(err, false);
@@ -74,6 +78,10 @@ passport.use(new GitHubStrategy({
                 password : 'nopassword'
             });
         }
+        // Generate JWT token
+        const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, {
+            expiresIn: "1h",
+        });
         done(null, user);
     } catch (err) {
         done(err, false);
