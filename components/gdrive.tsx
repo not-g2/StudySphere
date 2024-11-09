@@ -2,14 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { useParams } from 'next/navigation';
 
 const GDriveUpload: React.FC = () => {
-  const [chapterNumber, setChapterNumber] = useState('');
-  const [gdriveLink, setGdriveLink] = useState('');
+  const [title, setTitle] = useState(''); // Renamed from chapterNumber to title
+  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [token, setToken] = useState<string | undefined>(undefined);
+
+  const params = useParams();
+  const courseId = params.id; // Get courseId from the URL
 
   useEffect(() => {
     // Retrieve token from cookies
@@ -22,17 +26,29 @@ const GDriveUpload: React.FC = () => {
     }
   }, []);
 
-  const handleChapterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setChapterNumber(e.target.value);
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
   };
 
-  const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGdriveLink(e.target.value);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
   };
 
-  const submitGDriveLink = async () => {
+  const submitFile = async () => {
     if (!token) {
       alert("You are not authorized.");
+      return;
+    }
+
+    if (!file) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    if (!courseId) {
+      alert("Course ID is missing.");
       return;
     }
 
@@ -41,11 +57,13 @@ const GDriveUpload: React.FC = () => {
     setSuccessMessage(null);
 
     const formData = new FormData();
-    formData.append('chapterNumber', chapterNumber);
-    formData.append('gdriveLink', gdriveLink);
+    formData.append('title', title); // Use title instead of chapterNumber
+    formData.append('courseID', courseId as string);
+    formData.append('pdfFile', file);
+    
 
     try {
-      const response = await fetch('http://localhost:8000/api/upload/chapter', {
+      const response = await fetch('http://localhost:8000/api/chapter/create', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -54,15 +72,16 @@ const GDriveUpload: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload Google Drive link.');
+        throw new Error('Failed to upload file.');
       }
 
       const data = await response.json();
-      setSuccessMessage(`Chapter ${chapterNumber} link submitted successfully.`);
-      setChapterNumber(''); // Clear the chapter number field
-      setGdriveLink(''); // Clear the link field
+      console.log(data);
+      setSuccessMessage(`File for "${title}" uploaded successfully.`);
+      setTitle(''); // Clear the title field
+      setFile(null); // Clear the file input
     } catch (err) {
-      setError("Failed to submit the link. Please try again.");
+      setError("Failed to upload the file. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -70,27 +89,25 @@ const GDriveUpload: React.FC = () => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-2 text-white">Upload Google Drive Link</h2>
+      <h2 className="text-xl font-semibold mb-2 text-white">Upload Chapter File</h2>
       <input
-        type="number"
-        placeholder="Enter Chapter Number"
-        value={chapterNumber}
-        onChange={handleChapterChange}
+        type="text" // Changed input type to text for title
+        placeholder="Enter Title"
+        value={title}
+        onChange={handleTitleChange}
         className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-white"
       />
       <input
-        type="url"
-        placeholder="Enter Google Drive Link"
-        value={gdriveLink}
-        onChange={handleLinkChange}
+        type="file"
+        onChange={handleFileChange}
         className="w-full p-3 border border-gray-300 rounded mb-4 bg-c5 text-white placeholder-white"
       />
       <button
-        onClick={submitGDriveLink}
+        onClick={submitFile}
         disabled={loading}
         className="w-full bg-t2 text-white py-2 px-4 rounded hover:bg-opacity-80 transition"
       >
-        {loading ? "Submitting..." : "Submit Link"}
+        {loading ? "Submitting..." : "Submit File"}
       </button>
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {successMessage && <p className="text-green-500 mt-2">{successMessage}</p>}

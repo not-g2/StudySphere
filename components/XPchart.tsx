@@ -14,7 +14,9 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
 
   const COLORS = ['#00bfff', '#d6d6d6']; // Progress color and background trail color
 
-  const circleSize = 200;
+  const circleSize = 400; // Increase the size to match the height of Leaderboard
+  const innerRadius = 160; // Adjust inner radius to maintain ring thickness
+  const outerRadius = 180; // Adjust outer radius to maintain ring thickness
 
   return (
     <div style={{ position: 'relative', width: circleSize, height: circleSize }}>
@@ -26,8 +28,8 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
           cy="50%"
           startAngle={90}
           endAngle={-270}
-          innerRadius={80}
-          outerRadius={100}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
           paddingAngle={0}
           stroke="none"
         >
@@ -50,8 +52,8 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
           color: '#fff',
         }}
       >
-        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>Level {level}</div>
-        <div style={{ fontSize: '16px' }}>{xp}% XP</div>
+        <div style={{ fontSize: '36px', fontWeight: 'bold' }}>Level {level}</div>
+        <div style={{ fontSize: '22px' }}>{xp}% XP</div>
       </div>
     </div>
   );

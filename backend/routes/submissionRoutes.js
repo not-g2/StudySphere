@@ -68,12 +68,12 @@ router.put('/submission/:id/feedback', async (req, res) => {
     try {
         // Find the submission by ID
         const submission = await Submission.findById(req.params.id);
-        if (!submission) return res.status(404).json({ error: 'Submission not found' });
+        if (!submission) return res.status(200).json({ error: 'Submission not found' });
 
         const assignment = await Assignment.findById(assignmentId);
-        if (!assignment) return res.status(404).json({ error: 'Assignment not found' });
+        if (!assignment) return res.status(200).json({ error: 'Assignment not found' });
         const student = await User.findById(studentId);
-        if (!student) return res.status(404).json({ error: 'Student not found' });
+        if (!student) return res.status(200).json({ error: 'Student not found' });
 
         
         // Update the submission with feedback and optionally grade
