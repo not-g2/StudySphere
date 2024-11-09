@@ -40,6 +40,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
                 );
                 if (response.ok) {
                     const data = await response.json();
+                    console.log(data);
                     const updatedUsers = data.users.map(
                         (user: LeaderboardEntry) => ({
                             ...user,
