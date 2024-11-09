@@ -11,10 +11,14 @@ import { useRouter } from "next/navigation";
 import "../output.css";
 
 // Dynamically import Leaderboard without SSR
-const Leaderboard = dynamic(() => import("@/components/leaderboard"), { ssr: false });
+const Leaderboard = dynamic(() => import("@/components/leaderboard"), {
+    ssr: false,
+});
 
 // XP chart, also dynamically imported without SSR if necessary
-const LevelProgress = dynamic(() => import("@/components/XPchart"), { ssr: false });
+const LevelProgress = dynamic(() => import("@/components/XPchart"), {
+    ssr: false,
+});
 
 interface Deadline {
     name: string;
@@ -45,7 +49,10 @@ function Page() {
             <div className="grid grid-cols-12 gap-4 p-4 w-full">
                 {/* XP Chart and Deadline Form section centered */}
                 <div className="col-span-6 col-start-4 p-4 flex flex-col items-center">
-                    <div style={{ width: '250px', height: '250px' }} className="mb-8">
+                    <div
+                        style={{ width: "250px", height: "250px" }}
+                        className="mb-8"
+                    >
                         <LevelProgress level={5} xp={70} />
                     </div>
                     <div className="w-full max-w-md">
@@ -58,7 +65,7 @@ function Page() {
                     <DeadlinesList />
                 </div>
                 <div className="col-span-3 p-4 h-full">
-                    <Leaderboard />
+                    <Leaderboard session={session} />
                 </div>
 
                 {/* Challenge Table and Calendar */}
