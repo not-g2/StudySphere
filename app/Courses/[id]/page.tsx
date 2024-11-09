@@ -32,8 +32,9 @@ interface Assignment {
     title: string;
     dueDate: string;
     course: string;
-    desc: string;
+    description: string;
     link: string;
+    createdAt: string;
 }
 
 type Session = {
@@ -79,10 +80,7 @@ const DashboardPage = () => {
     };
 
     const formatdate = (date: string) => {
-        const formattedDate = format(
-            new Date("2024-11-06T07:38:09.881Z"),
-            "MMMM dd, yyyy HH:mm:ss"
-        );
+        const formattedDate = format(new Date(date), "MMMM dd, yyyy HH:mm:ss");
         return formattedDate;
     };
 
@@ -109,6 +107,8 @@ const DashboardPage = () => {
                     if (response.ok) {
                         const data = await response.json();
                         setassignments(data);
+                        console.log(assignments);
+                        console.log(data);
                     } else {
                         console.error("Failed to get Assignment deatils");
                     }
@@ -143,7 +143,6 @@ const DashboardPage = () => {
                     );
                     if (response.ok) {
                         const data = await response.json();
-                        console.log(data);
                         setannouncements(data);
                     } else {
                         console.error("Failed to get Announcement deatils");

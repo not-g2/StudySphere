@@ -28,8 +28,9 @@ interface Assignment {
     title: string;
     dueDate: string;
     course: string;
-    desc: string;
+    description: string;
     link: string;
+    createdAt: string;
 }
 
 interface PopupFormProps {
@@ -163,7 +164,7 @@ const PopupForm: React.FC<PopupFormProps> = ({
 
             <DialogContent>
                 <Typography sx={{ marginBottom: 2, color: "#FFFFFF" }}>
-                    {assignment?.desc}
+                    {assignment?.description}
                 </Typography>
                 <Box
                     display="flex"
