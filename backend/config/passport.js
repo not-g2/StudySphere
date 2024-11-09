@@ -48,16 +48,7 @@ passport.use(new GoogleStrategy({
 //     }
 // }));
 
-// // Serialize and deserialize user for session handling
-// passport.serializeUser((user, done) => done(null, user.id));
-// passport.deserializeUser(async (id, done) => {
-//     try {
-//         const user = await User.findById(id);
-//         done(null, user);
-//     } catch (err) {
-//         done(err, null);
-//     }
-// });
+
 
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_ID,
@@ -89,6 +80,15 @@ passport.use(new GitHubStrategy({
     }
 }));
 
-
+// Serialize and deserialize user for session handling
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (err) {
+        done(err, null);
+    }
+});
 
 module.exports = passport;
