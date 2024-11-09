@@ -53,7 +53,7 @@ router.post(
             const submission = new Submission({
                 assignmentId,
                 studentId,
-                pdfLink,
+                fileLink: pdfLink,
                 status: "submitted",
             });
             await submission.save();
