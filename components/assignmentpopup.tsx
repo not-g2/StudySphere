@@ -41,10 +41,10 @@ interface PopupFormProps {
 }
 
 const formatdate = (date: string | undefined) => {
-    const formattedDate = format(
-        new Date("2024-11-06T07:38:09.881Z"),
-        "MMMM dd, yyyy HH:mm:ss"
-    );
+    if (!date) {
+        return;
+    }
+    const formattedDate = format(new Date(date), "MMMM dd, yyyy HH:mm:ss");
     return formattedDate;
 };
 

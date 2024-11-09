@@ -37,6 +37,13 @@ interface Assignment {
     createdAt: string;
 }
 
+interface Chapter {
+    _id: number;
+    title: string;
+    createdAt: string;
+    chapterPdf: string;
+}
+
 type Session = {
     user: {
         id: string;
@@ -55,6 +62,8 @@ const DashboardPage = () => {
         useState<Assignment | null>(null);
     const [assignments, setassignments] = useState<Assignment[]>([]);
     const [announcements, setannouncements] = useState<Announcement[]>([]);
+    const [chapters, setchapters] = useState<Chapter[]>([]);
+
     const handleClickOpen = (announcement: Announcement) => {
         setCurrentAnnouncement(announcement);
         setOpen(true);
@@ -154,6 +163,42 @@ const DashboardPage = () => {
         };
 
         GetAnnouncements();
+    }, [session]);
+
+    useEffect(() => {
+        const GetChapters = async () => {
+            const sessionData: string | undefined = Cookies.get("session");
+
+            if (sessionData && !session) {
+                setSession(JSON.parse(sessionData));
+            } else if (!sessionData) {
+                router.push("/auth/signin");
+            }
+            if (session) {
+                const token = session?.user.token;
+
+                try {
+                    const response = await fetch(
+                        `http://localhost:8000/api/chapter/get/${courseID}`,
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            method: "GET",
+                        }
+                    );
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(data);
+                        setchapters(data);
+                    } else {
+                        console.error("Failed to get Chapter details");
+                    }
+                } catch (error) {
+                    console.error("Error Getting Chapter Details:", error);
+                }
+            }
+        };
+
+        GetChapters();
     }, [session]);
 
     return (
@@ -303,37 +348,42 @@ const DashboardPage = () => {
                                 },
                             }}
                         >
-                            {announcements.map((announcement) => (
-                                <Card
-                                    key={announcement._id}
-                                    className="bg-c5 text-white"
-                                    sx={{
-                                        marginBottom: 1,
-                                        borderRadius: 2,
-                                        boxShadow:
-                                            "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                                        cursor: "pointer",
-                                    }}
-                                    onClick={() => {
-                                        window.open(
-                                            "https://example.com",
-                                            "_blank"
-                                        );
-                                    }}
-                                >
-                                    <CardContent>
-                                        <Typography variant="h6" gutterBottom>
-                                            {announcement.title}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{ color: "#d3d3d3" }}
-                                        >
-                                            Posted on: {announcement.createdAt}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                            {chapters &&
+                                chapters.map((chapter) => (
+                                    <Card
+                                        key={chapter._id}
+                                        className="bg-c5 text-white"
+                                        sx={{
+                                            marginBottom: 1,
+                                            borderRadius: 2,
+                                            boxShadow:
+                                                "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                                            cursor: "pointer",
+                                        }}
+                                        onClick={() => {
+                                            window.open(
+                                                chapter.chapterPdf,
+                                                "_blank"
+                                            );
+                                        }}
+                                    >
+                                        <CardContent>
+                                            <Typography
+                                                variant="h6"
+                                                gutterBottom
+                                            >
+                                                {chapter.title}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ color: "#d3d3d3" }}
+                                            >
+                                                Posted on:{" "}
+                                                {formatdate(chapter.createdAt)}
+                                            </Typography>
+                                        </CardContent>
+                                    </Card>
+                                ))}
                         </Box>
                     </Box>
                 </Grid>
