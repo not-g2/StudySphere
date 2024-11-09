@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useRouter, useParams } from "next/navigation";
 import { format, formatDate } from "date-fns";
+import { Token } from "@mui/icons-material";
 
 interface Announcement {
     _id: number;
@@ -31,8 +32,9 @@ interface Assignment {
     title: string;
     dueDate: string;
     course: string;
-    desc: string;
+    description: string;
     link: string;
+    createdAt: string;
 }
 
 type Session = {
@@ -78,10 +80,7 @@ const DashboardPage = () => {
     };
 
     const formatdate = (date: string) => {
-        const formattedDate = format(
-            new Date("2024-11-06T07:38:09.881Z"),
-            "MMMM dd, yyyy HH:mm:ss"
-        );
+        const formattedDate = format(new Date(date), "MMMM dd, yyyy HH:mm:ss");
         return formattedDate;
     };
 
@@ -108,6 +107,8 @@ const DashboardPage = () => {
                     if (response.ok) {
                         const data = await response.json();
                         setassignments(data);
+                        console.log(assignments);
+                        console.log(data);
                     } else {
                         console.error("Failed to get Assignment deatils");
                     }
@@ -142,7 +143,6 @@ const DashboardPage = () => {
                     );
                     if (response.ok) {
                         const data = await response.json();
-                        console.log(data);
                         setannouncements(data);
                     } else {
                         console.error("Failed to get Announcement deatils");
@@ -219,7 +219,8 @@ const DashboardPage = () => {
                                         variant="body2"
                                         sx={{ color: "#d3d3d3" }}
                                     >
-                                        Due Date: {formatdate(assignment.dueDate)}
+                                        Due Date:{" "}
+                                        {formatdate(assignment.dueDate)}
                                     </Typography>
                                 </CardContent>
                                 <Button
@@ -346,6 +347,7 @@ const DashboardPage = () => {
                 open={openAssm}
                 handleClose={handleCloseAssm}
                 assignment={currentAssignment}
+                studentId={session?.user.id}
             />
         </Box>
     );
