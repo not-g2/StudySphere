@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import SubjectSchedulerModal from "@/components/timetable";
+import AttendancePieChart from "@/components/AttendancePieChart"; // Import the AttendancePieChart component
 import "../output.css";
 
 // Dynamically import components without SSR
@@ -79,12 +80,16 @@ function Page() {
           <Leaderboard session={session} />
         </div>
 
-        {/* Main Content: Add Goal and Goals Table */}
+        {/* Main Content: Add Goal, Goals Table, and Attendance Chart */}
         <div className="col-span-6 p-4 h-full bg-c2 rounded-lg shadow-md">
           <AddGoalForm onAddGoal={handleAddGoal} />
 
           <div className="mt-6">
             <GoalTable /> {/* Display goals in the GoalTable */}
+          </div>
+
+          <div className="mt-6">
+            <AttendancePieChart  /> {/* Pass token as prop */}
           </div>
         </div>
 
@@ -92,7 +97,6 @@ function Page() {
         <div className="col-span-12 p-4 h-full bg-c2 rounded-lg shadow-md">
           {isModalOpen ? (
             <SubjectSchedulerModal
-              studentId={session?.user?.id}  // Assuming session contains user.id
               onScheduleSubmit={handleScheduleSubmit}
               onClose={() => setIsModalOpen(false)}
             />
