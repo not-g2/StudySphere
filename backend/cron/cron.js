@@ -48,9 +48,9 @@ cron.schedule("0 0 * * *", async () => {
     }
 });
 
-cron.schedule("*/10 * * * *", async () => {
+cron.schedule("* * */10 * *", async () => {
     // Runs every 10 minutes
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
+    const tenMinutesAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 10 minutes ago
     const now = new Date(); // Current time
 
     // Find users and count recent "present" attendance records in the last 10 minutes

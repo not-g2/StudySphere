@@ -58,7 +58,7 @@ function Page() {
     } else {
       router.push("/auth/signin");
     }
-  }, [router]);
+  }, [router,session]);
 
   return (
     <div className="bg-c2 min-h-screen flex flex-col items-center justify-center">
