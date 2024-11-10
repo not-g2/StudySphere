@@ -11,6 +11,7 @@ const SubmissionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
+        
     }, // Student ID
     submittedDate: { type: Date, default: Date.now },
     status: {

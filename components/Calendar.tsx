@@ -4,9 +4,22 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { EventContentArg } from '@fullcalendar/core';
 import Cookies from "js-cookie";
-import '../app/output.css'; // Import your Tailwind CSS file
+import '../app/output.css';
 
-// Define a type for the event data
+// Helper to get the date of a specific day in the current week
+const getDateForDay = (day: string) => {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const today = new Date();
+  const currentDayIndex = today.getDay();
+  const targetDayIndex = daysOfWeek.indexOf(day);
+
+  const diff = (targetDayIndex - currentDayIndex + 7) % 7;
+  const targetDate = new Date(today);
+  targetDate.setDate(today.getDate() + diff);
+
+  return targetDate.toISOString().split('T')[0]; // Returns 'YYYY-MM-DD'
+};
+
 interface EventData {
   title: string;
   start: string;
@@ -18,7 +31,7 @@ const MyCalendar = () => {
   const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const fetchSession = () => {
       const sessionData = Cookies.get("session");
       if (sessionData) {
         const parsedSession = JSON.parse(sessionData);
@@ -32,10 +45,8 @@ const MyCalendar = () => {
   }, []);
 
   useEffect(() => {
-    const fetchDeadlines = async () => {
-      if (!session) {
-        return;
-      }
+    const fetchTimetable = async () => {
+      if (!session) return;
 
       const userId = session.user?.id;
       if (!userId) {
@@ -44,28 +55,36 @@ const MyCalendar = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8000/api/users/${userId}/deadlines`);
+        const response = await fetch(`http://localhost:8000/api/tt/timetable/${userId}`);
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
 
-          // Format the data to match FullCalendar's requirements
-          const formattedEvents = data.deadlines.map((deadline: any) => ({
-            title: `${deadline.assignmentTitle} - ${deadline.courseName}`,
-            start: new Date(deadline.dueDate).toISOString().split('T')[0], // Format as YYYY-MM-DD
-            end: new Date(deadline.dueDate).toISOString().split('T')[0],   // Same format
-          }));
+          // Transform timetable data to FullCalendar event format
+          const formattedEvents = data.timetable.flatMap((entry: any) => {
+            const dayDate = getDateForDay(entry.day); // Convert day name to 'YYYY-MM-DD'
+            
+            return entry.slots.map((slot: any) => {
+              const startTime = `${dayDate}T${slot.startTime}:00`; // Full datetime with seconds
+              const endTime = `${dayDate}T${slot.endTime}:00`;
+
+              return {
+                title: `${slot.subject} (${slot.activity})`,
+                start: startTime,
+                end: endTime,
+              };
+            });
+          });
 
           setEvents(formattedEvents);
         } else {
-          console.error('Failed to fetch deadlines. Response status:', response.status);
+          console.error('Failed to fetch timetable. Response status:', response.status);
         }
       } catch (error) {
-        console.error('Error fetching deadlines:', error);
+        console.error('Error fetching timetable:', error);
       }
     };
 
-    fetchDeadlines();
+    fetchTimetable();
   }, [session]);
 
   const handleDateClick = (arg: DateClickArg) => {
@@ -85,7 +104,7 @@ const MyCalendar = () => {
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,dayGridWeek,dayGridDay', // Add weekly and daily views
+          right: 'dayGridMonth,dayGridWeek,dayGridDay',
         }}
         height="auto"
         dayMaxEvents={true}

@@ -27,6 +27,7 @@ router.post(
                 return res.status(404).json({ error: "Student not found" });
 
             student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
+            student.xp += student.auraPoints;
 
             // calculate next level threshold
             const nextLevelPoints = 100 * (student.level + 1) ** 2;
@@ -111,7 +112,7 @@ router.put("/submission/:id/feedback", async (req, res) => {
         }
         submission.status = "graded";
         student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
-
+        student.xp += rewardfunc(assignment.dueDate, Date.now());
         // calculate next level threshold
         const nextLevelPoints = 100 * (student.level + 1) ** 2;
 
@@ -136,4 +137,28 @@ router.put("/submission/:id/feedback", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+router.get("/submissions/:studentId", async (req, res) => {
+    try {
+        const { studentId } = req.params;
+
+        const submissions = await Submission.find({ studentId }).populate(
+            "assignmentId"
+        );
+
+        if (!submissions) {
+            return res
+                .status(404)
+                .json({ message: "No submissions found for this student." });
+        }
+
+        res.status(200).json(submissions);
+    } catch (error) {
+        console.error("Error retrieving submissions:", error);
+        res.status(500).json({
+            message: "Server error, please try again later.",
+        });
+    }
+});
+
 module.exports = router;

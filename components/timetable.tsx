@@ -19,6 +19,7 @@ const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ onSchedul
   const [timings, setTimings] = useState<{ [day: string]: { startTime: string; endTime: string } }>({});
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     const fetchStudentIdFromSession = () => {
@@ -26,6 +27,7 @@ const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ onSchedul
 
       if (sessionData) {
         const parsedSession = JSON.parse(sessionData);
+        setSession(parsedSession);
         setStudentId(parsedSession.user?.id); // Set studentId from session
       } else {
         router.push("/auth/signin"); // Redirect if session data is missing
@@ -36,31 +38,33 @@ const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ onSchedul
   }, [router]);
 
   useEffect(() => {
-    // Fetch subjects if studentId is available
     const fetchSubjects = async () => {
       if (studentId) {
         try {
-          const response = await fetch(`http://localhost:8000/api/student/${studentId}`, {
+          const response = await fetch(`http://localhost:8000/api/courses/student/${studentId}`, {
+            method: "GET",
             headers: {
-              "Authorization": `Bearer ${Cookies.get("token")}`,
+              "Authorization": `Bearer ${session?.user.token}`,
+              "Content-Type": "application/json",
             },
           });
-          
+
           if (!response.ok) {
             throw new Error("Failed to fetch subjects");
           }
 
           const data = await response.json();
-          setSubjects(data.coursesList.map((course: any) => course.name));
-        } catch (error) {
-          console.error(error);
-          setError("Failed to load subjects. Please try again.");
+          const courseNames = data.coursesList.map((course: { name: string }) => course.name); // Assuming each course has a 'name' property
+          setSubjects(courseNames);
+        } catch (err) {
+          console.error(err);
+          setError("Failed to fetch subjects. Please try again.");
         }
       }
     };
 
     fetchSubjects();
-  }, [studentId]);
+  }, [studentId, session]);
 
   const handleDayToggle = (day: string) => {
     setSelectedDays((prevDays) => ({ ...prevDays, [day]: !prevDays[day] }));
@@ -73,15 +77,51 @@ const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ onSchedul
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedTimings = Object.keys(selectedDays).reduce((acc, day) => {
-      if (selectedDays[day]) acc[day] = timings[day];
-      return acc;
-    }, {} as { [day: string]: { startTime: string; endTime: string } });
+    
+    // Prepare the timetable data in the required format
+    const timetableData = daysOfWeek
+      .filter(day => selectedDays[day])
+      .map(day => ({
+        day,
+        slots: [
+          {
+            startTime: timings[day].startTime,
+            endTime: timings[day].endTime,
+            subject: selectedSubject,
+            activity: "Lecture"  // Example activity, adjust as needed
+          }
+        ]
+      }));
 
-    onScheduleSubmit({ subject: selectedSubject, days: selectedTimings });
-    onClose();
+    const requestData = {
+        studentId: session.user.id, // Assuming `email` is available in session data
+ 
+      timetable: timetableData
+    };
+    console.log(requestData);
+    try {
+      const response = await fetch("http://localhost:8000/api/tt/timetable", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${session?.user.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+      console.log(JSON.stringify(requestData));
+      if (!response.ok) {
+        throw new Error("Failed to save timetable");
+      }
+
+      const result = await response.json();
+      console.log(result.message); // Display success message
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to save timetable. Please try again.");
+    }
   };
 
   return (

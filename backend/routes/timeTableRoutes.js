@@ -57,6 +57,40 @@ router.get('/timetable/:studentId', async (req, res) => {
     }
 });
   
+// Route to delete a slot from a student's timetable
+router.delete('/delete-slot/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { day, startTime } = req.body;
 
+    // Validate that day and startTime are provided
+    if (!day || !startTime) {
+      return res.status(400).json({ message: 'Day and start time are required' });
+    }
+
+    // Find the student's timetable and pull the specific slot
+    const updatedTimetable = await Timetable.findOneAndUpdate(
+      { student: studentId, 'timetable.day': day },
+      {
+        $pull: {
+          'timetable.$.slots': { startTime: startTime }  // Remove slot based on start time
+        }
+      },
+      { new: true } // Return the updated document
+    );
+
+    // Check if timetable was found and updated
+    if (!updatedTimetable) {
+      return res.status(404).json({ message: 'Timetable or slot not found' });
+    }
+
+    res.status(200).json({
+      message: 'Slot deleted successfully',
+      updatedTimetable
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting slot', error });
+  }
+});
   
 module.exports = router;
