@@ -1,14 +1,17 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { Avatar, Button } from "@mui/material";
 import Dropdown from "../components/dropdown";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LogoutPage from "./signout";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 const Header: React.FC = () => {
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
+        null
+    );
+    const [notificationAnchorEl, setNotificationAnchorEl] =
+        useState<null | HTMLElement>(null);
     const router = useRouter();
     const [userImage, setuserImage] = useState<string | null>(null);
     const [session, setSession] = useState<any>(null);
@@ -18,12 +21,19 @@ const Header: React.FC = () => {
         router.push(path);
     };
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
+    const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation(); // Prevent the event from bubbling
+        setProfileAnchorEl(event.currentTarget);
+    };
+
+    const handleBellClick = (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation(); // Prevent the event from bubbling
+        setNotificationAnchorEl(event.currentTarget);
     };
 
     const handleClose = () => {
-        setAnchorEl(null);
+        setProfileAnchorEl(null);
+        setNotificationAnchorEl(null);
     };
 
     const handleSignOut = () => {
@@ -70,7 +80,7 @@ const Header: React.FC = () => {
         };
 
         GetProfile();
-    }, [session]); // Re-run this when the session changes
+    }, [session]);
 
     useEffect(() => {
         const handleCookieChange = () => {
@@ -81,10 +91,7 @@ const Header: React.FC = () => {
             }
         };
 
-        // Set up an interval to check for changes in cookies
         const intervalId = setInterval(handleCookieChange, 1000);
-
-        // Clean up the interval on unmount
         return () => {
             clearInterval(intervalId);
         };
@@ -141,19 +148,45 @@ const Header: React.FC = () => {
                         </Button>
                     </div>
                 ) : (
-                    <div className="relative flex items-center">
+                    <div className="relative flex items-center space-x-4">
+                        {/* Bell Icon */}
+                        <NotificationsIcon
+                            onClick={handleBellClick}
+                            style={{ cursor: "pointer" }}
+                            className="hover:shadow-lg"
+                        />
+                        <Dropdown
+                            anchorEl={notificationAnchorEl}
+                            handleClose={handleClose}
+                            items={[
+                                {
+                                    label: "New Message",
+                                    onClick: () =>
+                                        console.log("Message clicked"),
+                                },
+                                {
+                                    label: "New Notification",
+                                    onClick: () =>
+                                        console.log("Notification clicked"),
+                                },
+                            ]}
+                        />
+
+                        {/* Profile Avatar */}
                         <Avatar
                             src={userImage ?? "/default-profile.png"}
                             alt="Profile Picture"
-                            onClick={handleClick}
+                            onClick={handleProfileClick}
                             sx={{ width: 40, height: 40, cursor: "pointer" }}
                             className="hover:shadow-lg"
                         />
                         <Dropdown
-                            anchorEl={anchorEl}
+                            anchorEl={profileAnchorEl}
                             handleClose={handleClose}
                             handleSignOut={handleSignOut}
                         />
+
+                        {/* Logout Dialog */}
                         <LogoutPage
                             open={open}
                             setOpen={setOpen}
