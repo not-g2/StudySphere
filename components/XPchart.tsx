@@ -62,6 +62,16 @@ const LevelProgressContainer: React.FC = () => {
   const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
+    // Retrieve session data from cookies on component mount
+    const sessionData = Cookies.get('session');
+    if (sessionData) {
+      setSession(JSON.parse(sessionData));
+    } else {
+      console.error("No session data found in cookies");
+    }
+  }, []);
+
+  useEffect(() => {
     const getProfile = async () => {
       if (!session?.user?.token) {
         console.error("Session token is missing");
@@ -92,6 +102,7 @@ const LevelProgressContainer: React.FC = () => {
       }
     };
   
+    // Call getProfile only when session is available
     if (session) {
       getProfile();
     }

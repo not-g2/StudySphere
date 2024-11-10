@@ -65,9 +65,7 @@ const Header: React.FC = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setuserImage(data.image?.url || "");
-                } else {
-                    console.error("Failed to fetch profile image");
-                }
+                } 
             } catch (error) {
                 console.error("Error fetching profile image:", error);
             }

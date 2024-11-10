@@ -9,7 +9,11 @@ interface Goal {
   endDate: string;
 }
 
-const AddGoalForm: React.FC = () => {
+interface AddGoalFormProps {
+  onAddGoal: (goal: Goal) => void;
+}
+
+const AddGoalForm: React.FC<AddGoalFormProps> = ({ onAddGoal }) => {
   const [name, setName] = useState('');
   const [endDate, setEndDate] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -32,21 +36,17 @@ const AddGoalForm: React.FC = () => {
 
     if (name && endDate) {
       try {
-        const newGoal = {
-          title: name,
-          description: name,  // Assuming `description` is needed; modify as necessary
-          dueDate: endDate,
-        };
+        const newGoal = { title: name, description: name, dueDate: endDate };
 
         const response = await fetch('http://localhost:8000/api/goals/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.user.token}`,  // Use token from session
+            'Authorization': `Bearer ${session?.user.token}`,
           },
           body: JSON.stringify(newGoal),
         });
-        console.log(session?.user.token);
+
         if (!response.ok) {
           throw new Error('Failed to add goal');
         }
@@ -55,6 +55,7 @@ const AddGoalForm: React.FC = () => {
         setName('');
         setEndDate('');
         setError(null);
+        onAddGoal({ name: savedGoal.title, endDate: savedGoal.dueDate });
       } catch (err) {
         console.error(err);
         setError("Failed to add goal. Please try again.");

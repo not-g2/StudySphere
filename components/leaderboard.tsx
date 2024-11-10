@@ -13,7 +13,7 @@ import {
 interface LeaderboardEntry {
     _id: string;
     name: string;
-    auraPoints: number;
+    level: number;
 }
 
 interface LeaderboardProps {
@@ -27,6 +27,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
 
     useEffect(() => {
         const getLeaderboard = async () => {
+            if (!session) {
+                return;
+            }
             try {
                 const response = await fetch(
                     "http://localhost:8000/api/data/top-10-aura",
@@ -41,22 +44,24 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
                 if (response.ok) {
                     const data = await response.json();
                     console.log(data);
-                    const updatedUsers = data.users.map(
-                        (user: LeaderboardEntry) => ({
-                            ...user,
-                            name: user.name || `User(${user._id})`,
-                        })
-                    );
+
+                    // Map and ensure each user has a name and level
+                    const updatedUsers = data.users.map((user: LeaderboardEntry) => ({
+                        ...user,
+                        name: user.name || `User(${user._id})`, // Default name if missing
+                        level: user.level || 0, // Default level if missing
+                    }));
+
                     setLeaderboardEntries(updatedUsers);
                 } else {
-                    console.error("Failed to get leaderboard Details");
+                    console.error("Failed to get leaderboard details");
                 }
             } catch (error) {
-                console.error("Error Getting leaderboard:", error);
+                console.error("Error getting leaderboard:", error);
             }
         };
         getLeaderboard();
-    }, []);
+    }, [session]);
 
     return (
         <div className="p-4 bg-c5 rounded-lg shadow-lg">
@@ -70,10 +75,10 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" domain={[0, 100]} />
+                    <XAxis type="number" domain={[0, 10]} />
                     <YAxis dataKey="name" type="category" width={80} />
                     <Tooltip />
-                    <Bar dataKey="auraPoints" fill="#00bfff" barSize={20} />
+                    <Bar dataKey="level" fill="#00bfff" barSize={20} />
                 </BarChart>
             </ResponsiveContainer>
         </div>

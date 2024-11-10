@@ -149,29 +149,6 @@ const Header: React.FC = () => {
                     </div>
                 ) : (
                     <div className="relative flex items-center space-x-4">
-                        {/* Bell Icon */}
-                        <NotificationsIcon
-                            onClick={handleBellClick}
-                            style={{ cursor: "pointer" }}
-                            className="hover:shadow-lg"
-                        />
-                        <Dropdown
-                            anchorEl={notificationAnchorEl}
-                            handleClose={handleClose}
-                            items={[
-                                {
-                                    label: "New Message",
-                                    onClick: () =>
-                                        console.log("Message clicked"),
-                                },
-                                {
-                                    label: "New Notification",
-                                    onClick: () =>
-                                        console.log("Notification clicked"),
-                                },
-                            ]}
-                        />
-
                         {/* Profile Avatar */}
                         <Avatar
                             src={userImage ?? "/default-profile.png"}
