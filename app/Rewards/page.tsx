@@ -17,60 +17,8 @@ interface reward {
 const RewardsDisplay = () => {
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
-    const Rewards = [
-        {
-            title: "Reward 1",
-            picture: pic1.src,
-            desc: "Description for Reward 1",
-            cost: 100,
-        },
-        {
-            title: "Reward 2",
-            picture: pic2.src,
-            desc: "Description for Reward 2",
-            cost: 150,
-        },
-        {
-            title: "Reward 1",
-            picture: pic1.src,
-            desc: "Description for Reward 1",
-            cost: 100,
-        },
-        {
-            title: "Reward 2",
-            picture: pic2.src,
-            desc: "Description for Reward 2",
-            cost: 150,
-        },
-        {
-            title: "Reward 1",
-            picture: pic1.src,
-            desc: "Description for Reward 1",
-            cost: 100,
-        },
-        {
-            title: "Reward 2",
-            picture: pic2.src,
-            desc: "Description for Reward 2",
-            cost: 150,
-        },
-        {
-            title: "Reward 1",
-            picture: pic1.src,
-            desc: "Description for Reward 1",
-            cost: 100,
-        },
-        {
-            title: "Reward 2",
-            picture: pic2.src,
-            desc: "Description for Reward 2",
-            cost: 150,
-        },
-    ];
+    const [rewards, setrewards] = useState([]);
 
-    const handleSubmit = (reward: reward) => {
-        console.log(reward);
-    };
     useEffect(() => {
         const sessionData: string | undefined = Cookies.get("session");
 
@@ -79,7 +27,69 @@ const RewardsDisplay = () => {
         } else if (!sessionData) {
             router.push("/");
         }
-    }, []);
+
+        const getRewards = async () => {
+            if (!session) {
+                return;
+            }
+            try {
+                const response = await fetch(
+                    "http://localhost:8000/api/rewd/rewards",
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${session.user.token}`,
+                        },
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                setrewards(data.rewards);
+            } catch (error) {
+                console.error("Error fetching rewards:", error);
+                return null;
+            }
+        };
+        getRewards();
+    }, [session]);
+
+    function handleSubmit(reward: any) {
+        const redeemReward = async (rewardId: any, userId: any) => {
+            try {
+                const response = await fetch(
+                    `http://localhost:8000/api/rewd/rewards/redeem/${rewardId}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${session.user.token}`, // Replace with actual auth token if required
+                        },
+                        body: JSON.stringify({ userId: userId }),
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(
+                        errorData.error || "Error redeeming reward"
+                    );
+                }
+
+                const data = await response.json();
+                alert(`${data.message}, Coupon Code ${data.coupon_id}`);
+                return data;
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                return null;
+            }
+        };
+        redeemReward(reward._id, session.user.id);
+    }
 
     return (
         <Grid
@@ -91,7 +101,7 @@ const RewardsDisplay = () => {
             className="bg-c2" // Apply background color c2 to the main container
             sx={{ width: "100%", height: "100vh" }} // Ensure full viewport height
         >
-            {Rewards.map((reward, index) => (
+            {rewards.map((reward, index) => (
                 <Grid
                     item
                     xs={12}
@@ -127,7 +137,7 @@ const RewardsDisplay = () => {
                             component="img"
                             height="140"
                             image={reward.picture}
-                            alt={reward.title}
+                            alt={reward.name}
                             sx={{
                                 width: 200,
                                 height: 200,
@@ -142,13 +152,13 @@ const RewardsDisplay = () => {
                                 component="div"
                                 color="#FFFFFF"
                             >
-                                {reward.title}
+                                {reward.name}
                             </Typography>
-                            <Typography variant="body2" color="#FFFFFF">
+                            {/* <Typography variant="body2" color="#FFFFFF">
                                 {reward.desc}
-                            </Typography>
+                            </Typography> */}
                             <Typography color="#FFFFFF">
-                                Redeem for {reward.cost} points
+                                Redeem for {reward.reqPoints} points
                             </Typography>
                         </CardContent>
                     </Card>
