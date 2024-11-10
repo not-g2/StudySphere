@@ -27,6 +27,7 @@ router.post(
                 return res.status(404).json({ error: "Student not found" });
 
             student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
+            student.xp += student.auraPoints;
 
             // calculate next level threshold
             const nextLevelPoints = 100 * (student.level + 1) ** 2;
@@ -111,7 +112,7 @@ router.put("/submission/:id/feedback", async (req, res) => {
         }
 
         student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
-
+        student.xp += student.auraPoints;
         // calculate next level threshold
         const nextLevelPoints = 100 * (student.level + 1) ** 2;
 

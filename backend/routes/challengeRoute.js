@@ -24,7 +24,8 @@ router.get('/challenge',authMiddleware, async (req, res) => {
 
         // 5. Update the student's points (assuming you have a 'points' field in User schema)
         await User.findByIdAndUpdate(req.user.userID, {
-            $inc: { auraPoints : bonusPoints } // Increment student's points by the calculated bonus
+            $inc: { auraPoints : bonusPoints }, // Increment student's points by the calculated bonus
+            $inc : {xp : bonusPoints}
         });
 
         // 6. Send the response back with the random assignment and bonus points awarded
