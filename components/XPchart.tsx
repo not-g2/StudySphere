@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 import { PieChart, Pie, Cell } from 'recharts';
 
 interface LevelProgressProps {
-  level: number; // Level should be a number
-  xp: number;    // XP percentage should also be a number
+  level: number;
+  xp: number;
 }
 
 const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
@@ -12,11 +13,11 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
     { name: 'Remaining', value: 100 - xp },
   ];
 
-  const COLORS = ['#00bfff', '#d6d6d6']; // Progress color and background trail color
+  const COLORS = ['#00bfff', '#d6d6d6'];
 
-  const circleSize = 400; // Increase the size to match the height of Leaderboard
-  const innerRadius = 160; // Adjust inner radius to maintain ring thickness
-  const outerRadius = 180; // Adjust outer radius to maintain ring thickness
+  const circleSize = 400;
+  const innerRadius = 160;
+  const outerRadius = 180;
 
   return (
     <div style={{ position: 'relative', width: circleSize, height: circleSize }}>
@@ -34,14 +35,10 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
           stroke="none"
         >
           {data.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={COLORS[index % COLORS.length]}
-            />
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
       </PieChart>
-      {/* Centered Level Text */}
       <div
         style={{
           position: 'absolute',
@@ -59,4 +56,48 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
   );
 };
 
-export default LevelProgress;
+const LevelProgressContainer: React.FC = () => {
+  const [level, setLevel] = useState<number>(0);
+  const [xp, setXp] = useState<number>(0);
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    const getProfile = async () => {
+      if (!session?.user?.token) {
+        console.error("Session token is missing");
+        return;
+      }
+  
+      try {
+        const response = await fetch('http://localhost:8000/api/users/profile', {
+          headers: {
+            'Authorization': `Bearer ${session.user.token}`,
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+  
+        const data = await response.json();
+        console.log("Fetched profile data:", data); // Debug line to ensure data is fetched correctly
+  
+        // Ensure xp is between 0 and 100 by dividing by 10 if it's above 100
+        const adjustedXp = data.xp > 100 ? data.xp / 10 : data.xp;
+  
+        setLevel(data.level);
+        setXp(adjustedXp);
+      } catch (error) {
+        console.error('Failed to fetch profile data:', error);
+      }
+    };
+  
+    if (session) {
+      getProfile();
+    }
+  }, [session]);
+  
+  return <LevelProgress level={level} xp={xp} />;
+};
+
+export default LevelProgressContainer;

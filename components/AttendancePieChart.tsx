@@ -54,16 +54,21 @@ const AttendancePieChart: React.FC = () => {
     }
   }, [session]);
 
-  const renderCustomLabel = (attendancePercentage: string) => {
+  const renderCustomLabel = (courseName: string, attendancePercentage: string) => {
     return ({ x, y }: { x: number; y: number }) => (
-      <Text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize="16px" fontWeight="bold">
-        {attendancePercentage}%
-      </Text>
+      <>
+        <Text x={x} y={y - 10} textAnchor="middle" dominantBaseline="central" fontSize="14px" fontWeight="bold" fill="#ffffff">
+          {courseName}
+        </Text>
+        <Text x={x} y={y + 15} textAnchor="middle" dominantBaseline="central" fontSize="16px" fontWeight="bold" fill="#ffffff">
+          {attendancePercentage}%
+        </Text>
+      </>
     );
   };
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', gap: '40px', padding: '20px', justifyContent: 'flex-start', flexWrap: 'nowrap', overflowX: 'auto' }}>
       {attendanceData.map((data, index) => {
         const percentage = parseFloat(data.attendancePercentage);
         const pieData = [
@@ -72,21 +77,20 @@ const AttendancePieChart: React.FC = () => {
         ];
         
         return (
-          <div key={index} style={{ width: '200px', height: '200px', textAlign: 'center' }}>
-            <h3>{data.courseName}</h3>
-            <ResponsiveContainer width="100%" height="100%">
+          <div key={index} style={{ minWidth: '220px', textAlign: 'center' }}>
+            <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
+                  innerRadius={70}
+                  outerRadius={90}
                   startAngle={90}
                   endAngle={-270}
                   dataKey="value"
                   labelLine={false}
-                  label={renderCustomLabel(data.attendancePercentage)}
+                  label={renderCustomLabel(data.courseName, data.attendancePercentage)}
                 >
                   <Cell key="attended" fill="#82ca9d" />
                   <Cell key="missed" fill="#8884d8" />

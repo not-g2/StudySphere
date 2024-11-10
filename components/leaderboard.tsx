@@ -56,7 +56,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
             }
         };
         getLeaderboard();
-    }, [session]);
+    }, []);
 
     return (
         <div className="p-4 bg-c5 rounded-lg shadow-lg">
