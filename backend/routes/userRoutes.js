@@ -36,7 +36,7 @@ router.get("/:userId/deadlines", async (req, res) => {
 router.get('/profile', authMiddleware, async (req, res) => {
     try {
         // Fetch the user from the database using the userID from the JWT token
-        const user = await User.findById(req.user.userID).select('auraPoints level'); // Select only auraPoints and level fields
+        const user = await User.findById(req.user.userID).select('xp level'); // Select only auraPoints and level fields
 
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
@@ -44,7 +44,7 @@ router.get('/profile', authMiddleware, async (req, res) => {
 
         // Return the auraPoints and level
         res.status(200).json({
-            auraPoints: user.auraPoints,
+            xp: user.xp,
             level: user.level
         });
 
