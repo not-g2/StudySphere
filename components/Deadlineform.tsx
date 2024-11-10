@@ -12,7 +12,7 @@ interface Deadline {
 }
 
 interface DeadlineFormProps {
-  onAddDeadline: (deadline: Deadline) => void;
+    onAddDeadline: (deadline: Deadline) => void;
 }
 
 const DeadlineForm: React.FC<DeadlineFormProps> = ({ onAddDeadline }) => {
