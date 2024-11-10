@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useParams, useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 import DueDateModal from "@/components/DueDateModal"; // Adjust the path as necessary
 
 type Assignment = {
@@ -19,23 +21,39 @@ type Assignment = {
 };
 
 const AssignmentList: React.FC = () => {
-  const { data: session, status } = useSession();
-  const token = session?.accessToken;
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+  const [session, setSession] = useState<any>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const params = useParams();
+  const courseId = params.courseId || params.id;
+  const router = useRouter();
+  useEffect(() => {
+    // Fetch session from cookies and extract the token
+    const sessionData: string | undefined = Cookies.get("session");
+
+    if (sessionData) {
+      const parsedSession = JSON.parse(sessionData);
+      setSession(parsedSession);
+      setToken(parsedSession?.user?.token); // Fetch the token from parsed session
+    } else {
+      router.push("/auth/signin"); // Redirect if session is missing
+    }
+  }, [router]);
 
   useEffect(() => {
-    if (status !== "authenticated" || !token) {
+    if (!token || !courseId) {
       setLoading(false);
       return;
     }
+    console.log(token);
 
     const fetchAssignments = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/api/assgn/course/672a0dcdbddb3f6f6c16ee46",
+          `http://localhost:8000/api/assgn/course/${courseId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -50,7 +68,7 @@ const AssignmentList: React.FC = () => {
         }
 
         const data = await response.json();
-        setAssignments(data);
+        setAssignments(Array.isArray(data) ? data : data.assignments || []);
       } catch (err) {
         const error = err as Error;
         setError(error.message);
@@ -60,7 +78,7 @@ const AssignmentList: React.FC = () => {
     };
 
     fetchAssignments();
-  }, [status, token]);
+  }, [session, courseId]);
 
   const handleUpdateDueDate = async (id: string, newDate: string) => {
     try {

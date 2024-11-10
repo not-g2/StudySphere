@@ -229,13 +229,6 @@ const ClassesPage = () => {
                                             >
                                                 {classItem.description}
                                             </Typography>
-                                            <Typography
-                                                variant="caption"
-                                                color="inherit"
-                                                sx={{ fontSize: "0.9rem" }}
-                                            >
-                                                Teacher: Havent Figured it out
-                                            </Typography>
                                         </CardContent>
                                     </Grid>
                                     <Grid

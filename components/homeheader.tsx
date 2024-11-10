@@ -112,12 +112,6 @@ const Header: React.FC = () => {
                     Courses
                 </div>
                 <div
-                    onClick={() => handleGo("/Challenges")}
-                    className="cursor-pointer hover:underline"
-                >
-                    Challenges
-                </div>
-                <div
                     onClick={() => handleGo("/Rewards")}
                     className="cursor-pointer hover:underline"
                 >

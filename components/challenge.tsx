@@ -3,6 +3,9 @@ import React from "react";
 const dailyChallenges = [
   { title: "Daily Challenge", description: "Complete 5 math exercises." },
   { title: "Weekly Challenge", description: "Read a science article." },
+  { title: "Monthly Challenge", description: "Write a book summary." },
+  { title: "Fitness Challenge", description: "Run 3 miles." },
+  // Add more challenges as needed
 ];
 
 const Challengetable = () => {
@@ -10,25 +13,22 @@ const Challengetable = () => {
     <div className="flex flex-col items-center py-8 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-white">Challenges</h1>
 
-      {/* Render the challenges as centered tables with consistent styling */}
-      <div className="space-y-6 w-full">
-        {dailyChallenges.map((challenge, index) => (
-          <table
-            key={index}
-            className="w-full border rounded-lg shadow-lg overflow-hidden"
-          >
-            <thead>
-              <tr>
-                <th className="px-4 py-2 bg-t2 text-center font-semibold text-white">
-                  Title
-                </th>
-                <th className="px-4 py-2 bg-t2 text-center font-semibold text-white">
-                  Description
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t text-gray-700">
+      {/* Single scrollable table */}
+      <div className="w-full overflow-y-auto max-h-64"> {/* Set a max height for scrollability */}
+        <table className="w-full border rounded-lg shadow-lg overflow-hidden">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 bg-t2 text-center font-semibold text-white">
+                Title
+              </th>
+              <th className="px-4 py-2 bg-t2 text-center font-semibold text-white">
+                Description
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {dailyChallenges.map((challenge, index) => (
+              <tr key={index} className="border-t text-gray-700">
                 <td className="bg-c5 px-4 py-2 text-center text-white">
                   {challenge.title}
                 </td>
@@ -36,9 +36,9 @@ const Challengetable = () => {
                   {challenge.description}
                 </td>
               </tr>
-            </tbody>
-          </table>
-        ))}
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
