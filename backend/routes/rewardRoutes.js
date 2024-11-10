@@ -77,7 +77,9 @@ router.post('/rewards/redeem/:id', async (req, res) => {
         user.rewards.push(reward._id);
         await user.save();
 
-        res.status(200).json({ message: 'Reward redeemed successfully', user });
+        res.status(200).json({ message: 'Reward redeemed successfully', user ,
+            coupon_id : 'X9A7YZ3P2W'
+        });
     } catch (error) {
         res.status(500).json({ error: 'Error redeeming reward' });
     }
