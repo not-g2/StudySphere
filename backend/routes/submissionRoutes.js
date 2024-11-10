@@ -112,7 +112,7 @@ router.put("/submission/:id/feedback", async (req, res) => {
         }
 
         student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
-        student.xp += student.auraPoints;
+        student.xp += rewardfunc(assignment.dueDate, Date.now());
         // calculate next level threshold
         const nextLevelPoints = 100 * (student.level + 1) ** 2;
 
