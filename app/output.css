@@ -693,6 +693,10 @@ video {
   margin-bottom: 3rem;
 }
 
+.ml-4 {
+  margin-left: 1rem;
+}
+
 .block {
   display: block;
 }
@@ -727,6 +731,10 @@ video {
 
 .max-h-64 {
   max-height: 16rem;
+}
+
+.max-h-60 {
+  max-height: 15rem;
 }
 
 .min-h-screen {

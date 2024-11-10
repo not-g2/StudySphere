@@ -107,9 +107,9 @@ router.put("/submission/:id/feedback", async (req, res) => {
         submission.feedback = feedback;
         if (grade !== undefined) {
             submission.grade = grade;
-            submission.status = "graded"; // Optionally update status if graded
+             // Optionally update status if graded
         }
-
+        submission.status = "graded";
         student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
 
         // calculate next level threshold

@@ -47,7 +47,15 @@ const StudentList: React.FC = () => {
 
   // Toggle approval status for a submission
   const toggleApproval = async (submissionId: string) => {
-    console.log(submissionId);
+    // Find the specific submission by its ID
+    const submission = submissions.find((sub) => sub._id === submissionId);
+    if (!submission) {
+      setError("Submission not found.");
+      return;
+    }
+
+    const studentId = submission.studentId._id;
+
     try {
       const response = await fetch(`http://localhost:8000/api/submissions/submission/${submissionId}/feedback`, {
         method: "PUT",
@@ -55,21 +63,24 @@ const StudentList: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          studentId: submissionId,
+          studentId: studentId,
           assignmentId: assignmentId,
-          feedback: "", // No feedback provided
+          feedback: "",
         }),
       });
-      console.log(response);
+
       if (!response.ok) {
         throw new Error("Error updating approval status");
       }
 
-      // Update the status in the local state to "approved"
+      // Toggle between "approved" and "pending" or "graded" based on the current status
       setSubmissions((prevSubmissions) =>
         prevSubmissions.map((submission) =>
           submission._id === submissionId
-            ? { ...submission, status: "approved" }
+            ? {
+                ...submission,
+                status: submission.status === "approved" || submission.status === "graded" ? "pending" : "approved",
+              }
             : submission
         )
       );
@@ -95,7 +106,7 @@ const StudentList: React.FC = () => {
               <span className="text-white font-medium">{submission.studentId.name}</span>
               <input
                 type="checkbox"
-                checked={submission.status === "approved"}
+                checked={submission.status === "approved" || submission.status === "graded"}
                 onChange={() => toggleApproval(submission._id)}
                 className="form-checkbox h-5 w-5 text-blue-600"
               />

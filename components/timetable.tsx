@@ -1,17 +1,66 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 interface SubjectSchedulerModalProps {
-  subjects: string[];
   onScheduleSubmit: (schedule: { subject: string; days: { [day: string]: { startTime: string; endTime: string } } }) => void;
-  onClose: () => void; // Close modal function
+  onClose: () => void;
 }
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ subjects, onScheduleSubmit, onClose }) => {
+const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ onScheduleSubmit, onClose }) => {
+  const [studentId, setStudentId] = useState<string | null>(null);
+  const [subjects, setSubjects] = useState<string[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedDays, setSelectedDays] = useState<{ [day: string]: boolean }>({});
   const [timings, setTimings] = useState<{ [day: string]: { startTime: string; endTime: string } }>({});
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchStudentIdFromSession = () => {
+      const sessionData = Cookies.get("session");
+
+      if (sessionData) {
+        const parsedSession = JSON.parse(sessionData);
+        setStudentId(parsedSession.user?.id); // Set studentId from session
+      } else {
+        router.push("/auth/signin"); // Redirect if session data is missing
+      }
+    };
+
+    fetchStudentIdFromSession();
+  }, [router]);
+
+  useEffect(() => {
+    // Fetch subjects if studentId is available
+    const fetchSubjects = async () => {
+      if (studentId) {
+        try {
+          const response = await fetch(`http://localhost:8000/api/student/${studentId}`, {
+            headers: {
+              "Authorization": `Bearer ${Cookies.get("token")}`,
+            },
+          });
+          
+          if (!response.ok) {
+            throw new Error("Failed to fetch subjects");
+          }
+
+          const data = await response.json();
+          setSubjects(data.coursesList.map((course: any) => course.name));
+        } catch (error) {
+          console.error(error);
+          setError("Failed to load subjects. Please try again.");
+        }
+      }
+    };
+
+    fetchSubjects();
+  }, [studentId]);
 
   const handleDayToggle = (day: string) => {
     setSelectedDays((prevDays) => ({ ...prevDays, [day]: !prevDays[day] }));
@@ -32,6 +81,7 @@ const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ subjects,
     }, {} as { [day: string]: { startTime: string; endTime: string } });
 
     onScheduleSubmit({ subject: selectedSubject, days: selectedTimings });
+    onClose();
   };
 
   return (
@@ -40,12 +90,11 @@ const SubjectSchedulerModal: React.FC<SubjectSchedulerModalProps> = ({ subjects,
         <h2 className="text-xl font-semibold mb-4 text-white text-center">Schedule a Subject</h2>
 
         {/* Close button */}
-        <button 
-          onClick={onClose} 
-          className="absolute top-4 right-4 text-white text-lg font-bold"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-white text-lg font-bold">
           &times;
         </button>
+
+        {error && <p className="text-red-500 text-center">{error}</p>}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
