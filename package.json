@@ -29,6 +29,7 @@
         "ejs": "^3.1.10",
         "express": "^4.21.1",
         "express-session": "^1.18.1",
+        "framer-motion": "^12.5.0",
         "js-cookie": "^3.0.5",
         "jsonwebtoken": "^9.0.2",
         "moment": "^2.30.1",
