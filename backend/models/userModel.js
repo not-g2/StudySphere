@@ -1,20 +1,54 @@
 const mongoose = require('mongoose');
+// import mongoose from "mongoose"
 
 const UserSchema = new mongoose.Schema({
-    googleId : {type : String},
-    githubId : {type : String},
-    name:{type: String },
-    userName:{type : String},
-    email:{type : String, required : true , unique: true},
-    password:{type : String , required : true},
-    academicGoals:[{type : mongoose.Schema.Types.ObjectId , ref : 'Goal'}],
-    courses : [{type : mongoose.Schema.Types.ObjectId , ref : 'Course'}],
-    auraPoints : {type : Number , default : 0},
-    level : {type : Number , default : 1},
-    achievements : [{type : mongoose.Schema.Types.ObjectId , ref : 'Achievement'}],
-    rewards: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reward'}],
-    studyGroups: [{type: mongoose.Schema.Types.ObjectId , ref : 'StudyGroup'}],
-    xp : {type : Number , default : 0},
+    googleId : {
+        type : String
+    },
+    githubId : {
+        type : String
+    },
+    name:{
+        type: String
+    },
+    userName:{
+        type : String
+    },
+    email:{
+        type : String, 
+        required : true , 
+        unique: true,
+        lowercase : true
+    },
+    password:{
+        type : String , 
+        required : [true,"password is required"]
+    },
+    academicGoals:[
+        {type : mongoose.Schema.Types.ObjectId , ref : 'Goal'}
+    ],
+    courses : [
+        {type : mongoose.Schema.Types.ObjectId , ref : 'Course'}
+    ],
+    auraPoints : {type : Number , 
+        default : 0
+    },
+    level : {type : Number , 
+        default : 1
+    },
+    achievements : [
+        {type : mongoose.Schema.Types.ObjectId , ref : 'Achievement'}
+    ],
+    rewards: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Reward'}
+    ],
+    studyGroups: [
+        {type: mongoose.Schema.Types.ObjectId , ref : 'StudyGroup'}
+    ],
+    xp : {
+        type : Number , 
+        default : 0
+    },
     image:{
         publicId:{
             type: String,
@@ -25,8 +59,15 @@ const UserSchema = new mongoose.Schema({
             //required: true,
         }
     },
-    phoneNumber : {type : String , minlength :10 , maxlength : 10 },
-    createdAt : {type : Date , default : Date.now},
+    phoneNumber : {
+        type : String , 
+        minlength :10 , 
+        maxlength : 10 
+    },
+    createdAt : {
+        type : Date , 
+        default : Date.now
+    },
     // Attendance tracking
     attendance: [
         {
@@ -38,3 +79,4 @@ const UserSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('User', UserSchema);
+// export const User = mongoose.model("User",UserSchema);

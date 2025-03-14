@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors"); //we need cors to handle any Cross-Origin Resource Sharing errors we may come across
+const connectDB = require("./config/db");
 const passport = require("./config/passport");
 const session = require("express-session");
 
@@ -21,7 +22,6 @@ const advancedAuthRoutes = require("./routes/advancedAuthRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const challengeRoute = require("./routes/challengeRoute");
 const timeTableRoute = require("./routes/timeTableRoutes");
-const connectDB = require("./config/db");
 const reminderRoutes = require("./routes/reminderRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 
@@ -63,6 +63,6 @@ app.use("/api/reminder", reminderRoutes);
 app.use("/api/attendance", attendanceRoutes);
 
 require("./cron/cron");
-app.listen(8000, () => {
+app.listen(process.env.PORT, () => {
     console.log("server is running on port 8000");
 });
