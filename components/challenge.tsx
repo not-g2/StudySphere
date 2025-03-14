@@ -10,11 +10,10 @@ const dailyChallenges = [
 
 const Challengetable = () => {
   return (
-    <div className="flex flex-col items-center py-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-white">Challenges</h1>
-
+    <div className="flex flex-col items-center max-w-md">
+      <h1 className="text-xl font-bold mb-4 text-white">Challenges</h1>
       {/* Single scrollable table */}
-      <div className="w-full overflow-y-auto max-h-64"> {/* Set a max height for scrollability */}
+      <div className="w-full overflow-y-auto max-h-64">
         <table className="w-full border rounded-lg shadow-lg overflow-hidden">
           <thead>
             <tr>

@@ -10,10 +10,6 @@ interface Challenge {
   endDate: string;
 }
 
-interface ChallengeTableProps {
-  challenges: Challenge[];
-}
-
 const ChallengeTable: React.FC = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -21,26 +17,24 @@ const ChallengeTable: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Retrieve session data from cookies
     const sessionData = Cookies.get("session");
 
     if (sessionData) {
       const parsedSession = JSON.parse(sessionData);
       setSession(parsedSession);
     } else {
-      router.push("/auth/signin"); // Redirect if no session data
+      router.push("/auth/signin");
     }
   }, [router]);
 
   useEffect(() => {
-    // Fetch challenges if session is available
     const fetchChallenges = async () => {
       if (session?.user?.token) {
         try {
           const response = await fetch('http://localhost:8000/api/goals/', {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${session.user.token}`, // Use token from session
+              'Authorization': `Bearer ${session.user.token}`,
             },
           });
 

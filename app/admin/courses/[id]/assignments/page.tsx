@@ -172,10 +172,6 @@ const AssignmentList: React.FC = () => {
             <p className="text-sm text-gray-300">
               Due: {new Date(assignment.dueDate).toLocaleDateString()}
             </p>
-            <p className="text-sm text-gray-300">Status: {assignment.status}</p>
-            <p className="text-sm text-gray-300">
-              Professor Approval: {assignment.profApproval ? "Approved" : "Not Approved"}
-            </p>
             {assignment.description && (
               <p className="text-sm text-gray-300">Description: {assignment.description}</p>
             )}

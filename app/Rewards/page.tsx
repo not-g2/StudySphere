@@ -5,7 +5,7 @@ import pic1 from "../../public/reward1.jpeg";
 import pic2 from "../../public/reward2.jpeg";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
+import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
 
 interface reward {
     title: string;
@@ -17,21 +17,14 @@ interface reward {
 const RewardsDisplay = () => {
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
-    const [rewards, setrewards] = useState([]);
+    const [rewards, setRewards] = useState([]);
+
+    useSessionCheck(setSession); // ✅ Use session check hook
 
     useEffect(() => {
-        const sessionData: string | undefined = Cookies.get("session");
-
-        if (sessionData && !session) {
-            setSession(JSON.parse(sessionData));
-        } else if (!sessionData) {
-            router.push("/");
-        }
-
         const getRewards = async () => {
-            if (!session) {
-                return;
-            }
+            if (!session) return;
+
             try {
                 const response = await fetch(
                     "http://localhost:8000/api/rewd/rewards",
@@ -49,12 +42,12 @@ const RewardsDisplay = () => {
                 }
 
                 const data = await response.json();
-                setrewards(data.rewards);
+                setRewards(data.rewards);
             } catch (error) {
                 console.error("Error fetching rewards:", error);
-                return null;
             }
         };
+
         getRewards();
     }, [session]);
 
@@ -67,27 +60,24 @@ const RewardsDisplay = () => {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`, // Replace with actual auth token if required
+                            Authorization: `Bearer ${session.user.token}`,
                         },
-                        body: JSON.stringify({ userId: userId }),
+                        body: JSON.stringify({ userId }),
                     }
                 );
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(
-                        errorData.error || "Error redeeming reward"
-                    );
+                    throw new Error(errorData.error || "Error redeeming reward");
                 }
 
                 const data = await response.json();
                 alert(`${data.message}, Coupon Code ${data.coupon_id}`);
-                return data;
             } catch (error) {
                 alert(`Error: ${error.message}`);
-                return null;
             }
         };
+
         redeemReward(reward._id, session.user.id);
     }
 
@@ -98,8 +88,8 @@ const RewardsDisplay = () => {
             paddingLeft={1}
             paddingTop={1}
             margin={0}
-            className="bg-c2" // Apply background color c2 to the main container
-            sx={{ width: "100%", height: "100vh" }} // Ensure full viewport height
+            className="bg-c2"
+            sx={{ width: "100%", height: "100vh" }}
         >
             {rewards.map((reward, index) => (
                 <Grid
@@ -113,7 +103,7 @@ const RewardsDisplay = () => {
                 >
                     <Card
                         onClick={() => handleSubmit(reward)}
-                        className="bg-c5" // Apply color c5 to each card
+                        className="bg-c5"
                         sx={{
                             width: "90%",
                             display: "flex",
@@ -137,7 +127,7 @@ const RewardsDisplay = () => {
                             component="img"
                             height="140"
                             image={reward.picture}
-                            alt={reward.name}
+                            alt={reward.title}
                             sx={{
                                 width: 200,
                                 height: 200,
@@ -152,13 +142,10 @@ const RewardsDisplay = () => {
                                 component="div"
                                 color="#FFFFFF"
                             >
-                                {reward.name}
+                                {reward.title}
                             </Typography>
-                            {/* <Typography variant="body2" color="#FFFFFF">
-                                {reward.desc}
-                            </Typography> */}
                             <Typography color="#FFFFFF">
-                                Redeem for {reward.reqPoints} points
+                                Redeem for {reward.cost} points
                             </Typography>
                         </CardContent>
                     </Card>

@@ -14,6 +14,7 @@ const GoalTable: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<any>(null);
+  const [refresh, setRefresh] = useState(0); // Refresh trigger state
   const router = useRouter();
 
   // Retrieve session from cookies and handle redirection
@@ -28,7 +29,7 @@ const GoalTable: React.FC = () => {
     }
   }, [router]);
 
-  // Fetch goals when session is available
+  // Fetch goals when session or refresh trigger changes
   useEffect(() => {
     const fetchGoals = async () => {
       if (session?.user?.token) {
@@ -50,6 +51,7 @@ const GoalTable: React.FC = () => {
             name: goal.title,
             endDate: goal.dueDate,
           }));
+          setRefresh(prev => prev + 1);
           setGoals(formattedGoals);
         } catch (err) {
           console.error(err);
@@ -59,13 +61,12 @@ const GoalTable: React.FC = () => {
     };
 
     fetchGoals();
-  }, [session]);
+  }, [session, refresh]); // Dependencies: session and refresh
 
-  // Delete goal by ID
+  // Delete goal by ID and trigger refresh after deletion
   const deleteGoal = async (id: string) => {
     if (session?.user?.token) {
       try {
-        console.log(id);
         const response = await fetch(`http://localhost:8000/api/goals/${id}`, {
           method: 'DELETE',
           headers: {
@@ -77,8 +78,8 @@ const GoalTable: React.FC = () => {
           throw new Error('Failed to delete goal');
         }
 
-        // Remove the deleted goal from the state
-        setGoals(goals.filter(goal => goal._id !== id));
+        // Trigger a refresh after successful deletion
+        setRefresh(prev => prev + 1);
       } catch (err) {
         console.error(err);
         setError("Failed to delete goal. Please try again.");

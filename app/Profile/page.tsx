@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import {
     Button,
@@ -6,7 +7,6 @@ import {
     Typography,
     Avatar,
     Box,
-    Stack,
     TextField,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -145,7 +145,10 @@ const ProfilePage: React.FC = () => {
     };
 
     return (
-        <Container maxWidth="sm" sx={{ mt: 5 }}>
+        <Container
+            maxWidth="sm"
+            sx={{ mt: 5, bgcolor: "#001D3D", borderRadius: 2, padding: 4 }}
+        >
             <Box
                 display="flex"
                 flexDirection="column"
@@ -185,7 +188,6 @@ const ProfilePage: React.FC = () => {
                         label="Email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
                         fullWidth
                         margin="normal"
                         variant="outlined"
