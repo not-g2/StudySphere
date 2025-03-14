@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Cookies from "js-cookie";
 
 type Deadline = {
-  id: number;
+  id: number | string;
   name: string;
   date: string;
 };
@@ -32,7 +32,7 @@ function DeadlinesList() {
         if (response.ok) {
           const data = await response.json();
           const formattedDeadlines = data.deadlines.map((deadline: any) => ({
-            id: deadline.id || `${deadline.assignmentTitle}-${deadline.dueDate}`, // Use a unique ID or fallback
+            id: deadline.id || `${deadline.assignmentTitle}-${deadline.dueDate}`,
             name: deadline.assignmentTitle,
             date: deadline.dueDate,
           }));
@@ -49,26 +49,29 @@ function DeadlinesList() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center py-8 max-w-md mx-auto">
+    // Updated container: full width with padding instead of fixed max width
+    <div className="flex flex-col items-center py-8 w-full">
       <h2 className="text-2xl font-bold mb-6 text-center text-white">Deadlines</h2>
-      <table className="w-full border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-        <thead>
-          <tr className="bg-t2 text-gray-100">
-            <th className="text-white px-4 py-2 font-semibold text-center">Deadline</th>
-            <th className="text-white px-4 py-2 font-semibold text-center">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {deadlines.map((deadline) => (
-            <tr key={deadline.id} className="bg-c5 border-t text-gray-200">
-              <td className="px-4 py-2 text-center">{deadline.name}</td>
-              <td className="px-4 py-2 text-center">
-                {new Date(deadline.date).toLocaleDateString()}
-              </td>
+      <div className="w-full px-4">
+        <table className="w-full border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          <thead>
+            <tr className="bg-t2 text-gray-100">
+              <th className="text-white px-4 py-2 font-semibold text-center">Deadline</th>
+              <th className="text-white px-4 py-2 font-semibold text-center">Date</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {deadlines.map((deadline) => (
+              <tr key={deadline.id} className="bg-c5 border-t text-gray-200">
+                <td className="px-4 py-2 text-center">{deadline.name}</td>
+                <td className="px-4 py-2 text-center">
+                  {new Date(deadline.date).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

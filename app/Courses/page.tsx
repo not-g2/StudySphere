@@ -50,7 +50,7 @@ const ClassesPage = () => {
 
     const handleCardClick = (classId: string, classCode: string) => {
         setCurrentClassCode(classCode); // Set the class code when the card is clicked
-        setOpenClassCodePopup(true); // Open the popup
+        // setOpenClassCodePopup(true); // Open the popup
         router.push(`/Courses/${classId}`);
     };
 

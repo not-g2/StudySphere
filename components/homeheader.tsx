@@ -31,13 +31,14 @@ const Header: React.FC = () => {
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
   const [animateBell, setAnimateBell] = useState<boolean>(true);
 
-  // Define navigation items with explicit paths
+  // Define navigation items with explicit paths, including the new Schedule link
   const navItems = [
     { label: "Home", path: "/" },
     { label: "Dashboard", path: "/Dashboard" },
     { label: "Courses", path: "/Courses" },
     { label: "Rewards", path: "/Rewards" },
     { label: "Goals", path: "/Goals" },
+    { label: "Schedule", path: "/Schedule" },
   ];
 
   const handleGo = (path: string) => {
