@@ -1,25 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Cookies from "js-cookie";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import MyCalendar from "@/components/Calendar";
 import SubjectSchedulerModal from "@/components/timetable";
+import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
 
 const TimeTablePage: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
-  // Retrieve session from cookies and redirect if not found
-  useEffect(() => {
-    const sessionData = Cookies.get("session");
-    if (sessionData) {
-      setSession(JSON.parse(sessionData));
-    } else {
-      router.push("/auth/signin");
-    }
-  }, [router]);
+  useSessionCheck(setSession); // ✅ Use session check hook
 
   // Handler for when a new schedule is submitted via the modal
   const handleScheduleSubmit = (schedule: {

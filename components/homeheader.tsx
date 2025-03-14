@@ -20,6 +20,7 @@ import Cookies from "js-cookie";
 import LogoutPage from "./signout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { motion } from "framer-motion";
+import useSessionCheck from "../hooks/auth"; // 👈 Use your custom hook
 
 const Header: React.FC = () => {
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
@@ -31,7 +32,8 @@ const Header: React.FC = () => {
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
   const [animateBell, setAnimateBell] = useState<boolean>(true);
 
-  // Define navigation items with explicit paths, including the new Schedule link
+  useSessionCheck(setSession); // 👈 using the hook for session management
+
   const navItems = [
     { label: "Home", path: "/" },
     { label: "Dashboard", path: "/Dashboard" },
@@ -65,13 +67,6 @@ const Header: React.FC = () => {
   };
 
   useEffect(() => {
-    const sessionData = Cookies.get("session");
-    if (sessionData) {
-      setSession(JSON.parse(sessionData));
-    }
-  }, []);
-
-  useEffect(() => {
     if (!session) return;
 
     const GetProfile = async () => {
@@ -97,21 +92,17 @@ const Header: React.FC = () => {
   }, [session]);
 
   const markAsRead = () => {
-    setNotifications(0); // Clear notifications
-    setAnimateBell(false); // Stop bell animation
-    handleClose(); // Close dropdown
+    setNotifications(0);
+    setAnimateBell(false);
+    handleClose();
   };
 
   return (
     <AppBar
       position="static"
-      sx={{
-        background: "linear-gradient(to bottom right, #0f173a, #001d30)",
-        paddingX: 2,
-      }}
+      sx={{ background: "linear-gradient(to bottom right, #0f173a, #001d30)", paddingX: 2 }}
     >
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        {/* Left Side - Navigation Links */}
         <Box sx={{ display: "flex", gap: 3 }}>
           {navItems.map((item) => (
             <Typography
@@ -123,10 +114,7 @@ const Header: React.FC = () => {
                 fontSize: "1rem",
                 fontWeight: "500",
                 cursor: "pointer",
-                "&:hover": {
-                  color: "#ffcc00",
-                  transition: "0.3s ease-in-out",
-                },
+                "&:hover": { color: "#ffcc00", transition: "0.3s ease-in-out" },
               }}
             >
               {item.label}
@@ -134,32 +122,19 @@ const Header: React.FC = () => {
           ))}
         </Box>
 
-        {/* Right Side - Profile Avatar & Buttons */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* Notifications Icon */}
           <IconButton color="inherit" onClick={handleBellClick}>
             <Badge badgeContent={notifications} color="error">
               <motion.div
                 animate={animateBell ? { rotate: [0, -10, 10, -10, 10, 0] } : {}}
-                transition={{
-                  duration: 0.5,
-                  ease: "easeInOut",
-                  repeat: animateBell ? Infinity : 0,
-                  repeatDelay: 2,
-                }}
+                transition={{ duration: 0.5, ease: "easeInOut", repeat: animateBell ? Infinity : 0, repeatDelay: 2 }}
               >
                 <NotificationsIcon />
               </motion.div>
             </Badge>
           </IconButton>
 
-          {/* Notifications Dropdown */}
-          <Menu
-            anchorEl={notificationAnchorEl}
-            open={Boolean(notificationAnchorEl)}
-            onClose={handleClose}
-            sx={{ mt: 1 }}
-          >
+          <Menu anchorEl={notificationAnchorEl} open={Boolean(notificationAnchorEl)} onClose={handleClose} sx={{ mt: 1 }}>
             {notifications > 0 ? (
               <>
                 <MenuItem onClick={handleClose}>New Comment on your post</MenuItem>
@@ -167,12 +142,7 @@ const Header: React.FC = () => {
                 <MenuItem onClick={handleClose}>Weekly Challenge is Live!</MenuItem>
                 <Divider />
                 <MenuItem>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    onClick={markAsRead}
-                  >
+                  <Button fullWidth variant="contained" color="primary" onClick={markAsRead}>
                     Mark as Read
                   </Button>
                 </MenuItem>
@@ -184,49 +154,24 @@ const Header: React.FC = () => {
 
           {!session ? (
             <>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => router.push("/auth/signin")}
-              >
+              <Button variant="contained" color="primary" onClick={() => router.push("/auth/signin")}>
                 Sign In
               </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => router.push("/auth/signup")}
-              >
+              <Button variant="contained" color="secondary" onClick={() => router.push("/auth/signup")}>
                 Sign Up
               </Button>
             </>
           ) : (
             <>
-              {/* Profile Avatar */}
               <IconButton onClick={handleProfileClick}>
                 <Avatar
                   src={userImage ?? "/default-profile.png"}
                   alt="Profile Picture"
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    border: "2px solid white",
-                    boxShadow: "0px 0px 8px rgba(255, 255, 255, 0.3)",
-                    transition: "box-shadow 0.3s ease-in-out",
-                    "&:hover": {
-                      boxShadow: "0px 0px 12px rgba(255, 255, 255, 0.5)",
-                    },
-                  }}
+                  sx={{ width: 40, height: 40, border: "2px solid white" }}
                 />
               </IconButton>
 
-              {/* Dropdown for Profile */}
-              <Dropdown
-                anchorEl={profileAnchorEl}
-                handleClose={handleClose}
-                handleSignOut={handleSignOut}
-              />
-
-              {/* Logout Dialog */}
+              <Dropdown anchorEl={profileAnchorEl} handleClose={handleClose} handleSignOut={handleSignOut} />
               <LogoutPage open={open} setOpen={setOpen} setSession={setSession} />
             </>
           )}

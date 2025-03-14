@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import AddGoalForm from "@/components/addgoal";
 import DeadlineForm from "@/components/Deadlineform";
 import GoalTable from "@/components/goalview";
 import Challengetable from "@/components/challenge";
+import useSessionCheck from "../../hooks/auth";
 
 interface Goal {
   name: string;
@@ -12,6 +13,9 @@ interface Goal {
 }
 
 function ThirdRowPage() {
+  const [session, setSession] = useState<any>(null);
+  useSessionCheck(setSession);
+
   const handleAddGoal = (goal: Goal) => {
     console.log("Added goal:", goal);
   };

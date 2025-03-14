@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
+import useSessionCheck from "../../hooks/auth";
 
 import DeadlinesList from "@/components/deadlines";
 import AttendancePieChart from "@/components/AttendancePieChart";
@@ -17,18 +16,10 @@ const LevelProgress = dynamic(() => import("@/components/XPchart"), {
 });
 
 function Page() {
-  const [session, setSession] = useState<any>(null);
-  const router = useRouter();
-
-
-  useEffect(() => {
-    const sessionData = Cookies.get("session");
-    if (sessionData) {
-      setSession(JSON.parse(sessionData));
-    } else {
-      router.push("/auth/signin");
-    }
-  }, [router]);
+  const [session, setSession] = useState(null);
+  
+  // Use the custom hook for session checking
+  useSessionCheck(setSession);
 
   return (
     <div className="bg-c2 min-h-screen">
