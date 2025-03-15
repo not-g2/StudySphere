@@ -91,7 +91,7 @@ passport.use(
                 }
 
                 // Check if user exists
-                let user = await User.findOne({ githubId: profile.id });
+                let user = await User.findOne({ email: email });
                 if (!user) {
                     user = await User.create({
                         githubId: profile.id,
@@ -99,6 +99,11 @@ passport.use(
                         email: email,
                         password: "nopassword",
                     });
+                } else {
+                    if (!user.githubId) {
+                        user.githubId = profile.id;
+                        await user.save();
+                    }
                 }
                 // Generate JWT token
                 const token = jwt.sign(

@@ -88,7 +88,7 @@ const SignInPage = () => {
     };
 
     const handleGitHubSignIn = async () => {
-        window.location.href = "http://localhost:8000/api/auth/github";
+        window.location.href = "http://localhost:8000/auth/github";
     };
 
     return (
@@ -171,7 +171,18 @@ const SignInPage = () => {
                 fullWidth
                 variant="outlined"
                 color="secondary"
-                sx={{ mt: 2 }}
+                sx={{ mt: 2, textTransform: "none", fontWeight: "bold" }}
+                startIcon={
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24px"
+                        height="24px"
+                        fill="currentColor"
+                    >
+                        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48 0-.24-.01-1.05-.01-1.91-2.78.58-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.52 1.03 1.52 1.03.89 1.52 2.34 1.08 2.91.83.09-.64.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.93 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0 1 12 6.8c.85.004 1.71.11 2.51.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.83-2.34 4.68-4.57 4.92.36.31.68.91.68 1.84 0 1.33-.01 2.41-.01 2.73 0 .27.18.58.69.48A10.02 10.02 0 0 0 22 12c0-5.52-4.48-10-10-10z" />
+                    </svg>
+                }
             >
                 Sign in with GitHub
             </Button>

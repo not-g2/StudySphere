@@ -55,8 +55,19 @@ router.get(
             { expiresIn: "1h" }
         );
 
-        // Send the token in the response
-        res.status(200).json({ token });
+        const sessionData = {
+            user: { id: req.user._id, token: token },
+            isAdmin: false,
+            email: req.user.email,
+        };
+
+        const encodedSession = Buffer.from(
+            JSON.stringify(sessionData)
+        ).toString("base64");
+
+        res.redirect(
+            `http://localhost:3000/auth/github?session=${encodedSession}`
+        );
     }
 );
 
