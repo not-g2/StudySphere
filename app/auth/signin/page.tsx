@@ -8,9 +8,12 @@ import {
     Typography,
     Box,
     CircularProgress,
+    ToggleButtonGroup,
+    ToggleButton,
 } from "@mui/material";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import GoogleIcon from "@mui/icons-material/Google";
 
 const storeSessionData = (responseData: any) => {
     const sessionData = {
@@ -80,6 +83,14 @@ const SignInPage = () => {
             });
     };
 
+    const handleGoogleSignIn = async () => {
+        window.location.href = "http://localhost:8000/auth/google";
+    };
+
+    const handleGitHubSignIn = async () => {
+        window.location.href = "http://localhost:8000/api/auth/github";
+    };
+
     return (
         <Container
             maxWidth="xs"
@@ -145,13 +156,35 @@ const SignInPage = () => {
             </Box>
 
             <Button
-                onClick={toggleSignInMode}
-                variant="text"
+                onClick={handleGoogleSignIn}
+                fullWidth
+                variant="outlined"
+                color="primary"
+                sx={{ mt: 2, textTransform: "none", fontWeight: "bold" }}
+                startIcon={<GoogleIcon />}
+            >
+                Sign in with Google
+            </Button>
+
+            <Button
+                onClick={handleGitHubSignIn}
+                fullWidth
+                variant="outlined"
                 color="secondary"
                 sx={{ mt: 2 }}
             >
-                Switch to {isAdmin ? "User" : "Admin"} Sign In
+                Sign in with GitHub
             </Button>
+
+            <ToggleButtonGroup
+                value={isAdmin ? "admin" : "user"}
+                exclusive
+                onChange={() => setIsAdmin(!isAdmin)}
+                sx={{ mt: 2 }}
+            >
+                <ToggleButton value="user">User Sign In</ToggleButton>
+                <ToggleButton value="admin">Admin Sign In</ToggleButton>
+            </ToggleButtonGroup>
         </Container>
     );
 };
