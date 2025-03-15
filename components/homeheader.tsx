@@ -23,6 +23,7 @@ import { motion } from "framer-motion";
 import useSessionCheck from "../hooks/auth"; // 👈 Use your custom hook
 
 const Header: React.FC = () => {
+  const PORT = process.env.NEXT_PUBLIC_PORT
   const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
   const router = useRouter();
   const [userImage, setUserImage] = useState<string | null>(null);
@@ -72,7 +73,7 @@ const Header: React.FC = () => {
     const GetProfile = async () => {
       const token = session.user.token;
       try {
-        const response = await fetch("http://localhost:8000/api/desc/profile", {
+        const response = await fetch(`http://localhost:${PORT}/api/desc/profile`, {
           headers: { Authorization: `Bearer ${token}` },
           method: "GET",
         });

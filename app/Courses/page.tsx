@@ -42,6 +42,7 @@ interface classItem {
 }
 
 const ClassesPage = () => {
+    const PORT = process.env.NEXT_PUBLIC_PORT
     const router = useRouter();
     const [classesData, setClassesData] = useState<classItem[]>([]);
     const [session, setSession] = useState<Session | null>(null);
@@ -58,7 +59,7 @@ const ClassesPage = () => {
             if (session) {
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/courses/student/${session.user.id}`,
+                        `http://localhost:${PORT}/api/courses/student/${session.user.id}`,
                         {
                             headers: { Authorization: `Bearer ${session.user.token}` },
                             method: "GET",
@@ -92,7 +93,7 @@ const ClassesPage = () => {
 
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/courses/add-course",
+                    `http://localhost:${PORT}/api/courses/add-course`,
                     {
                         method: "PUT",
                         headers: {

@@ -13,6 +13,7 @@ interface Goal {
 }
 
 function ThirdRowPage() {
+  const PORT = process.env.NEXT_PUBLIC_PORT
   const [session, setSession] = useState<any>(null);
   useSessionCheck(setSession);
 
@@ -23,7 +24,7 @@ function ThirdRowPage() {
   function addDeadline(deadline: any): void {
     async function createReminder(deadlineData: any) {
       try {
-        const response = await fetch("http://localhost:8000/api/reminder/reminders", {
+        const response = await fetch(`http://localhost:${PORT}/api/reminder/reminders`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(deadlineData),

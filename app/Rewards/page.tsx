@@ -15,6 +15,8 @@ interface reward {
 }
 
 const RewardsDisplay = () => {
+    const PORT = process.env.NEXT_PUBLIC_PORT
+    console.log(PORT)
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
     const [rewards, setRewards] = useState([]);
@@ -27,7 +29,7 @@ const RewardsDisplay = () => {
 
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/rewd/rewards",
+                    `http://localhost:${PORT}/api/rewd/rewards`,
                     {
                         method: "GET",
                         headers: {
@@ -55,7 +57,7 @@ const RewardsDisplay = () => {
         const redeemReward = async (rewardId: any, userId: any) => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/rewd/rewards/redeem/${rewardId}`,
+                    `http://localhost:${PORT}/api/rewd/rewards/redeem/${rewardId}`,
                     {
                         method: "POST",
                         headers: {
