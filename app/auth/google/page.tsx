@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSessionCheck from "../../../hooks/auth";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 export default function GoogleAuthSuccess() {
     const searchParams = useSearchParams();
@@ -27,5 +28,21 @@ export default function GoogleAuthSuccess() {
         }
     }, [searchParams]);
 
-    return <p>Redirecting...</p>;
+    return (
+        <Box
+            sx={{
+                height: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 2,
+            }}
+        >
+            <CircularProgress />
+            <Typography variant="h6" color="gray">
+                Signing you in with Google...
+            </Typography>
+        </Box>
+    );
 }
