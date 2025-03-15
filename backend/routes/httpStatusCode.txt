@@ -1,0 +1,20 @@
+1xx => Informational
+2xx => Success
+3xx => Redirection
+4xx => Client Error
+5xx => Server Error
+
+Status Code      Verdict
+100              Continue
+102              Processing
+200              OK
+201              Created
+202              Accepted
+307              Temporary Redirect
+308              Permanent Redirect
+400              Bad request
+401              Unauthorized
+402              Payment required
+404              Not Found
+500              Internal Server Error
+504              Gateway TimeOut

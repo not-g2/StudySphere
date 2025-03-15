@@ -51,8 +51,6 @@ app.use("/api/announce", announcementRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chapter", chapterRoutes);
-//app.use("/api/submissions", submissionRoutes);
-//app.use("/api/users", userRoutes);
 app.use("/api/data", leaderboardRoutes);
 app.use("/api/rewd", rewardRoutes);
 app.use("/api/evnt", eventRoutes);
@@ -63,6 +61,6 @@ app.use("/api/reminder", reminderRoutes);
 app.use("/api/attendance", attendanceRoutes);
 
 require("./cron/cron");
-app.listen(process.env.PORT, () => {
-    console.log("server is running on port 8000");
+app.listen(process.env.PORT || 8000, () => {
+    console.log(`server is running on port ${process.env.PORT}`);
 });
