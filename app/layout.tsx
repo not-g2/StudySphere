@@ -1,34 +1,29 @@
 "use client";
-
-import Header from "../components/homeheader";
-import AdminHeader from "../components/adminheader";
-import { SessionProvider } from "next-auth/react";
-import { ReactNode } from "react";
-import "./output.css";
+import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-export default function RootLayout({
-    children,
-    session,
-}: {
-    children: ReactNode;
-    session: any;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
     const pathname = usePathname();
-    const isAdminRoute = pathname.startsWith("/admin");
-    const isAuthRedirect =
-        pathname.startsWith("/auth/google") ||
-        pathname.startsWith("/auth/github");
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) return null;
 
     return (
         <html lang="en">
-            <body>
-                <SessionProvider session={session}>
-                    {!isAuthRedirect &&
-                        (isAdminRoute ? <AdminHeader /> : <Header />)}
-                    {children}
-                </SessionProvider>
-            </body>
+            <head>
+                {/* Import Tailwind CSS only for Dashboard pages */}
+                {pathname !== "/" && (
+                    <link rel="stylesheet" href="/(protected)/output.css" />
+                )}
+
+                {/* Import external CSS only for Sign In page */}
+                {pathname === "/" && <link rel="stylesheet" href="/abc.css" />}
+            </head>
+            <body>{children}</body>
         </html>
     );
 }
