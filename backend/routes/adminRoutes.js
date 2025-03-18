@@ -200,23 +200,23 @@ router.post("/post/mark", authMiddleware, async (req, res) => {
         }
 
         // Find the user and check for existing attendance for the same course and date
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        // const user = await User.findById(userId);
+        // if (!user) {
+        //     return res.status(404).json({ message: "User not found" });
+        // }
 
-        const alreadyMarked = user.attendance.some(
-            (record) =>
-                record.courseId.toString() === courseId &&
-                record.date.toDateString() === new Date(date).toDateString()
-        );
+        // const alreadyMarked = user.attendance.some(
+        //     (record) =>
+        //         record.courseId.toString() === courseId &&
+        //         record.date.toDateString() === new Date(date).toDateString()
+        // );
 
-        if (alreadyMarked) {
-            return res.status(400).json({
-                message:
-                    "Attendance for this course and date is already marked",
-            });
-        }
+        // if (alreadyMarked) {
+        //     return res.status(400).json({
+        //         message:
+        //             "Attendance for this course and date is already marked",
+        //     });
+        // }
 
         // Add the attendance record for the specified course and date
         user.attendance.push({ courseId, date, status });

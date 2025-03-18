@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/userModel");
+const Course = require("../models/courseModel")
 const authMiddleware = require("../middleware/auth");
 
 router.get("/breakdown/:userId", authMiddleware, async (req, res) => {
@@ -60,5 +61,5 @@ router.get("/breakdown/:userId", authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 });
-
+    
 module.exports = router;

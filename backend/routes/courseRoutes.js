@@ -13,6 +13,7 @@ router.post("/create/:adminId", authMiddleware, async (req, res) => {
             name,
             description,
             students,
+            courseCode
         });
         await course.save();
         const admin = await Admin.findById(req.params.adminId);

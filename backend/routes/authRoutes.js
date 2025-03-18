@@ -9,9 +9,6 @@ const JWT = require("jsonwebtoken");
 router.post("/signup", async (req, res) => {
     try {
         const { email, password } = req.body;
-        // console.log(email);
-        // console.log(password);
-        // console.log(req);
         if (!email || !password) {
             return res.status(400).json({
                 msg: "Email and pasword are required!",
@@ -75,6 +72,7 @@ router.post("/login", async (req, res) => {
 
         // Find user by email
         const user = await User.findOne({ email });
+        // if no user is found with the given email , then the user variable will have "null" value
         if (!user) {
             return res.status(401).json({ msg: "Invalid credentials!" });
         }
