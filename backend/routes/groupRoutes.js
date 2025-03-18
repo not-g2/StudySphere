@@ -4,7 +4,7 @@ const { upload } = require("../utils/cloudinary");
 const User = require("../models/userModel");
 const Group = require("../models/groupSchema");
 const authMiddleware = require("../middleware/auth");
-const { Roofing, Room } = require("@mui/icons-material");
+//const { Roofing, Room } = require("@mui/icons-material");
 
 // create a group
 router.post("/create",authMiddleware,async(req,res)=>{
@@ -67,15 +67,32 @@ router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
             })
         }
 
-        const room = await Room.findOne({groupCode : groupid});
+        const group = await Group.findOne({groupCode : groupid});
 
-        if(!room){
+        if(!group){
             return res.status(404).json({
-                message : "room not found"
+                message : "group not found"
             })
         }
 
-        await 
+        // Check if user is already in the group
+        const isAlreadyMember = group.members.some(member => member.user.toString() === userId);
+        if (isAlreadyMember) {
+            return res.status(400).json({ message: "User is already a member of this group" });
+        }
+
+        // Add user to the group's members and update user's studyGroups list
+        const updatedGroup = await Group.findOneAndUpdate(
+            { groupCode: groupid },
+            { $push: { members: { user: userId, rank: "Member" } } },
+            { new: true } // Return the updated group
+        );
+
+        await User.findByIdAndUpdate(userId, { $push: { studyGroups: updatedGroup._id } });
+        return res.status(200).json({
+            msg : "user successfully added",
+            updatedGroup
+        })
 
 
     } catch(error){
@@ -85,3 +102,5 @@ router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
         })
     }
 })
+
+module.exports = router;
