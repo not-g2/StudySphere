@@ -24,7 +24,7 @@ export default function GithubAuthSuccess() {
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
             });
-            router.push("/");
+            router.push("/Dashboard");
         }
     }, [searchParams]);
 

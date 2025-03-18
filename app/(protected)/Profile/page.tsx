@@ -10,7 +10,7 @@ import {
     TextField,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import default_profile_pic from "../../public/default-profile.png";
+import default_profile_pic from "../../../public/default-profile.png";
 import Cookies from "js-cookie";
 import LogoutPage from "@/components/signout";
 

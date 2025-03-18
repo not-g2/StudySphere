@@ -8,10 +8,10 @@ import {
     CardMedia,
     Button,
 } from "@mui/material";
-import pic from "../../public/teach1.jpg";
+import pic from "../../../public/teach1.jpg";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import ClassCodePopup from "../../components/classAdd";
+import ClassCodePopup from "../../../components/classAdd";
 import useSessionCheck from "../../hooks/auth";
 
 type Session = {
@@ -42,7 +42,7 @@ interface classItem {
 }
 
 const ClassesPage = () => {
-    const PORT = process.env.NEXT_PUBLIC_PORT
+    const PORT = process.env.NEXT_PUBLIC_PORT;
     const router = useRouter();
     const [classesData, setClassesData] = useState<classItem[]>([]);
     const [session, setSession] = useState<Session | null>(null);
@@ -61,7 +61,9 @@ const ClassesPage = () => {
                     const response = await fetch(
                         `http://localhost:${PORT}/api/courses/student/${session.user.id}`,
                         {
-                            headers: { Authorization: `Bearer ${session.user.token}` },
+                            headers: {
+                                Authorization: `Bearer ${session.user.token}`,
+                            },
                             method: "GET",
                         }
                     );
@@ -116,41 +118,101 @@ const ClassesPage = () => {
 
     return (
         <div className="bg-[#001D3D] h-full">
-            <Box className="bg-c2 text-white p-4 flex flex-col items-start" sx={{ minHeight: "100vh", width: "100vw", alignItems: "center" }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ width: "100vw" }}>
-                    <Typography variant="h4" gutterBottom className="text-white mt-2 mb-4">
+            <Box
+                className="bg-c2 text-white p-4 flex flex-col items-start"
+                sx={{
+                    minHeight: "100vh",
+                    width: "100vw",
+                    alignItems: "center",
+                }}
+            >
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{ width: "100vw" }}
+                >
+                    <Typography
+                        variant="h4"
+                        gutterBottom
+                        className="text-white mt-2 mb-4"
+                    >
                         Your Classes
                     </Typography>
-                    <Button variant="contained" color="primary" onClick={() => setOpenClassCodePopup(true)} sx={{ ml: 2, mr: 4 }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setOpenClassCodePopup(true)}
+                        sx={{ ml: 2, mr: 4 }}
+                    >
                         Join Class
                     </Button>
                 </Box>
 
-                <Grid container spacing={4} justifyContent="flex-start" sx={{ flexGrow: 1 }}>
+                <Grid
+                    container
+                    spacing={4}
+                    justifyContent="flex-start"
+                    sx={{ flexGrow: 1 }}
+                >
                     {classesData.map((classItem) => (
-                        <Grid item key={classItem._id} xs={12} sm={6} md={4} lg={3} display="flex" justifyContent="center">
+                        <Grid
+                            item
+                            key={classItem._id}
+                            xs={12}
+                            sm={6}
+                            md={4}
+                            lg={3}
+                            display="flex"
+                            justifyContent="center"
+                        >
                             <Card
                                 className="bg-c5 text-white"
-                                sx={{ width: "100%", height: "300px", cursor: "pointer" }}
+                                sx={{
+                                    width: "100%",
+                                    height: "300px",
+                                    cursor: "pointer",
+                                }}
                                 onClick={() => handleCardClick(classItem._id)}
                             >
                                 <Grid container sx={{ height: "100%" }}>
                                     <Grid item xs={7} sx={{ padding: 2 }}>
                                         <CardContent sx={{ padding: 0 }}>
-                                            <Typography variant="h5" sx={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+                                            <Typography
+                                                variant="h5"
+                                                sx={{
+                                                    fontSize: "1.2rem",
+                                                    fontWeight: "bold",
+                                                }}
+                                            >
                                                 {classItem.name}
                                             </Typography>
-                                            <Typography variant="body1" sx={{ fontSize: "1rem" }}>
+                                            <Typography
+                                                variant="body1"
+                                                sx={{ fontSize: "1rem" }}
+                                            >
                                                 {classItem.description}
                                             </Typography>
                                         </CardContent>
                                     </Grid>
-                                    <Grid item xs={5} display="flex" alignItems="center" justifyContent="center">
+                                    <Grid
+                                        item
+                                        xs={5}
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                    >
                                         <CardMedia
                                             component="img"
                                             image={pic.src}
                                             alt={`${classItem.name} cover`}
-                                            sx={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "50%", border: "2px solid #010101" }}
+                                            sx={{
+                                                width: "120px",
+                                                height: "120px",
+                                                objectFit: "cover",
+                                                borderRadius: "50%",
+                                                border: "2px solid #010101",
+                                            }}
                                         />
                                     </Grid>
                                 </Grid>
@@ -159,7 +221,11 @@ const ClassesPage = () => {
                     ))}
                 </Grid>
 
-                <ClassCodePopup open={openClassCodePopup} handleClose={handleCloseClassCodePopup} onJoinClass={onJoinClass} />
+                <ClassCodePopup
+                    open={openClassCodePopup}
+                    handleClose={handleCloseClassCodePopup}
+                    onJoinClass={onJoinClass}
+                />
             </Box>
         </div>
     );

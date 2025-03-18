@@ -15,8 +15,8 @@ interface reward {
 }
 
 const RewardsDisplay = () => {
-    const PORT = process.env.NEXT_PUBLIC_PORT
-    console.log(PORT)
+    const PORT = process.env.NEXT_PUBLIC_PORT;
+    console.log(PORT);
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
     const [rewards, setRewards] = useState([]);
@@ -44,6 +44,7 @@ const RewardsDisplay = () => {
                 }
 
                 const data = await response.json();
+                console.log(data);
                 setRewards(data.rewards);
             } catch (error) {
                 console.error("Error fetching rewards:", error);
@@ -70,7 +71,9 @@ const RewardsDisplay = () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || "Error redeeming reward");
+                    throw new Error(
+                        errorData.error || "Error redeeming reward"
+                    );
                 }
 
                 const data = await response.json();
