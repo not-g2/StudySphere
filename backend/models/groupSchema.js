@@ -20,7 +20,21 @@ const GroupSchema = new mongoose.Schema({
         rank : {type: String, enum : ["Creator","Admin","Member"]}
     }],
     file:[{type : String}],
-    announcement : [{type : String}]
+    announcement : [{type : String}],
+    groupCode : {type:String,unique:true}
 })
+
+GroupSchema.pre("save", function (next) {
+    if (!this.groupCode) {
+        // Corrected to courseCode here
+        const hashInput = `${this._id}${this.createdAt}`;
+        const hash = crypto
+            .createHash("sha256")
+            .update(hashInput)
+            .digest("hex");
+        this.groupCode = hash.slice(0, 8); // Take the first 8 characters of the hash
+    }
+    next(); 
+});
 
 module.exports = mongoose.model('Group',GroupSchema);
