@@ -43,8 +43,13 @@ const UserSchema = new mongoose.Schema({
         { type: mongoose.Schema.Types.ObjectId, ref: 'Reward'}
     ],
     studyGroups: [
-        {type: mongoose.Schema.Types.ObjectId , ref : 'StudyGroup'}
+        {type: mongoose.Schema.Types.ObjectId , ref : 'Group'}
     ],
+    groupCreated : {
+        // this denotes the number of groups created by a particular user , so that any user doesnt really make too  any un necessary groups
+        type : Number,
+        default : 0
+    },
     xp : {
         type : Number , 
         default : 0
