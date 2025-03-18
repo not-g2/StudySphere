@@ -1,3 +1,4 @@
+// this will include submissions to the normal assignments , and also the submissions to the assignments as a challenege
 const express = require("express");
 const router = express.Router();
 const Submission = require("../models/submissionSchema");
@@ -21,7 +22,7 @@ router.post(
             if (!assignment)
                 return res.status(404).json({ error: "Assignment not found" });
 
-            // Check if the student existsa
+            // Check if the student exists
             const student = await User.findById(studentId);
             if (!student)
                 return res.status(404).json({ error: "Student not found" });
@@ -69,17 +70,22 @@ router.post(
     }
 );
 
-// route for fetching all submissions for a specific assignment
+// route for fetching all submissions for a specific assignment (will return the name of the students who have submitted the given assignment)
 router.get("/assignment/:id/submissions", async (req, res) => {
     try {
         const submissions = await Submission.find({
             assignmentId: req.params.id,
-        }).populate({ path: "studentId", select: "name" });
+        }).populate({ 
+            path: "studentId", 
+            select: "name" 
+        });
 
-        if (!submissions.length)
-            return res
-                .status(404)
-                .json({ error: "No submissions found for this assignment" });
+        if (!submissions.length){
+            return res.status(404).json({ 
+                error: "No submissions found for this assignment" 
+            });
+        }
+            
 
         res.json(submissions);
     } catch (error) {
@@ -111,14 +117,15 @@ router.put("/submission/:id/feedback", async (req, res) => {
              // Optionally update status if graded
         }
         submission.status = "graded";
-        student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
-        student.xp += rewardfunc(assignment.dueDate, Date.now());
+        student.auraPoints += rewardfunc(assignment.dueDate, submission.submissionDate);
+        student.xp += rewardfunc(assignment.dueDate, submission.submissionDate);
         // calculate next level threshold
         const nextLevelPoints = 100 * (student.level + 1) ** 2;
 
         // Check if user qualifies for a level up
         if (student.auraPoints >= nextLevelPoints) {
             student.level += 1; // Level up
+            student.auraPoints=0; // reset the aura points every level
             console.log(
                 `Congratulations! ${student.name} reached Level ${student.level}`
             );
@@ -138,6 +145,7 @@ router.put("/submission/:id/feedback", async (req, res) => {
     }
 });
 
+// get all the submissions done by a student
 router.get("/submissions/:studentId", async (req, res) => {
     try {
         const { studentId } = req.params;
@@ -160,5 +168,20 @@ router.get("/submissions/:studentId", async (req, res) => {
         });
     }
 });
+
+// routes to handle submissions for challenge
+router.get('/challenge_submission/:studentId/:assgn_id',async(req,res) => {
+    // 
+    const {studentId,assgn_id} = req.params;
+
+    const submission = await Submission.find({studentId}).populate("assignmentId");
+
+    submission.forEach((item)=>{
+        if(item._id == assgn_id){
+            // the student already submitted this assignment
+            
+        }
+    })
+})
 
 module.exports = router;

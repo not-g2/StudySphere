@@ -4,7 +4,7 @@
 4xx => Client Error
 5xx => Server Error
 
-Status Code      Verdict
+Status Code      Verdict 
 100              Continue
 102              Processing
 200              OK
