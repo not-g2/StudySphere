@@ -4,10 +4,43 @@ import { useRouter } from "next/navigation";
 import useSessionCheck from "./hooks/auth";
 import Cookies from "js-cookie";
 import "./abc.css";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 function Page() {
     const router = useRouter();
     const [session, setSession] = useState<any>(null);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isAdmin, setisAdmin] = useState("User");
+
+    const handleChange = (
+        event: any,
+        newAlignment: React.SetStateAction<string> | null
+    ) => {
+        if (newAlignment !== null) {
+            setisAdmin(newAlignment);
+        }
+    };
+
+    const storeSessionData = (responseData: any) => {
+        const sessionData = {
+            user: {
+                id: responseData.user.id,
+                token: responseData.token,
+            },
+            email: responseData.user.email,
+            isAdmin: responseData.user.isAdmin,
+        };
+
+        const expirationDate = new Date();
+        expirationDate.setHours(expirationDate.getHours() + 1);
+
+        Cookies.set("session", JSON.stringify(sessionData), {
+            expires: expirationDate, // expires in 1 hour
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+    };
 
     const handleGoogleSignIn = () => {
         router.push("http://localhost:8000/auth/google");
@@ -46,54 +79,180 @@ function Page() {
         });
     }
 
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+        const endpoint =
+            isAdmin === "Admin"
+                ? "http://localhost:8000/api/adminauth/login"
+                : "http://localhost:8000/api/auth/login";
+
+        fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.token) {
+                    storeSessionData(data);
+                    if (isAdmin === "Admin") {
+                        router.push("/admin");
+                    } else {
+                        router.push("/Dashboard");
+                    }
+                } else {
+                    console.log("Login failed: " + data.msg);
+                }
+            })
+            .catch((error) => {
+                console.error("An error occurred:", error);
+                console.log("An error occurred. Please try again.");
+            });
+    };
+
+    const handleSubmitSignUp = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        try {
+            const response = await fetch(
+                "http://localhost:8000/api/auth/signup",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password }),
+                }
+            );
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Sign-up failed");
+            }
+
+            storeSessionData(data);
+
+            router.push("/Dashboard");
+        } catch (err) {
+            console.log((err as Error).message);
+        }
+    };
     return (
         <div>
-            <h2>Weekly Coding Challenge #1: Sign in/up Form</h2>
             <div className="container" id="container">
                 <div className="form-container sign-up-container">
                     <form action="#">
                         <h1>Create Account</h1>
                         <div className="social-container">
-                            <a href="#" className="social">
-                                <i className="fab fa-facebook-f"></i>
-                            </a>
                             <a
                                 href="#"
                                 className="social"
                                 onClick={handleGoogleSignIn}
                             >
+                                <img src="/google.svg" />
                                 <i className="fab fa-google-plus-g"></i>
                             </a>
-                            <a href="#" className="social">
-                                <i className="fab fa-linkedin-in"></i>
+                            <a
+                                href="#"
+                                className="social"
+                                onClick={handleGitHubSignIn}
+                            >
+                                <img src="/github.svg" />
+                                <i className="fab fa-github"></i>
                             </a>
                         </div>
                         <span>or use your email for registration</span>
-                        <input type="text" placeholder="Name" />
-                        <input type="email" placeholder="Email" />
-                        <input type="password" placeholder="Password" />
-                        <button>Sign Up</button>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button onClick={(e) => handleSubmitSignUp(e)}>
+                            Sign Up
+                        </button>
                     </form>
                 </div>
                 <div className="form-container sign-in-container">
                     <form action="#">
                         <h1>Sign in</h1>
                         <div className="social-container">
-                            <a href="#" className="social">
-                                <i className="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" className="social">
+                            <a
+                                href="#"
+                                className="social"
+                                onClick={handleGoogleSignIn}
+                            >
+                                <img src="/google.svg" />
                                 <i className="fab fa-google-plus-g"></i>
                             </a>
-                            <a href="#" className="social">
-                                <i className="fab fa-linkedin-in"></i>
+                            <a
+                                href="#"
+                                className="social"
+                                onClick={handleGitHubSignIn}
+                            >
+                                <img src="/github.svg" />
+                                <i className="fab fa-github"></i>
                             </a>
                         </div>
                         <span>or use your account</span>
-                        <input type="email" placeholder="Email" />
-                        <input type="password" placeholder="Password" />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                         <a href="#">Forgot your password?</a>
-                        <button>Sign In</button>
+                        <ToggleButtonGroup
+                            exclusive
+                            value={isAdmin}
+                            onChange={handleChange}
+                            sx={{
+                                borderRadius: "50px",
+                                backgroundColor: "#f0f0f0",
+                                padding: "2px", // Reduced padding
+                                maxHeight: "40px", // Adjust height
+                                marginBottom: "5px",
+                            }}
+                        >
+                            <ToggleButton
+                                value="Admin"
+                                sx={{
+                                    borderRadius: "50px",
+                                    px: 2, // Reduced padding
+                                    fontSize: "12px", // Smaller text
+                                    minHeight: "26px", // Adjust height
+                                }}
+                            >
+                                Admin
+                            </ToggleButton>
+                            <ToggleButton
+                                value="User"
+                                sx={{
+                                    borderRadius: "50px",
+                                    px: 2, // Reduced padding
+                                    fontSize: "12px", // Smaller text
+                                    minHeight: "26px", // Adjust height
+                                }}
+                            >
+                                User
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+
+                        <button onClick={(e) => handleSubmit(e)}>
+                            Sign In
+                        </button>
                     </form>
                 </div>
                 <div className="overlay-container">
