@@ -64,6 +64,7 @@ const AttendancePage: React.FC = () => {
         const data = await response.json();
         console.log("Fetched students data:", data);
         setStudents(data.students);
+        // Initialize attendance state to false for each student
         setAttendance(
           data.students.reduce((acc: { [key: string]: boolean }, student: Student) => {
             acc[student._id] = false;
@@ -81,6 +82,7 @@ const AttendancePage: React.FC = () => {
     }
   }, [session, courseId]);
 
+  // When the date changes, reset attendance and fetch each student's attendance summary
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDate(e.target.value);
     // Reset attendance for the new date
@@ -92,6 +94,66 @@ const AttendancePage: React.FC = () => {
     );
   };
 
+  // New useEffect: For each student, fetch their attendance summary for the selected date.
+  useEffect(() => {
+    const fetchAttendanceForStudents = async () => {
+      if (!date || !session) return;
+
+      const token = session.user.token;
+      if (!token) return;
+
+      // Create a new attendance object to update based on fetched summaries.
+      const updatedAttendance: { [key: string]: boolean } = { ...attendance };
+
+      await Promise.all(
+        students.map(async (student) => {
+          try {
+            const response = await fetch(
+              `http://localhost:8000/api/adminauth/summary/${student._id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (!response.ok) {
+              throw new Error(`Failed to fetch summary for student ${student._id}`);
+            }
+            const data = await response.json();
+            // data is expected to have a structure like:
+            // { name: string, attendance: { [courseName]: [{ date, status }, ...] } }
+            let found = false;
+            // Loop over each course in the summary
+            for (const course in data.attendance) {
+              const record = data.attendance[course].find((rec: any) => {
+                // Convert record.date to YYYY-MM-DD format for comparison
+                const recordDate = new Date(rec.date).toISOString().slice(0, 10);
+                return recordDate === date;
+              });
+              if (record) {
+                // Update attendance based on status: true for "present", false for "absent"
+                updatedAttendance[student._id] = record.status === "present";
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              updatedAttendance[student._id] = false;
+            }
+          } catch (error) {
+            console.error("Error fetching attendance summary for student", student._id, error);
+            updatedAttendance[student._id] = false;
+          }
+        })
+      );
+
+      setAttendance(updatedAttendance);
+    };
+
+    fetchAttendanceForStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, session, students]);
+
   const toggleAttendance = (studentId: string) => {
     setAttendance((prevAttendance) => ({
       ...prevAttendance,
@@ -99,6 +161,7 @@ const AttendancePage: React.FC = () => {
     }));
   };
 
+  // Handle submit: post attendance records for each student using the provided POST route.
   const handleSubmit = async () => {
     if (!date) {
       alert("Please select a date.");
