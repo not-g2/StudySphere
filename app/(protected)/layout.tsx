@@ -6,7 +6,6 @@ import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
 import "./output.css";
 import { usePathname } from "next/navigation";
-
 export default function RootLayout({
     children,
     session,
