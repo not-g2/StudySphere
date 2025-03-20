@@ -5,6 +5,7 @@ const Assignment = require("../models/assignmentSchema");
 const authMiddleware = require('../middleware/auth');
 
 // Route to fetch all deadlines (assignment due dates) for a specific user
+// TO ADD :- MAKE SURE TO NOT INCCLUDE ASSIGNMENTS THAT ARE NOT YET SUBMITTED
 router.get("/:userId/deadlines", async (req, res) => {
     try {
         // Find the user by ID and populate the courses field

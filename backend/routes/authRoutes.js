@@ -30,8 +30,10 @@ router.post("/signup", async (req, res) => {
         // hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const name = email.split('@')[0]; // default name , user can change it later
         // create and save the user
         const newUser = new User({
+            name : name,
             email,
             password: hashedPassword,
         });

@@ -160,6 +160,8 @@ router.get("/submissions/:studentId", async (req, res) => {
                 .json({ message: "No submissions found for this student." });
         }
 
+        // take care of the null condition
+
         res.status(200).json(submissions);
     } catch (error) {
         console.error("Error retrieving submissions:", error);
