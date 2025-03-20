@@ -24,6 +24,7 @@ const challengeRoute = require("./routes/challengeRoute");
 const timeTableRoute = require("./routes/timeTableRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
+const groupRoutes = require("./routes/groupRoutes");
 
 connectDB();
 const app = express();
@@ -59,6 +60,7 @@ app.use("/api/challenge", challengeRoute);
 app.use("/api/tt", timeTableRoute);
 app.use("/api/reminder", reminderRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/groups",groupRoutes);
 
 require("./cron/cron");
 app.listen(process.env.PORT || 8000, () => {
