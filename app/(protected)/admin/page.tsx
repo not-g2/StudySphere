@@ -29,6 +29,7 @@ type Course = {
   instructor: string;
 };
 
+// Fetch and display the student count as a badge.
 const StudentBadge: React.FC<{ courseId: string; token: string }> = ({
   courseId,
   token,
@@ -61,6 +62,7 @@ const StudentBadge: React.FC<{ courseId: string; token: string }> = ({
   );
 };
 
+// Fetch and display announcements preview.
 const AnnouncementsPreview: React.FC<{ courseId: string; token: string }> = ({
   courseId,
   token,
@@ -118,6 +120,43 @@ const AnnouncementsPreview: React.FC<{ courseId: string; token: string }> = ({
   return (
     <Typography variant="caption" color="textSecondary">
       {previewText}
+    </Typography>
+  );
+};
+
+// Fetch and display the course code.
+const CourseCode: React.FC<{ courseId: string; adminId: string; token: string }> = ({
+  courseId,
+  adminId,
+  token,
+}) => {
+  const [courseCode, setCourseCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCourseCode = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/courses/fetchcoursecode/${courseId}/${adminId}`,
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch course code");
+        }
+        const data = await response.json();
+        setCourseCode(data.coursecode);
+      } catch (error) {
+        console.error("Error fetching course code:", error);
+      }
+    };
+    fetchCourseCode();
+  }, [courseId, adminId, token]);
+
+  return (
+    <Typography variant="caption" color="black">
+      Code: {courseCode ? courseCode : "Loading..."}
     </Typography>
   );
 };
@@ -372,6 +411,12 @@ const MyCourses: React.FC = () => {
                           Instructor: {course.instructor}
                         </Typography>
                       )}
+                      {/* Display the course code using the CourseCode component */}
+                      <CourseCode
+                        courseId={course._id}
+                        adminId={session.user.id}
+                        token={session.user.token}
+                      />
                     </CardContent>
                   </CardActionArea>
                 </Card>

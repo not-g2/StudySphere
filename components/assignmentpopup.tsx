@@ -117,6 +117,7 @@ const PopupForm: React.FC<PopupFormProps> = ({
             formData.append("assignmentId", assignment?._id.toString());
             formData.append("studentId", studentId);
             formData.append("pdfFile", files);
+            console.log(files)
             const token = session.user.token;
             const response = await fetch(
                 "http://localhost:8000/api/submissions/submit",

@@ -61,8 +61,8 @@ const UserSchema = new mongoose.Schema({
     },
     phoneNumber : {
         type : String , 
-        minlength :10 , 
-        maxlength : 10 
+        // minlength :10 , 
+        // maxlength : 10 
     },
     createdAt : {
         type : Date , 

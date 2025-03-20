@@ -13,7 +13,7 @@ router.post("/create/:adminId", authMiddleware, async (req, res) => {
             name,
             description,
             students,
-            courseCode
+            // courseCode
         });
         await course.save();
         const admin = await Admin.findById(req.params.adminId);
@@ -180,5 +180,33 @@ router.put("/add-course", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+
+router.post("/fetchcoursecode/:courseid/:adminId",authMiddleware,async(req,res)=>{
+    try{
+        const {courseid,adminId}=req.params;
+
+        const admin = await Admin.findById(adminId);
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        const course = await Course.findById(courseid);
+        if(!course){
+            return res.status(404).json({
+                message : "course not found"
+            })
+        }
+
+        return res.status(200).json({
+            coursecode : course.courseCode
+        })
+
+    }catch(error){
+        console.error(error);
+        return res.status(401).json({
+            message : "course not found"
+        })
+    }
+})
 
 module.exports = router;
