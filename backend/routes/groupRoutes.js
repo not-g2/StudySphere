@@ -386,38 +386,39 @@ router.post("/changemembership/:groupId/",authMiddleware,async(req,res)=>{
 //router.post()
 
 // show all the groups joined by a user
-router.get("/allusergrps",authMiddleware,async(req,res)=>{
-    try{
-        const userid = req.user.userID;
-
-        const user = await User.findById(userid);
-
-        if(!user){
-            return res.status(401).json({
-                message : "User isnt logged in!"
-            })
-        }
-
-        await user.populate("studyGroups","name");
-
-        let usergrp=[];
-
-        //console.log(user.studyGroups.length())
-
-        for(const group of user.studyGroups){
-            //console.log(group.name);
-            usergrp.push(group.name);
-        }
-
-        return res.status(200).json({
-            message : "Fetched all groups correctly!",
-            usergrp
-        })
-    } catch(error){
-        console.error(error);
-        res.status(500).json({
-            message : "Internal Server Error"
-        })
+router.get("/allusergrps", authMiddleware, async (req, res) => {
+    try {
+      const userid = req.user.userID;
+  
+      const user = await User.findById(userid);
+  
+      if (!user) {
+        return res.status(401).json({
+          message: "User isn't logged in!",
+        });
+      }
+  
+      await user.populate("studyGroups", "name");
+  
+      let usergrp = [];
+  
+      for (const group of user.studyGroups) {
+        usergrp.push({
+          _id: group._id,
+          name: group.name,
+        });
+      }
+  
+      return res.status(200).json({
+        message: "Fetched all groups correctly!",
+        usergrp,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Internal Server Error",
+      });
     }
-})
+  });
+  
 module.exports = router;

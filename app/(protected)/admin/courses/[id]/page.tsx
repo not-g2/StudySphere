@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -10,9 +10,6 @@ import {
   Skeleton,
   IconButton,
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   Fade
 } from "@mui/material";
@@ -186,6 +183,31 @@ const DashboardPage = () => {
   const handleUpdateAssignment = (assignment: Assignment) => {
     setCurrentAssignment(assignment);
     setOpenAssm(true);
+  };
+
+  // Delete Announcement Handler
+  const handleDeleteAnnouncement = async (announcementId: number) => {
+    if (!window.confirm("Are you sure you want to delete this announcement?")) return;
+    if (!session) return;
+    try {
+      const response = await fetch(`http://localhost:8000/api/announce/delete/${announcementId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.user.token}`
+        },
+        body: JSON.stringify({ courseId: courseID })
+      });
+      if (response.ok) {
+        alert("Announcement deleted successfully.");
+        setRefresh((prev) => prev + 1);
+      } else {
+        alert("Failed to delete announcement.");
+      }
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+      alert("Error deleting announcement.");
+    }
   };
 
   // Feedback Handlers
@@ -510,7 +532,11 @@ const DashboardPage = () => {
 
   // Prepare limited lists for announcements and chapters
   const displayedAnnouncements = showAllAnnouncements ? announcements : announcements.slice(0, 4);
-  const displayedChapters = showAllChapters ? chapters : chapters.slice(0, 4);
+  
+  // Memoize displayedChapters so its reference doesn’t change unnecessarily.
+  const displayedChapters = useMemo(() => {
+    return showAllChapters ? chapters : chapters.slice(0, 4);
+  }, [showAllChapters, chapters]);
 
   return (
     <Box sx={{ backgroundColor: "#F4F6F8", minHeight: "100vh", padding: 4 }}>
@@ -548,6 +574,7 @@ const DashboardPage = () => {
                 <AnnouncementsList
                   announcements={displayedAnnouncements}
                   onAnnouncementClick={handleAnnouncementClick}
+                  onAnnouncementDelete={handleDeleteAnnouncement}
                 />
               </div>
             </Fade>
@@ -590,7 +617,7 @@ const DashboardPage = () => {
         </Grid>
       </Grid>
 
-      {/* Assignments Section (displaying all assignments) */}
+      {/* Assignments Section */}
       <Box mt={4}>
         <Box display="flex" alignItems="center" mb={2}>
           <Typography variant="h5" color="black" sx={{ mr: 1 }}>
