@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Lottie from "lottie-react";
 
 export default function PomodoroTimer() {
@@ -11,25 +11,12 @@ export default function PomodoroTimer() {
     const [lastActiveState, setLastActiveState] = useState<
         "focus" | "break" | null
     >(null);
-    const pauseAnimation = [
-        {
-            path: "/talkwithothers.json",
-            text: "Connect briefly with others - A short social interaction can boost mood and provide perspective.",
-        },
-        {
-            path: "/hydration.json",
-            text: "Hydrate and nourish - Use breaks to drink water or have a healthy snack to maintain your energy levels.",
-        },
-        {
-            path: "/meditate.json",
-            text: "Practice mindfulness - Take a few deep breaths or do a quick meditation to reset your mental state.",
-        },
-        {
-            path: "/Schedule.json",
-            text: "Schedule regular breaks - Build breaks into your daily routine rather than waiting until you're exhausted or overwhelmed",
-        },
-    ];
-    const runAnimation = [
+    const [animations, setAnimations] = useState<
+        { animationData: any; text: string }[]
+    >([]);
+    const [index, setIndex] = useState(0);
+
+    const animationData = [
         {
             path: "/goals.json",
             text: "Set clear, achievable goals - Define exactly what you want to accomplish during your focus session before you begin.",
@@ -46,16 +33,31 @@ export default function PomodoroTimer() {
             path: "/sleeping.json",
             text: "Manage your energy, not just time - Recognize when your focus naturally wanes and schedule accordingly.",
         },
+        {
+            path: "/talkwithothers.json",
+            text: "Connect briefly with others - A short social interaction can boost mood and provide perspective.",
+        },
+        {
+            path: "/hydration.json",
+            text: "Hydrate and nourish - Use breaks to drink water or have a healthy snack to maintain your energy levels.",
+        },
+        {
+            path: "/meditate.json",
+            text: "Practice mindfulness - Take a few deep breaths or do a quick meditation to reset your mental state.",
+        },
+        {
+            path: "/Schedule.json",
+            text: "Schedule regular breaks - Build breaks into your daily routine rather than waiting until you're exhausted or overwhelmed.",
+        },
     ];
-
-    const [animations, setAnimations] = useState<any[]>([]);
-    const [index, setIndex] = useState(0);
 
     useEffect(() => {
         Promise.all(
-            runAnimation.map((anim) =>
-                fetch(anim.path).then((res) => res.json())
-            )
+            animationData.map(async (anim) => {
+                const response = await fetch(anim.path);
+                const json = await response.json();
+                return { animationData: json, text: anim.text };
+            })
         )
             .then((data) => setAnimations(data))
             .catch((err) => console.error("Failed to load animations:", err));
@@ -67,26 +69,47 @@ export default function PomodoroTimer() {
             interval = setInterval(() => {
                 setTime((prevTime) => {
                     if (prevTime > 0) return prevTime - 1;
-
-                    // When timer hits 0, check the current state
                     if (timerState === "focus") {
-                        setTimerState("break"); // Switch to break mode
-                        return 5 * 60; // Set break time to 5 minutes (300 seconds)
+                        setTimerState("break");
+                        setIndex(4);
+                        return 5 * 60;
                     } else if (timerState === "break") {
-                        setIsRunning(false); // Stop timer after break
-                        setTimerState("paused"); // Pause after break ends
-                        return 25 * 60; // Reset back to 25 minutes for next session
+                        setIsRunning(true);
+                        setTimerState("focus");
+                        return 25 * 60;
                     }
-
                     return prevTime;
                 });
             }, 1000);
         } else {
             clearInterval(interval);
         }
-
         return () => clearInterval(interval);
     }, [isRunning, timerState]);
+
+    useEffect(() => {
+        if (timerState === "paused") return;
+
+        const interval = setInterval(() => {
+            setIndex((prevIndex) => {
+                if (timerState === "focus") {
+                    return (prevIndex + 1) % 4; // First 4 are focus animations
+                }
+                if (timerState === "break") {
+                    return 4 + ((prevIndex - 4 + 1) % 4); // Next 4 are break animations
+                }
+                return prevIndex;
+            });
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [timerState]);
+
+    useEffect(() => {
+        if (timerState !== "paused") {
+            setLastActiveState(timerState);
+        }
+    }, [timerState]);
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -97,77 +120,40 @@ export default function PomodoroTimer() {
         )}`;
     };
 
-    useEffect(() => {
-        if (timerState === "paused") return;
-        const interval = setInterval(() => {
-            setIndex((prevIndex) => (prevIndex + 1) % pauseAnimation.length);
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, [animations, timerState]);
-
-    useEffect(() => {
-        if (timerState !== "paused") {
-            setLastActiveState(timerState);
-        }
-    }, [timerState]);
-
     return (
         <div
-            className="flex flex-col items-center justify-center bg-gray-900 text-white "
+            className="flex flex-col items-center justify-center bg-gray-900 text-white"
             style={{ height: "calc(100vh - 4rem)" }}
         >
             <h1 className="shadow-orange-500 text-lime-300 text-4xl pb-3">
                 Networking
             </h1>
             <div
-                className={`flex flex-col items-center justify-center text-5xl font-bold
-                    transition-all duration-700 ease-out
-                    ${
-                        isRunning ||
-                        (timerState === "paused" && lastActiveState != null)
-                            ? "w-2/3 h-[66vh] scale-100 rounded-[7%] border-4"
-                            : "w-64 h-64 scale-100 rounded-[50%] border-4"
-                    }${isRunning ? "border-green-500" : "border-red-500"}`}
+                className={`flex flex-col items-center justify-center text-5xl font-bold transition-all duration-700 ease-out ${
+                    isRunning ||
+                    (timerState === "paused" && lastActiveState != null)
+                        ? "w-2/3 h-[66vh] scale-100 rounded-[7%] border-4"
+                        : "w-64 h-64 scale-100 rounded-[50%] border-4"
+                } ${isRunning ? "border-green-500" : "border-red-500"}`}
             >
                 <div className="w-full">
-                    {(timerState === "focus" ||
-                        (timerState === "paused" &&
-                            lastActiveState === "focus")) && (
-                        <div className="flex flex-row w-full justify-evenly items-center">
-                            <div className="flex justify-center">
-                                {animations.length > 0 && (
+                    {(timerState !== "paused" || lastActiveState) &&
+                        animations.length > 0 && (
+                            <div className="flex flex-row w-full justify-evenly items-center">
+                                <div className="flex justify-center">
                                     <Lottie
-                                        animationData={animations[index]}
+                                        animationData={
+                                            animations[index].animationData
+                                        }
                                         loop={true}
                                         className="w-80 h-80"
                                     />
-                                )}
+                                </div>
+                                <div className="transition-all duration-1000 ease-in text-xl w-1/2">
+                                    {animations[index].text}
+                                </div>
                             </div>
-                            <div className="transition-all duration-1000 ease-in text-xl w-1/2">
-                                {`${runAnimation[index].text}`}
-                            </div>
-                        </div>
-                    )}
-
-                    {(timerState === "break" ||
-                        (timerState === "paused" &&
-                            lastActiveState === "break")) && (
-                        <div className="flex flex-row w-full justify-evenly items-center">
-                            <div className="flex justify-center">
-                                {animations.length > 0 && (
-                                    <Lottie
-                                        animationData={animations[index]}
-                                        loop={true}
-                                        className="w-80 h-80"
-                                    />
-                                )}
-                            </div>
-                            <div className="transition-all duration-1000 ease-in text-xl w-1/2">
-                                {`${runAnimation[index].text}`}
-                            </div>
-                        </div>
-                    )}
+                        )}
                 </div>
                 <span
                     className={`text-white drop-shadow-lg transition-all duration-500 ease-out ${
