@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("crypto");
 const router = express.Router();
 const { upload } = require("../utils/cloudinary");
 const User = require("../models/userModel");
@@ -383,11 +384,14 @@ router.post("/changemembership/:groupcode/",authMiddleware,async(req,res)=>{
             })
         }
 
-        const group = await group.findOne({groupCode : groupcode});
+        const group = await group.findOne({
+            groupCode : groupcode,
+            "members.user" : {$all : [userId,targetuserId]}
+        });
 
         if(!group){
             return res.status(404).json({
-                message : "Group doesnt exist!"
+                message : "Specified Group doesnt exist!"
             })
         }
 
@@ -482,6 +486,9 @@ router.post("/createanncmnt/:groupcode",authMiddleware,async(req,res)=>{
         if (!groupcode) {
             return res.status(400).json({ message: "Group ID is required!" });
         }
+        if(!announcementBody){
+            return res.status(400).json({ message: "Description for announcement is needed!" });
+        }
         const user = await User.findById(userid);
 
         if(!user){
@@ -521,7 +528,9 @@ router.post("/createanncmnt/:groupcode",authMiddleware,async(req,res)=>{
         }
 
         let anncmntObj = {
-            content : announcementBody
+            announcementId: crypto.randomBytes(4).toString("hex"),
+            createdBy : userid,
+            content : announcementBody,
         }
         
         group.announcements.push(anncmntObj);
@@ -530,7 +539,9 @@ router.post("/createanncmnt/:groupcode",authMiddleware,async(req,res)=>{
 
         return res.status(200).json({
             message : "Announcement successfully created.",
-            group
+            authorOfAnnouncement : user.name,
+            group,
+            user
         })
 
 
@@ -551,7 +562,7 @@ router.post("/fetchanncmnt/:groupcode",authMiddleware,async(req,res)=>{
             return res.status(400).json({ message: "Group ID is required!" });
         }
 
-        const group = await Group.findOne({groupCode : groupcode});
+        const group = await Group.findOne({groupCode : groupcode}).populate("announcements.createdBy", "name");;
 
         if(!group){
             return res.status(404).json({
@@ -563,7 +574,10 @@ router.post("/fetchanncmnt/:groupcode",authMiddleware,async(req,res)=>{
         let allAnnouncements = [];
 
         for(const anncmnt of group.announcements){
-            allAnnouncements.push(anncmnt.content)
+            allAnnouncements.push({
+                content : anncmnt.content,
+                user : anncmnt.createdBy
+            })
         }
 
         return res.status(200).json({
@@ -590,7 +604,10 @@ router.delete("/deleteanncmnt/:groupcode/:anncmntid",authMiddleware,async(req,re
             return res.status(400).json({ message: "announcement ID is required!" });
         }
 
-        const group = await Group.findOne({groupCode : groupcode});
+        const group = await Group.findOne({
+            groupCode : groupcode,
+            "announcements.announcementId" : {$all : [anncmntid]}
+        });
 
         if(!group){
             return res.status().json({
@@ -619,7 +636,7 @@ router.delete("/deleteanncmnt/:groupcode/:anncmntid",authMiddleware,async(req,re
 })
 
 // route for a member to leave the group
-router.delete("/rmvuser/:groupcode/:successoruserid?",authMiddleware,async(req,res)=>{
+router.delete("/leavegrp/:groupcode/:successoruserid?",authMiddleware,async(req,res)=>{
     try{
         const userid = req.user.userID;
         const {groupcode,successoruserid} = req.params;
@@ -728,6 +745,40 @@ router.delete("/rmvuser/:groupcode/:successoruserid?",authMiddleware,async(req,r
     } catch(error){
         console.error(error);
         return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+})
+
+router.get("/getstatus/:groupcode/:targetuserid",async(req,res)=>{
+    try{
+        const {groupcode,targetuserid} = req.params;
+
+        if(!groupcode || !targetuserid) {
+            return res.status(400).json({
+                message : "Missing required parameters"
+            })
+        }
+
+        const group = await Group.findOne(
+            {groupCode : groupcode,"members.user" : targetuserid},
+            {"members.$" : 1}
+        )
+
+        if(!group || !group.members.length){
+            return res.status(404).json({
+                message : "user not found in group"
+            })
+        }
+
+        return res.status(200).json({
+            rankOfUser : group.members[0].rank
+        })
+
+
+    } catch(error){
+        console.error(error);
+        res.status(500).json({
             message : "Internal Server Error"
         })
     }
