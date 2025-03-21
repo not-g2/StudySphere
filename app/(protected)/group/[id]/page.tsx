@@ -71,7 +71,7 @@ const DashboardNoAssignments = () => {
     if (session) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/groups/rmvuser/${courseID}`,
+          `http://localhost:8000/api/groups/leavegrp/${courseID}`,
           {
             method: "DELETE",
             headers: {

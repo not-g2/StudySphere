@@ -98,7 +98,7 @@ const GroupsDashboard = () => {
     if (session) {
       try {
         const response = await fetch(
-          `http://localhost:${PORT}/groups/api/create`,
+          `http://localhost:${PORT}/api/groups/create`,
           {
             method: "POST",
             headers: {

@@ -4,7 +4,8 @@
 // ensure that a student cant create more than 10 groups
 
 const mongoose = require("mongoose");
-//const crypto = require("crypto");
+const crypto = require("crypto");
+const { StringDecoder } = require("string_decoder");
 
 const GroupSchema = new mongoose.Schema({
     //groupId : 
@@ -25,32 +26,34 @@ const GroupSchema = new mongoose.Schema({
         bannedUntil : {type : Date }
     }],
     files :[{type : String}],
-    announcements : [{
-        createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
-        content : {type : String,required : true},
-        announcementId : {type : String,unique : true}
-    }],
+    // announcements : [{
+    //     createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
+    //     content : {type : String},
+    //     // announcementId : {type : String}
+    // }],
     groupCode : {type:String,unique:true}
 })
 
 // this middleware is fine , but problem is that whenever any object in Group is saved using .save() , then this middleware will go through all the objects in group to check for announcements with no announcement id , which is expensive , so we will dynamically give
-// GroupSchema.pre("save", function (next) {
-//     if (!this.groupCode) {
-//         const hashInput = `${this._id}${this.createdAt}`;
-//         const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
-//         this.groupCode = hash.slice(0, 8);
-//     }
+GroupSchema.pre("save", function (next) {
+    if (!this.groupCode) {
+        const hashInput = `${this._id}${this.createdAt}`;
+        const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+        this.groupCode = hash.slice(0, 8);
+    }
+    console.log("here2")
 
-//     this.announcements.forEach((announcement) => {
-//         if (!announcement.announcementId) {
-//             const hashInput = `${this._id}${Date.now()}`;
-//             const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
-//             announcement.announcementId = hash.slice(0, 8);
-//         }
-//     });
+    // this.announcements.forEach((announcement) => {
+    //     if (!announcement.announcementId) {
+    //         const hashInput = `${this._id}${Date.now()}`;
+    //         const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+    //         announcement.announcementId = hash.slice(0, 8);
+    //     }
+    // }
+    // );
 
-//     next();
-// });
+    next();
+});
 
 
 module.exports = mongoose.model('Group',GroupSchema);

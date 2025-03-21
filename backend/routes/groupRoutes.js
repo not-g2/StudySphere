@@ -12,9 +12,8 @@ router.post("/create",authMiddleware,async(req,res)=>{
     try{
         const userId = req.user.userID;
         const {name}= req.body;
-
         const user = await User.findById(userId);
-
+        console.log(user)
         if(!user){
             return res.status(404).json({
                 message : "user not found"
@@ -26,15 +25,13 @@ router.post("/create",authMiddleware,async(req,res)=>{
                 message : "the user already created the maximum number of groups!"
             })
         }
-
         const newGroup = new Group({
             name,
             creator : userId,
             members : [{user : userId, rank : "Creator"}]
         })
-
         await newGroup.save();
-
+        
         user.groupCreated++;
         await user.save();
 
@@ -639,7 +636,6 @@ router.delete("/deleteanncmnt/:groupcode/:anncmntid",authMiddleware,async(req,re
 router.delete("/leavegrp/:groupcode/:successoruserid?",authMiddleware,async(req,res)=>{
     try{
         const userid = req.user.userID;
-        console.log(userid)
         const {groupcode,successoruserid} = req.params;
 
         const user = await User.findById(userid);
@@ -648,7 +644,6 @@ router.delete("/leavegrp/:groupcode/:successoruserid?",authMiddleware,async(req,
                 message : "user not found"
             })
         }
-        
         const group = await Group.findOne({groupCode : groupcode});
         if(!group){
             return res.status(404).json({
