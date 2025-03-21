@@ -1,5 +1,11 @@
 "use client";
-import { Typography, Grid, Box, Button } from "@mui/material";
+import {
+  Typography,
+  Grid,
+  Box,
+  Button,
+  Slide,
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useRouter, useParams } from "next/navigation";
@@ -38,15 +44,18 @@ const DashboardNoAssignments = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [session, setSession] = useState<Session | null>(null);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "people">("dashboard");
+
   const router = useRouter();
   const params = useParams();
-  const courseID = params.id;
+  const courseID = params.id; // Assuming courseID is also used as groupcode
 
-  // Top navigation with placeholder routes
+  // Navigation handler for tabs (and any future navigation)
   const handleNav = (path: string) => {
     router.push(path);
   };
 
+  // Handle announcement click to open the popup
   const handleAnnouncementClick = (announcement: Announcement) => {
     setCurrentAnnouncement(announcement);
     setOpen(true);
@@ -55,6 +64,34 @@ const DashboardNoAssignments = () => {
   const handleCloseAnnouncement = () => {
     setOpen(false);
     setCurrentAnnouncement(null);
+  };
+
+  // New function to leave the group
+  const handleLeaveGroup = async () => {
+    if (session) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/groups/rmvuser/${courseID}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.user.token}`,
+            },
+          }
+        );
+        console.log(session.user.token)
+        if (response.ok) {
+          // On success, route the user to the groups overview page.
+          router.push("/group");
+        } else {
+          const errorData = await response.json();
+          console.error("Error leaving group:", errorData);
+        }
+      } catch (error) {
+        console.error("Network error leaving group:", error);
+      }
+    }
   };
 
   useEffect(() => {
@@ -69,27 +106,34 @@ const DashboardNoAssignments = () => {
       if (session) {
         const token = session.user.token;
 
-        // Fetch announcements
+        // Fetch announcements using the new POST endpoint.
         try {
-          
           const response = await fetch(
-            `http://localhost:8000/api/announce/${courseID}`,
+            `http://localhost:8000/api/groups/fetchanncmnt/${courseID}`,
             {
               headers: { Authorization: `Bearer ${token}` },
-              method: "GET",
+              method: "POST",
             }
           );
           if (response.ok) {
             const data = await response.json();
-            setAnnouncements(data);
+            // data.allAnnouncements is an array of strings.
+            // Transform each announcement string into an object.
+            const transformedAnnouncements = data.allAnnouncements.map((content: string, index: number) => ({
+              _id: index,
+              title: content.substring(0, 20) + (content.length > 20 ? "..." : ""),
+              description: content,
+              createdAt: new Date().toISOString(),
+            }));
+            setAnnouncements(transformedAnnouncements);
           } else {
-            console.error("Failed to get Announcement details");
+            console.error("Failed to fetch announcements");
           }
         } catch (error) {
-          console.error("Error getting Announcement Details:", error);
+          console.error("Error fetching announcements:", error);
         }
 
-        // Fetch chapters
+        // Fetch chapters as before.
         try {
           const response = await fetch(
             `http://localhost:8000/api/chapter/get/${courseID}`,
@@ -105,30 +149,37 @@ const DashboardNoAssignments = () => {
             console.error("Failed to get Chapter details");
           }
         } catch (error) {
-          console.error("Error getting Chapter Details:", error);
+          console.error("Error getting Chapter details:", error);
         }
       }
     };
 
     fetchDashboardData();
-  }, [session]);
+  }, [session, courseID, router]);
 
-  return (
+  // Dashboard content view: Banner, AnnouncementsList, ChaptersList, and Leave Group button.
+  const DashboardContent = () => (
     <Box
       className="bg-c2"
       sx={{
-        minHeight: "100vh",
+        minHeight: "calc(100vh - 60px)",
         display: "flex",
         flexDirection: "column",
-        padding: 4,
+        padding: 2,
       }}
     >
-
       <Banner
         courseTitle="Mathematics"
         bannerImage="/mbanner.png"
         professorImage="/teach1.jpg"
       />
+
+      {/* Leave Group button */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Button variant="outlined" color="error" onClick={handleLeaveGroup}>
+          Leave Group
+        </Button>
+      </Box>
 
       <Grid container spacing={4} mt={2} sx={{ flex: 1 }}>
         <Grid item xs={12} md={6}>
@@ -147,6 +198,94 @@ const DashboardNoAssignments = () => {
         handleClose={handleCloseAnnouncement}
         announcement={currentAnnouncement}
       />
+    </Box>
+  );
+
+  // People content placeholder view.
+  const PeopleContent = () => (
+    <Box
+      className="bg-c2"
+      sx={{
+        minHeight: "calc(100vh - 60px)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 2,
+      }}
+    >
+      <Typography variant="h4" gutterBottom>
+        People
+      </Typography>
+      <Typography variant="body1">
+        People content goes here.
+      </Typography>
+    </Box>
+  );
+
+  return (
+    <Box
+      className="bg-c2"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        padding: 4,
+      }}
+    >
+      {/* Top Navigation: Tabs and Leave Group button */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid rgba(255,255,255,0.2)",
+          mb: 2,
+        }}
+      >
+        <Box sx={{ display: "flex" }}>
+          <Typography
+            variant="h6"
+            onClick={() => setActiveTab("dashboard")}
+            sx={{
+              p: 2,
+              cursor: "pointer",
+              borderBottom: activeTab === "dashboard" ? "2px solid white" : "none",
+            }}
+          >
+            Dashboard
+          </Typography>
+          <Typography
+            variant="h6"
+            onClick={() => setActiveTab("people")}
+            sx={{
+              p: 2,
+              cursor: "pointer",
+              borderBottom: activeTab === "people" ? "2px solid white" : "none",
+            }}
+          >
+            People
+          </Typography>
+        </Box>
+        {/* Optional: If you want a separate Leave Group button here instead of inside DashboardContent */}
+        {/* <Button variant="outlined" color="error" onClick={handleLeaveGroup}>
+          Leave Group
+        </Button> */}
+      </Box>
+
+      {/* Sliding content container */}
+      <Box sx={{ position: "relative", width: "100%", flex: 1 }}>
+        <Slide direction="right" in={activeTab === "dashboard"} mountOnEnter unmountOnExit>
+          <Box sx={{ position: "absolute", width: "100%" }}>
+            <DashboardContent />
+          </Box>
+        </Slide>
+        <Slide direction="left" in={activeTab === "people"} mountOnEnter unmountOnExit>
+          <Box sx={{ position: "absolute", width: "100%" }}>
+            <PeopleContent />
+          </Box>
+        </Slide>
+      </Box>
     </Box>
   );
 };

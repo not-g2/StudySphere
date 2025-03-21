@@ -622,6 +622,7 @@ router.delete("/deleteanncmnt/:groupcode/:anncmntid",authMiddleware,async(req,re
 router.delete("/rmvuser/:groupcode/:successoruserid?",authMiddleware,async(req,res)=>{
     try{
         const userid = req.user.userID;
+        console.log(userid)
         const {groupcode,successoruserid} = req.params;
 
         const user = await User.findById(userid);
