@@ -75,17 +75,16 @@ router.get("/assignment/:id/submissions", async (req, res) => {
     try {
         const submissions = await Submission.find({
             assignmentId: req.params.id,
-        }).populate({ 
-            path: "studentId", 
-            select: "name" 
+        }).populate({
+            path: "studentId",
+            select: "name",
         });
 
-        if (!submissions.length){
-            return res.status(404).json({ 
-                error: "No submissions found for this assignment" 
+        if (!submissions.length) {
+            return res.status(404).json({
+                error: "No submissions found for this assignment",
             });
         }
-            
 
         res.json(submissions);
     } catch (error) {
@@ -114,10 +113,13 @@ router.put("/submission/:id/feedback", async (req, res) => {
         submission.feedback = feedback;
         if (grade !== undefined) {
             submission.grade = grade;
-             // Optionally update status if graded
+            // Optionally update status if graded
         }
         submission.status = "graded";
-        student.auraPoints += rewardfunc(assignment.dueDate, submission.submissionDate);
+        student.auraPoints += rewardfunc(
+            assignment.dueDate,
+            submission.submissionDate
+        );
         student.xp += rewardfunc(assignment.dueDate, submission.submissionDate);
         // calculate next level threshold
         const nextLevelPoints = 100 * (student.level + 1) ** 2;
@@ -125,7 +127,7 @@ router.put("/submission/:id/feedback", async (req, res) => {
         // Check if user qualifies for a level up
         if (student.auraPoints >= nextLevelPoints) {
             student.level += 1; // Level up
-            student.auraPoints=0; // reset the aura points every level
+            student.auraPoints = 0; // reset the aura points every level
             console.log(
                 `Congratulations! ${student.name} reached Level ${student.level}`
             );
@@ -172,18 +174,19 @@ router.get("/submissions/:studentId", async (req, res) => {
 });
 
 // routes to handle submissions for challenge
-router.get('/challenge_submission/:studentId/:assgn_id',async(req,res) => {
-    // 
-    const {studentId,assgn_id} = req.params;
+router.get("/challenge_submission/:studentId/:assgn_id", async (req, res) => {
+    //
+    const { studentId, assgn_id } = req.params;
 
-    const submission = await Submission.find({studentId}).populate("assignmentId");
+    const submission = await Submission.find({ studentId }).populate(
+        "assignmentId"
+    );
 
-    submission.forEach((item)=>{
-        if(item._id == assgn_id){
+    submission.forEach((item) => {
+        if (item._id == assgn_id) {
             // the student already submitted this assignment
-            
         }
-    })
-})
+    });
+});
 
 module.exports = router;

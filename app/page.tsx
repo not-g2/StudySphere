@@ -5,6 +5,7 @@ import useSessionCheck from "./hooks/auth";
 import Cookies from "js-cookie";
 import "./abc.css";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 function Page() {
     const router = useRouter();
@@ -12,6 +13,8 @@ function Page() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isAdmin, setisAdmin] = useState("User");
+    const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (
         event: any,
@@ -52,6 +55,10 @@ function Page() {
 
     useSessionCheck(setSession);
 
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev);
+    };
+
     useEffect(() => {
         const sessionData = Cookies.get("session");
         if (sessionData) {
@@ -59,25 +66,34 @@ function Page() {
         }
     }, [router, setSession]);
 
-    const signUpButton = document.getElementById("signUp");
-    const signInButton = document.getElementById("signIn");
-    const container = document.getElementById("container");
-
-    if (signUpButton) {
-        signUpButton.addEventListener("click", () => {
-            if (container) {
+    useEffect(() => {
+        const signUpButton = document.getElementById("signUp");
+        const signInButton = document.getElementById("signIn");
+        const container = document.getElementById("container");
+    
+        if (signUpButton && signInButton && container) {
+            signUpButton.addEventListener("click", () => {
                 container.classList.add("right-panel-active");
-            }
-        });
-    }
-
-    if (signInButton) {
-        signInButton.addEventListener("click", () => {
-            if (container) {
+            });
+    
+            signInButton.addEventListener("click", () => {
                 container.classList.remove("right-panel-active");
+            });
+        }
+    
+        return () => {
+            if (signUpButton && signInButton) {
+                signUpButton.removeEventListener("click", () => {
+                    container?.classList.add("right-panel-active");
+                });
+    
+                signInButton.removeEventListener("click", () => {
+                    container?.classList.remove("right-panel-active");
+                });
             }
-        });
-    }
+        };
+    }, []);
+    
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -96,22 +112,35 @@ function Page() {
                 if (data.token) {
                     storeSessionData(data);
                     if (isAdmin === "Admin") {
-                        router.push("/admin");
+                        window.location.href = "/Dashboard";
                     } else {
-                        router.push("/Dashboard");
+                        window.location.href = "/Dashboard";
                     }
                 } else {
-                    console.log("Login failed: " + data.msg);
+                    setError("Login failed: " + data.msg);
                 }
             })
             .catch((error) => {
                 console.error("An error occurred:", error);
-                console.log("An error occurred. Please try again.");
+                setError("An error occurred. Please try again.");
             });
+    };
+
+    const isValidPassword = (password: string) => {
+        const regex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return regex.test(password);
     };
 
     const handleSubmitSignUp = async (event: React.FormEvent) => {
         event.preventDefault();
+
+        if (!isValidPassword(password)) {
+            setError(
+                "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+            );
+            return;
+        }
 
         try {
             const response = await fetch(
@@ -132,9 +161,9 @@ function Page() {
 
             storeSessionData(data);
 
-            router.push("/Dashboard");
+            window.location.href = "/Dashboard";
         } catch (err) {
-            console.log((err as Error).message);
+            setError((err as Error).message);
         }
     };
     return (
@@ -168,12 +197,32 @@ function Page() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                        <div style={{ position: "relative" }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                style={{ width: "100%", paddingRight: "40px" }} // Add space for icon
+                            />
+                            <span
+                                onClick={togglePasswordVisibility}
+                                style={{
+                                    position: "absolute",
+                                    right: "10px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                {showPassword ? (
+                                    <VisibilityOff />
+                                ) : (
+                                    <Visibility />
+                                )}
+                            </span>
+                        </div>
+                        {error && <p style={{ color: "red" }}>{error}</p>}
                         <button onClick={(e) => handleSubmitSignUp(e)}>
                             Sign Up
                         </button>
