@@ -54,9 +54,12 @@ router.post("/create",authMiddleware,async(req,res)=>{
 });
 
 // join a group (works , tested on postman)
-router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
+router.post("/joingroup/:groupcode",authMiddleware,async(req,res)=>{
     try{
-        const {groupid} = req.params;
+        const {groupcode} = req.params;
+        if (!groupcode) {
+            return res.status(400).json({ message: "Group ID is required!" });
+        }
         const userId = req.user.userID;
 
         const user = await User.findById(userId);
@@ -67,7 +70,7 @@ router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
             })
         }
 
-        const group = await Group.findOne({groupCode : groupid});
+        const group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -99,7 +102,7 @@ router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
 
         // Add user to the group's members and update user's studyGroups list
         const updatedGroup = await Group.findOneAndUpdate(
-            { groupCode: groupid },
+            { groupCode: groupcode },
             { $push: { members: { user: userId, rank: "Member" } } },
             { new: true } // Return the updated group
         );
@@ -120,10 +123,13 @@ router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
 })
 
 // delete a group
-router.delete("/delgroup/:groupid",authMiddleware,async(req,res)=>{
+router.delete("/delgroup/:groupcode",authMiddleware,async(req,res)=>{
     try{
-        // groupId is the group code
-        const {groupid} = req.params;
+        // groupcode is the group code
+        const {groupcode} = req.params;
+        if (!groupcode) {
+            return res.status(400).json({ message: "Group ID is required!" });
+        }
         const userId = req.user.userID;
 
         const user = await User.findById(userId);
@@ -134,7 +140,7 @@ router.delete("/delgroup/:groupid",authMiddleware,async(req,res)=>{
             })
         }
 
-        const group = await Group.findOne({groupCode : groupid});
+        const group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -191,10 +197,13 @@ router.delete("/delgroup/:groupid",authMiddleware,async(req,res)=>{
 })
 
 // removing someone from the group (this works, checked on postman)
-router.delete("/rmvuser/:groupId/:rmvuserId",authMiddleware,async(req,res)=>{
+router.delete("/rmvuser/:groupcode/:rmvuserId",authMiddleware,async(req,res)=>{
     try{
-        // groupId is the group code
-        const {groupId,rmvuserId} = req.params;
+        // groupcode is the group code
+        const {groupcode,rmvuserId} = req.params;
+        if (!groupcode) {
+            return res.status(400).json({ message: "Group ID is required!" });
+        }
         const userId = req.user.userID;
 
         const user = await User.findById(userId);
@@ -212,7 +221,7 @@ router.delete("/rmvuser/:groupId/:rmvuserId",authMiddleware,async(req,res)=>{
             })
         }
 
-        const group = await Group.findOne({groupCode : groupId});
+        const group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -285,17 +294,17 @@ router.delete("/rmvuser/:groupId/:rmvuserId",authMiddleware,async(req,res)=>{
 })
 
 // for a group , show all the participants with their membership status (works)
-router.get("/getallusers/:groupId",authMiddleware,async(req,res)=>{
+router.get("/getallusers/:groupcode",authMiddleware,async(req,res)=>{
     try{
-        const {groupId} = req.params;
+        const {groupcode} = req.params;
 
-        if (!groupId) {
+        if (!groupcode) {
             return res.status(400).json({ 
                 message: "Group ID is required!" 
             });
         }
 
-        let group = await Group.findOne({groupCode : groupId});
+        let group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -350,10 +359,13 @@ router.get("/getallusers/:groupId",authMiddleware,async(req,res)=>{
 })
 
 // change membership status of a member (only the creator of the group can do this)
-router.post("/changemembership/:groupId/",authMiddleware,async(req,res)=>{
+router.post("/changemembership/:groupcode/",authMiddleware,async(req,res)=>{
     try{
         const {targetuserId,newRole} = req.body;
-        const {groupId} = req.params;
+        const {groupcode} = req.params;
+        if (!groupcode) {
+            return res.status(400).json({ message: "Group ID is required!" });
+        }
         const userId = req.user.userID;
 
         const user = await User.findById(userId);
@@ -371,7 +383,7 @@ router.post("/changemembership/:groupId/",authMiddleware,async(req,res)=>{
             })
         }
 
-        const group = await group.findOne({groupCode : groupId});
+        const group = await group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -462,11 +474,14 @@ router.get("/allusergrps",authMiddleware,async(req,res)=>{
 })
 
 // route to make an announcement in the group
-router.post("/createanncmnt/:groupid",authMiddleware,async(req,res)=>{
+router.post("/createanncmnt/:groupcode",authMiddleware,async(req,res)=>{
     try{
         const userid = req.user.userID;
         const {announcementBody}=req.body;
-        const {groupid} = req.params;
+        const {groupcode} = req.params;
+        if (!groupcode) {
+            return res.status(400).json({ message: "Group ID is required!" });
+        }
         const user = await User.findById(userid);
 
         if(!user){
@@ -475,7 +490,7 @@ router.post("/createanncmnt/:groupid",authMiddleware,async(req,res)=>{
             })
         }
 
-        const group = await Group.findOne({groupCode : groupid});
+        const group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -529,11 +544,14 @@ router.post("/createanncmnt/:groupid",authMiddleware,async(req,res)=>{
 })
 
 // fetch all the announcements
-router.post("/fetchanncmnt/:groupid",authMiddleware,async(req,res)=>{
+router.post("/fetchanncmnt/:groupcode",authMiddleware,async(req,res)=>{
     try{
-        const {groupid} = req.params;
-        
-        const group = await Group.findOne({groupCode : groupid});
+        const {groupcode} = req.params;
+        if (!groupcode) {
+            return res.status(400).json({ message: "Group ID is required!" });
+        }
+
+        const group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -561,8 +579,36 @@ router.post("/fetchanncmnt/:groupid",authMiddleware,async(req,res)=>{
 })
 
 // delete an announcement
-router.delete("",authMiddleware,async(req,res)=>{
+router.delete("/deleteanncmnt/:groupcode/:anncmntid",authMiddleware,async(req,res)=>{
     try{
+        const {groupcode,anncmntid} = req.params;
+
+        if (!groupcode) {
+            return res.status(400).json({ message: "Group ID is required!" });
+        }
+        if (!anncmntid) {
+            return res.status(400).json({ message: "announcement ID is required!" });
+        }
+
+        const group = await Group.findOne({groupCode : groupcode});
+
+        if(!group){
+            return res.status().json({
+                message : 'Group not found'
+            })
+        }
+
+        const res = await Group.updateOne(
+            {_id : group._id},
+            {$pull : {announcements : {announcementId : anncmntid}}}
+        )
+
+        if(res.modifiedCount === 0){
+            return res.status(404).json({ message: "Announcement not found!" });
+        }
+
+        return res.status(200).json({ message: "Announcement removed successfully!" });
+
 
     } catch(error){
         console.error(error);
@@ -573,10 +619,10 @@ router.delete("",authMiddleware,async(req,res)=>{
 })
 
 // route for a member to leave the group
-router.delete("/rmvuser/:groupid/:successoruserid?",authMiddleware,async(req,res)=>{
+router.delete("/rmvuser/:groupcode/:successoruserid?",authMiddleware,async(req,res)=>{
     try{
         const userid = req.user.userID;
-        const {groupid,successoruserid} = req.params;
+        const {groupcode,successoruserid} = req.params;
 
         const user = await User.findById(userid);
         if(!user ){
@@ -585,7 +631,7 @@ router.delete("/rmvuser/:groupid/:successoruserid?",authMiddleware,async(req,res
             })
         }
         
-        const group = await Group.findOne({groupCode : groupid});
+        const group = await Group.findOne({groupCode : groupcode});
         if(!group){
             return res.status(404).json({
                 message : "group doesnt exist."

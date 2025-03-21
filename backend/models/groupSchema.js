@@ -26,6 +26,7 @@ const GroupSchema = new mongoose.Schema({
     }],
     files :[{type : String}],
     announcements : [{
+        createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
         content : {type : String,required : true},
         announcementId : {type : String,unique : true}
     }],
