@@ -20,7 +20,7 @@ router.post("/create",authMiddleware,async(req,res)=>{
             })
         }
 
-        if(user.groupCreated>=10){
+        if(user.groupCreated>10){
             return res.status(403).json({
                 message : "the user already created the maximum number of groups!"
             })
@@ -142,6 +142,19 @@ router.delete("/delgroup/:groupid",authMiddleware,async(req,res)=>{
             })
         }
 
+        // check if the user is the part of the group
+        let isPartOfGroup = false;
+        for(const member of group.members){
+            if(member.user.toString() === userId.toString()){
+                isPartOfGroup = true;break;
+            }
+        }
+        if(!isPartOfGroup){
+            return res.status(403).json({
+                message : "User is not a part of this group"
+            })
+        }
+
         // only owner can delete a group
         if (group.creator.toString() !== userId) {
             return res.status(403).json({ message: "Only the creator can delete the group" });
@@ -204,6 +217,19 @@ router.delete("/rmvuser/:groupId/:rmvuserId",authMiddleware,async(req,res)=>{
         if(!group){
             return res.status(404).json({
                 message : "group not found"
+            })
+        }
+
+        // check if the user is the part of the group
+        let isPartOfGroup = false;
+        for(const member of group.members){
+            if(member.user.toString() === userId.toString()){
+                isPartOfGroup = true;break;
+            }
+        }
+        if(!isPartOfGroup){
+            return res.status(403).json({
+                message : "User is not a part of this group"
             })
         }
 
@@ -287,11 +313,25 @@ router.get("/getallusers/:groupId",authMiddleware,async(req,res)=>{
             })
         }
 
+        // check if the user is the part of the group
+        let isPartOfGroup = false;
+        for(const member of group.members){
+            if(member.user.toString() === userId.toString()){
+                isPartOfGroup = true;break;
+            }
+        }
+        if(!isPartOfGroup){
+            return res.status(403).json({
+                message : "User is not a part of this group"
+            })
+        }
+
         group = await group.populate("members.user","name");
 
         let memberInfo = group.members.map((member) => {
-            console.log(member.user.name);
+            //console.log(member.user.name);
             return {
+                memberid : member.user._id,
                 name : member.user.name,
                 rank : member.rank
             }
@@ -416,6 +456,232 @@ router.get("/allusergrps",authMiddleware,async(req,res)=>{
     } catch(error){
         console.error(error);
         res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+})
+
+// route to make an announcement in the group
+router.post("/createanncmnt/:groupid",authMiddleware,async(req,res)=>{
+    try{
+        const userid = req.user.userID;
+        const {announcementBody}=req.body;
+        const {groupid} = req.params;
+        const user = await User.findById(userid);
+
+        if(!user){
+            return res.status(401).json({
+                message : "User isnt logged in"
+            })
+        }
+
+        const group = await Group.findOne({groupCode : groupid});
+
+        if(!group){
+            return res.status(404).json({
+                message : "group doesnt exist."
+            })
+        }
+
+        // check if the user is the part of the group
+        let isPartOfGroup = false;
+        let rankOfUser = "";
+        for(const member of group.members){
+            if(member.user.toString() === userid.toString()){
+                isPartOfGroup = true;
+                rankOfUser = member.rank;
+                break;
+            }
+        }
+        if(!isPartOfGroup){
+            return res.status(403).json({
+                message : "User is not a part of this group"
+            })
+        }
+
+        if(rankOfUser === 'Member'){
+            return res.status(403).json({
+                message : "Only Admin/Creator can perform this task!"
+            })
+        }
+
+        let anncmntObj = {
+            content : announcementBody
+        }
+        
+        group.announcements.push(anncmntObj);
+
+        await group.save();
+
+        return res.status(200).json({
+            message : "Announcement successfully created.",
+            group
+        })
+
+
+
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server error"
+        })
+    }
+})
+
+// fetch all the announcements
+router.post("/fetchanncmnt/:groupid",authMiddleware,async(req,res)=>{
+    try{
+        const {groupid} = req.params;
+        
+        const group = await Group.findOne({groupCode : groupid});
+
+        if(!group){
+            return res.status(404).json({
+                message : "group doesnt exist."
+            })
+        }
+
+
+        let allAnnouncements = [];
+
+        for(const anncmnt of group.announcements){
+            allAnnouncements.push(anncmnt.content)
+        }
+
+        return res.status(200).json({
+            message : "All announcements fetched",
+            allAnnouncements
+        })
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+})
+
+// delete an announcement
+router.delete("",authMiddleware,async(req,res)=>{
+    try{
+
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+})
+
+// route for a member to leave the group
+router.delete("/rmvuser/:groupid/:successoruserid?",authMiddleware,async(req,res)=>{
+    try{
+        const userid = req.user.userID;
+        const {groupid,successoruserid} = req.params;
+
+        const user = await User.findById(userid);
+        if(!user ){
+            return res.status(404).json({
+                message : "user not found"
+            })
+        }
+        
+        const group = await Group.findOne({groupCode : groupid});
+        if(!group){
+            return res.status(404).json({
+                message : "group doesnt exist."
+            })
+        }
+
+        // check if the user is the part of the group
+        let isPartOfGroup = false;
+        for(const member of group.members){
+            if(member.user.toString() === userid.toString()){
+                isPartOfGroup = true;break;
+            }
+        }
+        if(!isPartOfGroup){
+            return res.status(403).json({
+                message : "User is not a part of this group"
+            })
+        }
+
+        // some cases to take care of :
+        // 1. If creator leaves , then he can make any member of his choice as the creator .
+
+        // 2. If there are no other members in the group , then this is as good as just deleting the group
+
+        // in either of the case , we will have to remove this study group from the list of the groups the user is currently joined in.
+
+        // remove the group from the user db
+        await User.updateOne(
+            {_id : userid},
+            {$pull : {studyGroups : group._id}}
+        )
+
+        // check number of members in the group
+        let numberOfMembers = group.members.length;
+        if(numberOfMembers===1){
+            // delete the group from the db
+            user.groupCreated--;
+            await user.save();
+            await Group.findByIdAndDelete(group._id);
+
+            return res.status(200).json({
+                message : "Since there is only one user , the entire group has been deleted"
+            })
+        }
+
+        if(group.creator.toString() === userid.toString()){
+            // this means that the creator of the group is leaving the group
+
+            if(!successoruserid){
+                return res.status(400).json({
+                    message : "A successor user need to be specified!"
+                })
+            }
+            const successoruser = await User.findById(successoruserid);
+            if(!successoruser ){
+                return res.status(404).json({
+                    message : "successor user not found"
+                })
+            }
+            user.groupCreated--;
+            await user.save();
+
+            successoruser.groupCreated++;
+            await successoruser.save();
+
+            group.creator = successoruserid;
+            await group.save();
+
+            await Group.updateOne(
+                {_id : group._id},
+                {$pull : {members : {user : user._id}}}
+            )
+
+            // MongoDB field names containing a dot (.) must be enclosed in quotes in JavaScript.
+            await Group.updateOne(
+                {_id : group._id , "members.user" : successoruserid},
+                {$set : {"members.$.rank" : "Creator"}}
+            )
+            return res.status(200).json({
+                message : "Creator of the group removed , new creator reinstantiated"
+            })
+        }
+
+        // if we reach here , it means that the user is of "member" rank in a group with multiple users
+        await Group.updateOne(
+            {_id : group._id},
+            {$pull : {members : {user : user._id}}}
+        )
+
+        return res.status(200).json({
+            message : "User is successfully removed!"
+        })
+
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
             message : "Internal Server Error"
         })
     }
