@@ -4,6 +4,7 @@
 // ensure that a student cant create more than 10 groups
 
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 
 const GroupSchema = new mongoose.Schema({
     //groupId : 
@@ -19,8 +20,16 @@ const GroupSchema = new mongoose.Schema({
         user : {type:mongoose.Schema.Types.ObjectId,ref:"User"},
         rank : {type: String, enum : ["Creator","Admin","Member"]}
     }],
-    file:[{type : String}],
-    announcement : [{type : String}],
+    bannedUsers : [{
+        user : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
+        bannedUntil : {type : Date }
+    }],
+    files :[{type : String}],
+    announcements : [{
+        createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
+        content : {type : String,required : true},
+        announcementId : {type : String,unique : true}
+    }],
     groupCode : {type:String,unique:true}
 })
 
@@ -35,6 +44,17 @@ GroupSchema.pre("save", function (next) {
         this.groupCode = hash.slice(0, 8); // Take the first 8 characters of the hash
     }
     next(); 
+});
+
+GroupSchema.pre("save", function (next) {
+    this.announcements.forEach((announcement) => {
+        if (!announcement.announcementId) {
+            const hashInput = `${this._id}${Date.now()}`;
+            const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+            announcement.announcementId = hash.slice(0, 8); // Take the first 8 characters
+        }
+    });
+    next();
 });
 
 module.exports = mongoose.model('Group',GroupSchema);
