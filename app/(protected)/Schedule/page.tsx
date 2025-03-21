@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import MyCalendar from "@/components/Calendar";
+import MyCalendar from "../../../components/Calendar";
 import SubjectSchedulerModal from "@/components/timetable";
 import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
 
