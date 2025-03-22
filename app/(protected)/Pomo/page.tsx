@@ -1,124 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
 import Lottie from "lottie-react";
+import { useTimer } from "@/context/TimerContext";
+import { formatTime } from "@/utils/formatTime";
 
 export default function PomodoroTimer() {
-    const [timerState, setTimerState] = useState<"focus" | "break" | "paused">(
-        "paused"
-    );
-    const [time, setTime] = useState(25 * 60);
-    const [isRunning, setIsRunning] = useState(false);
-    const [lastActiveState, setLastActiveState] = useState<
-        "focus" | "break" | null
-    >(null);
-    const [animations, setAnimations] = useState<
-        { animationData: any; text: string }[]
-    >([]);
-    const [index, setIndex] = useState(0);
-
-    const animationData = [
-        {
-            path: "/goals.json",
-            text: "Set clear, achievable goals - Define exactly what you want to accomplish during your focus session before you begin.",
-        },
-        {
-            path: "/music.json",
-            text: "Try focus-enhancing background sounds - White noise, nature sounds, or instrumental music can help some people concentrate better.",
-        },
-        {
-            path: "/teamwork.json",
-            text: "Try body doubling - Work alongside someone else who is also focusing (in person or virtually) to create mutual accountability.",
-        },
-        {
-            path: "/sleeping.json",
-            text: "Manage your energy, not just time - Recognize when your focus naturally wanes and schedule accordingly.",
-        },
-        {
-            path: "/talkwithothers.json",
-            text: "Connect briefly with others - A short social interaction can boost mood and provide perspective.",
-        },
-        {
-            path: "/hydration.json",
-            text: "Hydrate and nourish - Use breaks to drink water or have a healthy snack to maintain your energy levels.",
-        },
-        {
-            path: "/meditate.json",
-            text: "Practice mindfulness - Take a few deep breaths or do a quick meditation to reset your mental state.",
-        },
-        {
-            path: "/Schedule.json",
-            text: "Schedule regular breaks - Build breaks into your daily routine rather than waiting until you're exhausted or overwhelmed.",
-        },
-    ];
-
-    useEffect(() => {
-        Promise.all(
-            animationData.map(async (anim) => {
-                const response = await fetch(anim.path);
-                const json = await response.json();
-                return { animationData: json, text: anim.text };
-            })
-        )
-            .then((data) => setAnimations(data))
-            .catch((err) => console.error("Failed to load animations:", err));
-    }, []);
-
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (isRunning) {
-            interval = setInterval(() => {
-                setTime((prevTime) => {
-                    if (prevTime > 0) return prevTime - 1;
-                    if (timerState === "focus") {
-                        setTimerState("break");
-                        setIndex(4);
-                        return 5 * 60;
-                    } else if (timerState === "break") {
-                        setIsRunning(true);
-                        setTimerState("focus");
-                        return 25 * 60;
-                    }
-                    return prevTime;
-                });
-            }, 1000);
-        } else {
-            clearInterval(interval);
-        }
-        return () => clearInterval(interval);
-    }, [isRunning, timerState]);
-
-    useEffect(() => {
-        if (timerState === "paused") return;
-
-        const interval = setInterval(() => {
-            setIndex((prevIndex) => {
-                if (timerState === "focus") {
-                    return (prevIndex + 1) % 4; // First 4 are focus animations
-                }
-                if (timerState === "break") {
-                    return 4 + ((prevIndex - 4 + 1) % 4); // Next 4 are break animations
-                }
-                return prevIndex;
-            });
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, [timerState]);
-
-    useEffect(() => {
-        if (timerState !== "paused") {
-            setLastActiveState(timerState);
-        }
-    }, [timerState]);
-
-    const formatTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
-            2,
-            "0"
-        )}`;
-    };
+    const {
+        time,
+        setTime,
+        isRunning,
+        setIsRunning,
+        timerState,
+        setTimerState,
+        animations,
+        index,
+        lastActiveState,
+        setLastActiveState,
+    } = useTimer();
 
     return (
         <div
@@ -132,9 +29,17 @@ export default function PomodoroTimer() {
                 className={`flex flex-col items-center justify-center text-5xl font-bold transition-all duration-700 ease-out ${
                     isRunning ||
                     (timerState === "paused" && lastActiveState != null)
-                        ? "w-2/3 h-[66vh] scale-100 rounded-[7%] border-4"
+                        ? "w-2/3 h-[66vh] scale-100 rounded-[7%] border-4 animate-border-pulse"
                         : "w-64 h-64 scale-100 rounded-[50%] border-4"
-                } ${isRunning ? "border-green-500" : "border-red-500"}`}
+                } ${
+                    isRunning && timerState === "focus"
+                        ? "border-green-500"
+                        : ""
+                }${
+                    isRunning && timerState === "break"
+                        ? "border-yellow-500"
+                        : ""
+                }${!isRunning ? "border-red-500" : ""}`}
             >
                 <div className="w-full">
                     {(timerState !== "paused" || lastActiveState) &&
@@ -156,7 +61,7 @@ export default function PomodoroTimer() {
                         )}
                 </div>
                 <span
-                    className={`text-white drop-shadow-lg transition-all duration-500 ease-out ${
+                    className={`text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-500 ease-out ${
                         isRunning ? "translate-y-8" : ""
                     }`}
                 >
@@ -170,7 +75,11 @@ export default function PomodoroTimer() {
                         setIsRunning(true);
                         setTimerState("focus");
                     }}
-                    className="bg-green-500 px-4 py-2 rounded text-white"
+                    className={
+                        !isRunning
+                            ? `bg-green-500 px-4 py-2 rounded text-white`
+                            : "bg-gray-600 px-4 py-2 rounded text-gray-400 cursor-not-allowed"
+                    }
                 >
                     Start
                 </button>
@@ -179,7 +88,11 @@ export default function PomodoroTimer() {
                         setIsRunning(false);
                         setTimerState("paused");
                     }}
-                    className="bg-yellow-500 px-4 py-2 rounded text-white"
+                    className={
+                        isRunning
+                            ? "bg-yellow-500 px-4 py-2 rounded text-white"
+                            : "bg-gray-600 px-4 py-2 rounded text-gray-400 cursor-not-allowed"
+                    }
                 >
                     Pause
                 </button>

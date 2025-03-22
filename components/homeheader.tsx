@@ -16,11 +16,12 @@ import {
 } from "@mui/material";
 import Dropdown from "../components/dropdown";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import LogoutPage from "./signout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { motion } from "framer-motion";
 import useSessionCheck from "../app/hooks/auth"; // 👈 Use your custom hook
+import { useTimer } from "@/context/TimerContext";
+import { formatTime } from "@/utils/formatTime";
 
 const Header: React.FC = () => {
     const PORT = process.env.NEXT_PUBLIC_PORT;
@@ -46,6 +47,8 @@ const Header: React.FC = () => {
         { label: "Goals", path: "/Goals" },
         { label: "Schedule", path: "/Schedule" },
     ];
+
+    const { time, isRunning, timerState, lastActiveState } = useTimer();
 
     const handleGo = (path: string) => {
         router.push(path);
@@ -104,6 +107,33 @@ const Header: React.FC = () => {
         handleClose();
     };
 
+    const renderTimer = (): JSX.Element => {
+        switch (true) {
+            case isRunning && timerState === "focus":
+                return (
+                    <span className="text-green-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-500 ease-out">
+                        {formatTime(time)}
+                    </span>
+                );
+            case !isRunning &&
+                timerState === "paused" &&
+                lastActiveState != null:
+                return (
+                    <span className="text-red-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-500 ease-out">
+                        {formatTime(time)}
+                    </span>
+                );
+            case isRunning && timerState === "break":
+                return (
+                    <span className="text-yellow-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-500 ease-out">
+                        {formatTime(time)}
+                    </span>
+                );
+            default:
+                return <div></div>;
+        }
+    };
+
     return (
         <AppBar
             position="static"
@@ -135,6 +165,13 @@ const Header: React.FC = () => {
                         </Typography>
                     ))}
                 </Box>
+
+                <div
+                    className="flex justify-end w-full pr-4"
+                    onClick={() => router.push("/Pomo")}
+                >
+                    {renderTimer()}
+                </div>
 
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <IconButton color="inherit" onClick={handleBellClick}>

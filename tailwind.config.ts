@@ -27,6 +27,16 @@ const config: Config = {
                 t1: "#A4B494",
                 t2: "#033B78",
             },
+            animation: {
+                "border-pulse": "borderPulse 1.5s infinite ease-in-out",
+            },
+            keyframes: {
+                borderPulse: {
+                    "0%": { boxShadow: "0 0 0 2px rgba(34, 197, 94, 0.5)" },
+                    "50%": { boxShadow: "0 0 10px 4px rgba(34, 197, 94, 1)" },
+                    "100%": { boxShadow: "0 0 0 2px rgba(34, 197, 94, 0.5)" },
+                },
+            },
         },
     },
     plugins: [],
