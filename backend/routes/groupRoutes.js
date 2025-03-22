@@ -389,7 +389,7 @@ router.post("/changemembership/:groupid/",authMiddleware,async(req,res)=>{
                 { "members.user": targetuserId }
             ]
         });
-
+        console.log(group)
         if(!group){
             return res.status(404).json({
                 message : "Specified Group doesnt exist!"
