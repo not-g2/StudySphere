@@ -104,7 +104,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [timerState]);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: NodeJS.Timeout | undefined;
 
         if (isRunning && cycleCount < 3) {
             interval = setInterval(() => {
@@ -140,6 +140,26 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
 
         return () => clearInterval(interval);
     }, [isRunning, timerState, cycleCount]);
+
+    useEffect(() => {
+        const savedTime = localStorage.getItem("timer-time");
+        const savedIsRunning = localStorage.getItem("timer-isRunning");
+        const savedState = localStorage.getItem("timer-state");
+        const savedCycles = localStorage.getItem("timer-cycles");
+
+        if (savedTime) setTime(parseInt(savedTime, 10));
+        if (savedIsRunning) setIsRunning(savedIsRunning === "true");
+        if (savedState)
+            setTimerState(savedState as "focus" | "break" | "paused");
+        if (savedCycles) setCycleCount(parseInt(savedCycles, 10));
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("timer-time", time.toString());
+        localStorage.setItem("timer-isRunning", isRunning.toString());
+        localStorage.setItem("timer-state", timerState);
+        localStorage.setItem("timer-cycles", cycleCount.toString());
+    }, [time, isRunning, timerState, cycleCount]);
 
     return (
         <TimerContext.Provider
