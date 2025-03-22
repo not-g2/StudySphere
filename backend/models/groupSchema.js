@@ -26,11 +26,11 @@ const GroupSchema = new mongoose.Schema({
         bannedUntil : {type : Date }
     }],
     files :[{type : String}],
-    // announcements : [{
-    //     createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
-    //     content : {type : String},
-    //     // announcementId : {type : String}
-    // }],
+    announcements : [{
+        createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
+        content : {type : String},
+        // announcementId : {type : String}
+    }],
     groupCode : {type:String,unique:true}
 })
 
