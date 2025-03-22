@@ -5,7 +5,6 @@
 
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const { StringDecoder } = require("string_decoder");
 
 const GroupSchema = new mongoose.Schema({
     //groupId : 
@@ -29,31 +28,49 @@ const GroupSchema = new mongoose.Schema({
     announcements : [{
         createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
         content : {type : String},
-        // announcementId : {type : String}
+        announcementId : {type : String},
+        date : {type : Date , default : Date.now()}
     }],
     groupCode : {type:String,unique:true}
 })
 
 // this middleware is fine , but problem is that whenever any object in Group is saved using .save() , then this middleware will go through all the objects in group to check for announcements with no announcement id , which is expensive , so we will dynamically give
+// GroupSchema.pre("save", function (next) {
+//     if (!this.groupCode) {
+//         const hashInput = `${this._id}${this.createdAt}`;
+//         const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+//         this.groupCode = hash.slice(0, 8);
+//     }
+
+//     this.announcements.forEach((announcement) => {
+//         if (!announcement.announcementId) {
+//             const hashInput = `${this._id}${Date.now()}`;
+//             const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+//             announcement.announcementId = hash.slice(0, 8);
+//         }
+//     });
+
+//     next();
+// });
+
 GroupSchema.pre("save", function (next) {
-    if (!this.groupCode) {
-        const hashInput = `${this._id}${this.createdAt}`;
+    if (this.isNew && !this.groupCode) {  
+        const hashInput = `${new mongoose.Types.ObjectId()}${Date.now()}`;
         const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
         this.groupCode = hash.slice(0, 8);
     }
-    console.log("here2")
 
-    // this.announcements.forEach((announcement) => {
-    //     if (!announcement.announcementId) {
-    //         const hashInput = `${this._id}${Date.now()}`;
-    //         const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
-    //         announcement.announcementId = hash.slice(0, 8);
-    //     }
-    // }
-    // );
+    this.announcements.forEach((announcement) => {
+        if (!announcement.announcementId) {
+            const hashInput = `${new mongoose.Types.ObjectId()}${Date.now()}`;
+            const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+            announcement.announcementId = hash.slice(0, 8);
+        }
+    });
 
     next();
 });
+
 
 
 module.exports = mongoose.model('Group',GroupSchema);
