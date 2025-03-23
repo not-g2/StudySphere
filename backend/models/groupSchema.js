@@ -24,7 +24,13 @@ const GroupSchema = new mongoose.Schema({
         user : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
         bannedUntil : {type : Date }
     }],
-    files :[{type : String}],
+    files :[{
+        fileLink : {type : String},
+        postedBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
+        createdAt : {type : Date, default : Date.now()},
+        title : {type : String},
+        description : {type : String}
+    }],
     announcements : [{
         createdBy : {type : mongoose.Schema.Types.ObjectId,ref : 'User'},
         content : {type : String},

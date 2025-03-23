@@ -1,10 +1,11 @@
 const express = require("express");
 const authMiddleware = require("../middleware/auth");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
-const chapterModel = require("../models/chapterSchema"); // Import your model
+const Chapter = require("../models/chapterSchema"); 
 const router = express.Router();
 const generatePdfUrl = require("../utils/pdflinkhelper");
-
+const Course = require("../models/chapterSchema.js")
+const mongoose = require("mongoose")
 router.post(
     "/create",
     authMiddleware,
@@ -16,8 +17,16 @@ router.post(
             if (!req.file || !req.file.path) {
                 return res.status(400).json({ message: "PDF upload failed." });
             }
+            console.log(typeof(courseID))
+            const course = await Course.findById(courseID);
+            console.log(course)
+            if(!course){
+                return res.status(404).json({
+                    msg : "Course doesnt exist!"
+                })
+            }
 
-            const newChapter = new chapterModel({
+            const newChapter = new Chapter({
                 title,
                 course: courseID,
                 chapterPdf: req.file.path,
@@ -41,7 +50,7 @@ router.post(
 router.get("/get/:courseID", authMiddleware, async (req, res) => {
     try {
         const { courseID } = req.params;
-        const chapters = await chapterModel.find({ course: courseID });
+        const chapters = await Chapter.find({ course: courseID });
         const chaptersWithPdfUrl = chapters.map((chapter) => {
             const pdfUrl = generatePdfUrl(`pdfs/${chapter._id}`);
             return {
