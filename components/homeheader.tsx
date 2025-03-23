@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import {
     AppBar,
@@ -13,29 +12,30 @@ import {
     Badge,
     Divider,
     Button,
+    Skeleton // <-- Import Skeleton here
 } from "@mui/material";
 import Dropdown from "../components/dropdown";
 import { useRouter } from "next/navigation";
 import LogoutPage from "./signout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { motion } from "framer-motion";
-import useSessionCheck from "../app/hooks/auth"; // 👈 Use your custom hook
+import useSessionCheck from "../app/hooks/auth"; // Use your custom hook
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
 
+// Define a darker blue for the skeleton background
+const skeletonBg = "#001125"; // Adjust this color as needed
+
 const Header: React.FC = () => {
     const PORT = process.env.NEXT_PUBLIC_PORT;
-    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
-        null
-    );
+    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
     const router = useRouter();
     const [userImage, setUserImage] = useState<string | null>(null);
     // Start with undefined so we know when the session check is in progress.
     const [session, setSession] = useState<any | null | undefined>(undefined);
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState<number>(3);
-    const [notificationAnchorEl, setNotificationAnchorEl] =
-        useState<null | HTMLElement>(null);
+    const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
     const [animateBell, setAnimateBell] = useState<boolean>(true);
 
     // This hook sets session to an object if logged in, or null if not logged in, leaving it undefined while checking.
@@ -140,34 +140,46 @@ const Header: React.FC = () => {
         <AppBar
             position="static"
             sx={{
-                background:
-                    "linear-gradient(to bottom right, #0f173a, #001d30)",
+                background: "linear-gradient(to bottom right, #0f173a, #001d30)",
                 paddingX: 2,
             }}
         >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+                {/* Navigation Links */}
                 <Box sx={{ display: "flex", gap: 3 }}>
-                    {navItems.map((item) => (
-                        <Typography
-                            key={item.label}
-                            variant="h6"
-                            onClick={() => handleGo(item.path)}
-                            sx={{
-                                color: "#fff",
-                                fontSize: "1rem",
-                                fontWeight: "500",
-                                cursor: "pointer",
-                                "&:hover": {
-                                    color: "#ffcc00",
-                                    transition: "0.3s ease-in-out",
-                                },
-                            }}
-                        >
-                            {item.label}
-                        </Typography>
-                    ))}
+                    {session === undefined ? (
+                        navItems.map((item, index) => (
+                            <Skeleton
+                                key={index}
+                                variant="text"
+                                width={80}
+                                sx={{ bgcolor: skeletonBg, height: "1rem" }}
+                            />
+                        ))
+                    ) : (
+                        navItems.map((item) => (
+                            <Typography
+                                key={item.label}
+                                variant="h6"
+                                onClick={() => handleGo(item.path)}
+                                sx={{
+                                    color: "#fff",
+                                    fontSize: "1rem",
+                                    fontWeight: "500",
+                                    cursor: "pointer",
+                                    "&:hover": {
+                                        color: "#ffcc00",
+                                        transition: "0.3s ease-in-out",
+                                    },
+                                }}
+                            >
+                                {item.label}
+                            </Typography>
+                        ))
+                    )}
                 </Box>
 
+                {/* Timer */}
                 <div
                     className="flex justify-end w-full pr-4"
                     onClick={() => router.push("/Pomo")}
@@ -175,6 +187,7 @@ const Header: React.FC = () => {
                     {renderTimer()}
                 </div>
 
+                {/* Right Side: Notifications and Auth Buttons/Profile */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <IconButton color="inherit" onClick={handleBellClick}>
                         <Badge badgeContent={notifications} color="error">
@@ -196,41 +209,22 @@ const Header: React.FC = () => {
                         </Badge>
                     </IconButton>
 
-                    <Menu
-                        anchorEl={notificationAnchorEl}
-                        open={Boolean(notificationAnchorEl)}
-                        onClose={handleClose}
-                        sx={{ mt: 1 }}
-                    >
-                        {notifications > 0 ? (
-                            <>
-                                <MenuItem onClick={handleClose}>
-                                    New Comment on your post
-                                </MenuItem>
-                                <MenuItem onClick={handleClose}>
-                                    Assignment Due Tomorrow
-                                </MenuItem>
-                                <MenuItem onClick={handleClose}>
-                                    Weekly Challenge is Live!
-                                </MenuItem>
-                                <Divider />
-                                <MenuItem>
-                                    <Button
-                                        fullWidth
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={markAsRead}
-                                    >
-                                        Mark as Read
-                                    </Button>
-                                </MenuItem>
-                            </>
-                        ) : (
-                            <MenuItem>No new notifications</MenuItem>
-                        )}
-                    </Menu>
-
-                    {!session ? (
+                    {session === undefined ? (
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                            <Skeleton
+                                variant="rectangular"
+                                width={80}
+                                height={36}
+                                sx={{ bgcolor: skeletonBg }}
+                            />
+                            <Skeleton
+                                variant="rectangular"
+                                width={80}
+                                height={36}
+                                sx={{ bgcolor: skeletonBg }}
+                            />
+                        </Box>
+                    ) : !session ? (
                         <>
                             <Button
                                 variant="contained"

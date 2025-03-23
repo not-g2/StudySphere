@@ -2,6 +2,8 @@ const express = require("express");
 const crypto = require("crypto");
 const router = express.Router();
 const { upload } = require("../utils/cloudinary");
+const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
+const generatePdfUrl = require("../utils/pdflinkhelper");
 const User = require("../models/userModel");
 const Group = require("../models/groupSchema");
 const authMiddleware = require("../middleware/auth");
@@ -389,7 +391,7 @@ router.post("/changemembership/:groupid/",authMiddleware,async(req,res)=>{
                 { "members.user": targetuserId }
             ]
         });
-        console.log(group)
+
         if(!group){
             return res.status(404).json({
                 message : "Specified Group doesnt exist!"
@@ -796,13 +798,191 @@ router.get("/getstatus/:groupid/:targetuserid",async(req,res)=>{
     }
 })
 
-// route to upload a file
-router.post("/uploadfile")
+// route to upload a file (works on postman)
+router.post("/uploadfile/:groupid",authMiddleware,uploadPDF.single("pdfFile"),async(req,res)=>{
+    try{
+        if (!req.file || !req.file.path) {
+            return res.status(400).json({ message: "PDF upload failed." });
+        }
+
+        const {title,description} = req.body;
+        const {groupid} = req.params;
+        if(!title || !description){
+            return res.status(400).json({
+                msg : "please give a title and description"
+            })
+        }
+
+        if(!groupid){
+            return res.status(400).json({
+                msg : "group not specified"
+            })
+        }
+
+        const userid = req.user.userID;
+        
+        const group = await Group.findOne({
+            _id : groupid,
+            "members.user" : userid,
+            "members.rank" : {$in : ['Creator','Admin']}
+        })
+        
+        if(!group){
+            return res.status(404).json({
+                msg : 'group not found or user is not part of group or user is a MEMBER'
+            })
+        }
 
 
-// route to fetch all files
+        const updatedGroup = await Group.findByIdAndUpdate(
+            group._id,
+            {$push : {files : {
+                title : title,
+                description : description,
+                fileLink : req.file.path,
+                postedBy : userid
+            }}},{new : true}
+        )
 
-// route to update a file
+        res.status(200).json({
+            "message" : "file added successfully",
+            updatedGroup
+        })
 
-// route to delete a file
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
+            msg : "Internal server error"
+        })
+    }
+})
+
+
+// route to fetch all files (works , tested on postman)
+router.get("/getallfiles/:groupid",authMiddleware,async(req,res)=>{
+    try{
+        const {groupid} = req.params;
+
+        if(!groupid){
+            return res.status(400).json({
+                message : "Group ID is required in the URL parameters!"
+            })
+        }
+
+        const allFiles = await Group.findById(groupid).select("files.fileLink files.postedBy files.title files._id").populate("files.postedBy","name")
+
+        if(!allFiles){
+            return res.status(404).json({
+                msg : "group not found"
+            })
+        }
+
+        return res.status(200).json({
+            msg : "fetched all files successfully",
+            allFiles
+        })
+    } catch(error){
+        console.error(error);
+        return res.status().json({
+            message : "Internal Server error!"
+        })
+    }
+})
+// route to update a file (works , checked on postman)
+router.post("/updatefile/:groupid/:filesid", authMiddleware, uploadPDF.single("pdfFile"), async (req, res) => {
+    try {
+        console.log("Request params:", req.params);
+        const { groupid, filesid } = req.params;
+        const userid = req.user.userID;
+        const { title, description } = req.body;
+
+        // Check if the user is authorized 
+        const group = await Group.findOne({
+            _id: groupid,
+            "members.user": userid,
+            "members.rank": { $in: ["Admin", "Creator"] }
+        });
+
+        if (!group) {
+            return res.status(403).json({ message: "Group not found or not authorized" });
+        }
+
+        // Prepare update fields dynamically
+        let updateFields = {};
+        if (title) updateFields["files.$.title"] = title;
+        if (description) updateFields["files.$.description"] = description;
+        if (req.file && req.file.path) updateFields["files.$.fileLink"] = req.file.path;
+
+        // If no fields to update, return error
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).json({ msg: "No valid fields provided for update" });
+        }
+
+        const updatedGroup = await Group.findOneAndUpdate(
+            { _id: groupid, "files._id": filesid },
+            { $set: updateFields },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            msg: "File updated successfully",
+            updatedGroup
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// route to delete a file (works , tested on postman)
+router.delete("/deletefile/:groupid/:fileid",authMiddleware,async(req,res)=>{
+    try{
+        const {groupid,fileid} = req.params;
+        if(!groupid || !fileid){
+            return res.status(400).json({
+                message : "Invalid parameters passed!"
+            })
+        }
+
+        const userid = req.user.userID;
+
+        const group = await Group.findOne({
+            _id : groupid,
+            "members.user" : userid,
+            "members.rank" : {$in : ['Creator','Admin']}
+        })
+
+        if(!group){
+            return res.status(403).json({
+                message : "Speicified group with the given user as a admin/creator not found"
+            })
+        }
+
+
+        // Check if the file exists before deletion
+        const fileExists = group.files.some(file => file._id.toString() === fileid);
+        if (!fileExists) {
+            return res.status(404).json({
+                message: "No file with the given file ID found"
+            });
+        }
+
+        const newGroup = await Group.findOneAndUpdate(
+            {_id : groupid},
+            {$pull : {files : {_id : fileid}} },
+            {new : true}
+        )
+
+        return res.status(200).json({
+            "message" : "file deleted successfully",
+            newGroup
+        })
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+})
 module.exports = router;

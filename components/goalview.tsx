@@ -3,6 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Checkbox from '@mui/material/Checkbox';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
 interface Goal {
   _id: string;
@@ -10,26 +27,34 @@ interface Goal {
   endDate: string;
 }
 
+const headerBgColor = '#3f51b5';
+const headerTextColor = '#fff';
+
 const GoalTable: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<any>(null);
-  const [refresh, setRefresh] = useState(0); // Refresh trigger state
+  const [completedGoals, setCompletedGoals] = useState<string[]>([]);
+  const [fadedGoals, setFadedGoals] = useState<string[]>([]);
   const router = useRouter();
+
+  // For new goal dialog
+  const [open, setOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEndDate, setNewEndDate] = useState("");
+  const [addingError, setAddingError] = useState<string | null>(null);
 
   // Retrieve session from cookies and handle redirection
   useEffect(() => {
     const sessionData = Cookies.get("session");
-
     if (sessionData) {
-      const parsedSession = JSON.parse(sessionData);
-      setSession(parsedSession);
+      setSession(JSON.parse(sessionData));
     } else {
-      router.push("/auth/signin"); // Redirect if no session data
+      router.push("/auth/signin");
     }
   }, [router]);
 
-  // Fetch goals when session or refresh trigger changes
+  // Fetch goals when session changes
   useEffect(() => {
     const fetchGoals = async () => {
       if (session?.user?.token) {
@@ -40,18 +65,15 @@ const GoalTable: React.FC = () => {
               'Authorization': `Bearer ${session.user.token}`,
             },
           });
-
           if (!response.ok) {
             throw new Error('Failed to fetch goals');
           }
-
           const data = await response.json();
           const formattedGoals = data.map((goal: any) => ({
             _id: goal._id,
             name: goal.title,
             endDate: goal.dueDate,
           }));
-          setRefresh(prev => prev + 1);
           setGoals(formattedGoals);
         } catch (err) {
           console.error(err);
@@ -59,11 +81,10 @@ const GoalTable: React.FC = () => {
         }
       }
     };
-
     fetchGoals();
-  }, [session, refresh]); // Dependencies: session and refresh
+  }, [session]);
 
-  // Delete goal by ID and trigger refresh after deletion
+  // Delete goal by ID (calls API)
   const deleteGoal = async (id: string) => {
     if (session?.user?.token) {
       try {
@@ -73,13 +94,9 @@ const GoalTable: React.FC = () => {
             'Authorization': `Bearer ${session.user.token}`,
           },
         });
-
         if (!response.ok) {
           throw new Error('Failed to delete goal');
         }
-
-        // Trigger a refresh after successful deletion
-        setRefresh(prev => prev + 1);
       } catch (err) {
         console.error(err);
         setError("Failed to delete goal. Please try again.");
@@ -87,38 +104,159 @@ const GoalTable: React.FC = () => {
     }
   };
 
+  // When a checkbox is checked, strike-through the goal, fade it out, then delete it.
+  const handleCheckboxChange = (goalId: string, checked: boolean) => {
+    if (checked) {
+      setCompletedGoals(prev => [...prev, goalId]);
+      setTimeout(() => {
+        setFadedGoals(prev => [...prev, goalId]);
+      }, 100);
+      setTimeout(() => {
+        deleteGoal(goalId);
+        setGoals(prevGoals => prevGoals.filter(goal => goal._id !== goalId));
+      }, 1000); // Delay to allow fade-out transition
+    }
+  };
+
+  // Handle opening and closing the dialog
+  const handleOpenDialog = () => {
+    setOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+    setNewName("");
+    setNewEndDate("");
+    setAddingError(null);
+  };
+
+  // Handle adding a new goal
+  const handleAddNewGoal = async () => {
+    if (!newName || !newEndDate) {
+      setAddingError("Please fill out both fields.");
+      return;
+    }
+    try {
+      const newGoal = { title: newName, description: newName, dueDate: newEndDate };
+      const response = await fetch('http://localhost:8000/api/goals/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.user.token}`,
+        },
+        body: JSON.stringify(newGoal),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add goal');
+      }
+      const savedGoal = await response.json();
+      setGoals(prevGoals => [
+        ...prevGoals,
+        { _id: savedGoal._id, name: savedGoal.title, endDate: savedGoal.dueDate }
+      ]);
+      handleCloseDialog();
+    } catch (err) {
+      console.error(err);
+      setAddingError("Failed to add goal. Please try again.");
+    }
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <h2 className="text-xl font-semibold mb-4 text-white text-center">Goals</h2>
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      <table className="min-w-full border border-gray-700 rounded-lg bg-c5 text-white">
-        <thead className="bg-t2 text-black">
-          <tr>
-            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold text-white">Goal Name</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold text-white">End Date</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left font-semibold text-white">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {goals.map((goal) => (
-            <tr key={goal._id}>
-              <td className="py-2 px-4 border-b border-gray-700">{goal.name}</td>
-              <td className="py-2 px-4 border-b border-gray-700">
-                {new Date(goal.endDate).toLocaleDateString()}
-              </td>
-              <td className="py-2 px-4 border-b border-gray-700">
-                <button
-                  onClick={() => deleteGoal(goal._id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
+    <>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            {/* First header row: Goals title and plus icon in one row */}
+            <TableRow>
+              <TableCell colSpan={2} style={{ backgroundColor: headerBgColor, padding: '8px 16px' }}>
+                <Typography variant="h6" style={{ color: headerTextColor, margin: 0 }}>
+                  Goals
+                </Typography>
+              </TableCell>
+              <TableCell style={{ backgroundColor: headerBgColor, padding: '8px 16px', textAlign: 'center' }}>
+                <IconButton onClick={handleOpenDialog} size="small">
+                  <AddIcon style={{ color: headerTextColor }} />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+            {/* Second header row: column labels */}
+            <TableRow>
+              <TableCell style={{ width: '33%', backgroundColor: headerBgColor, color: headerTextColor }}>
+                <Typography variant="subtitle2">Completed</Typography>
+              </TableCell>
+              <TableCell style={{ width: '33%', backgroundColor: headerBgColor, color: headerTextColor }}>
+                <Typography variant="subtitle2">Goal Name</Typography>
+              </TableCell>
+              <TableCell style={{ width: '33%', backgroundColor: headerBgColor, color: headerTextColor, textAlign: 'center' }}>
+                <Typography variant="subtitle2">End Date</Typography>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {goals.map((goal) => (
+              <TableRow
+                key={goal._id}
+                style={{
+                  opacity: fadedGoals.includes(goal._id) ? 0 : 1,
+                  transition: 'opacity 1s ease'
+                }}
+              >
+                <TableCell>
+                  <Checkbox
+                    onChange={(e) => handleCheckboxChange(goal._id, e.target.checked)}
+                    color="primary"
+                  />
+                </TableCell>
+                <TableCell
+                  style={{
+                    textDecoration: completedGoals.includes(goal._id) ? 'line-through' : 'none'
+                  }}
                 >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                  {goal.name}
+                </TableCell>
+                <TableCell style={{ textAlign: 'center' }}>
+                  {new Date(goal.endDate).toLocaleDateString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Dialog for adding new goal */}
+      <Dialog open={open} onClose={handleCloseDialog}>
+        <DialogTitle>Add New Goal</DialogTitle>
+        <DialogContent>
+          {addingError && <Typography color="error">{addingError}</Typography>}
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Goal Name"
+            type="text"
+            fullWidth
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="End Date"
+            type="date"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            value={newEndDate}
+            onChange={(e) => setNewEndDate(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleAddNewGoal} color="primary">
+            Add Goal
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
