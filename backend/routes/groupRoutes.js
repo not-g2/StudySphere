@@ -869,7 +869,7 @@ router.get("/getallfiles/:groupid",authMiddleware,async(req,res)=>{
             })
         }
 
-        const allFiles = await Group.findById(groupid).select("files.fileLink files.postedBy files.title").populate("files.postedBy","name")
+        const allFiles = await Group.findById(groupid).select("files.fileLink files.postedBy files.title files._id").populate("files.postedBy","name")
 
         if(!allFiles){
             return res.status(404).json({
