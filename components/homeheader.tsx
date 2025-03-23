@@ -2,17 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Avatar,
-  Box,
-  IconButton,
-  MenuItem,
-  Menu,
-  Badge,
-  Divider,
-  Skeleton,
+    AppBar,
+    Toolbar,
+    Typography,
+    Avatar,
+    Box,
+    IconButton,
+    MenuItem,
+    Menu,
+    Badge,
+    Divider,
+    Button,
 } from "@mui/material";
 import Dropdown from "../components/dropdown";
 import { useRouter } from "next/navigation";
@@ -24,28 +24,31 @@ import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
 
 const Header: React.FC = () => {
-  const PORT = process.env.NEXT_PUBLIC_PORT;
-  const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
-  const router = useRouter();
-  const [userImage, setUserImage] = useState<string | null>(null);
-  // Start with undefined so we know when the session check is in progress.
-  const [session, setSession] = useState<any | null | undefined>(undefined);
-  const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<number>(3);
-  const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
-  const [animateBell, setAnimateBell] = useState<boolean>(true);
+    const PORT = process.env.NEXT_PUBLIC_PORT;
+    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
+        null
+    );
+    const router = useRouter();
+    const [userImage, setUserImage] = useState<string | null>(null);
+    // Start with undefined so we know when the session check is in progress.
+    const [session, setSession] = useState<any | null | undefined>(undefined);
+    const [open, setOpen] = useState(false);
+    const [notifications, setNotifications] = useState<number>(3);
+    const [notificationAnchorEl, setNotificationAnchorEl] =
+        useState<null | HTMLElement>(null);
+    const [animateBell, setAnimateBell] = useState<boolean>(true);
 
-  // This hook sets session to an object if logged in, or null if not logged in, leaving it undefined while checking.
-  useSessionCheck(setSession);
+    // This hook sets session to an object if logged in, or null if not logged in, leaving it undefined while checking.
+    useSessionCheck(setSession);
 
-  const navItems = [
-    { label: "Home", path: "/" },
-    { label: "Dashboard", path: "/Dashboard" },
-    { label: "Courses", path: "/Courses" },
-    { label: "Rewards", path: "/Rewards" },
-    { label: "Goals", path: "/Goals" },
-    { label: "Schedule", path: "/Schedule" },
-  ];
+    const navItems = [
+        { label: "Home", path: "/" },
+        { label: "Dashboard", path: "/Dashboard" },
+        { label: "Courses", path: "/Courses" },
+        { label: "Rewards", path: "/Rewards" },
+        { label: "Goals", path: "/Goals" },
+        { label: "Schedule", path: "/Schedule" },
+    ];
 
     const { time, isRunning, timerState, lastActiveState } = useTimer();
 

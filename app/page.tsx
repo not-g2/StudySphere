@@ -70,30 +70,29 @@ function Page() {
         const signUpButton = document.getElementById("signUp");
         const signInButton = document.getElementById("signIn");
         const container = document.getElementById("container");
-    
+
         if (signUpButton && signInButton && container) {
             signUpButton.addEventListener("click", () => {
                 container.classList.add("right-panel-active");
             });
-    
+
             signInButton.addEventListener("click", () => {
                 container.classList.remove("right-panel-active");
             });
         }
-    
+
         return () => {
             if (signUpButton && signInButton) {
                 signUpButton.removeEventListener("click", () => {
                     container?.classList.add("right-panel-active");
                 });
-    
+
                 signInButton.removeEventListener("click", () => {
                     container?.classList.remove("right-panel-active");
                 });
             }
         };
     }, []);
-    
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -112,7 +111,7 @@ function Page() {
                 if (data.token) {
                     storeSessionData(data);
                     if (isAdmin === "Admin") {
-                        window.location.href = "/Dashboard";
+                        window.location.href = "/admin";
                     } else {
                         window.location.href = "/Dashboard";
                     }
