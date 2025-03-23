@@ -4,16 +4,13 @@ const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
 const Chapter = require("../models/chapterSchema"); 
 const router = express.Router();
 const generatePdfUrl = require("../utils/pdflinkhelper");
-const Course = require("../models/chapterSchema.js")
+const Course = require("../models/courseModel.js")
 const mongoose = require("mongoose")
-router.post(
-    "/create",
-    authMiddleware,
-    uploadPDF.single("pdfFile"),
-    async (req, res) => {
-        const { title, courseID } = req.body;
 
+router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async (req, res) => {
         try {
+            const { title } = req.body;
+            const {courseID} = req.params;
             if (!req.file || !req.file.path) {
                 return res.status(400).json({ message: "PDF upload failed." });
             }
@@ -33,6 +30,11 @@ router.post(
             });
 
             await newChapter.save();
+
+            await Course.findByIdAndUpdate(
+                courseID,
+                {$push : {chapters : newChapter._id}}
+            )
 
             res.status(201).json({
                 message: "Chapter saved successfully.",
