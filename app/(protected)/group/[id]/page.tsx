@@ -475,25 +475,35 @@ const DashboardNoAssignments = () => {
     }
   };
 
-  const handleFileUpdate = async (updatedData: { fileId: string; title: string; description: string; newFile?: File | null }) => {
+  const handleFileUpdate = async (updatedData: {
+    fileId: string;
+    title: string;
+    description: string;
+    newFile?: File | null;
+  }) => {
     const formData = new FormData();
     formData.append("title", updatedData.title);
     formData.append("description", updatedData.description);
     if (updatedData.newFile) {
       formData.append("pdfFile", updatedData.newFile);
     }
+  
     try {
-      const response = await fetch(`http://localhost:8000/api/groups/updatefile/${courseID}/${updatedData.fileId}`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-        body: formData,
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/groups/updatefile/${courseID}/${updatedData.fileId}`, // use updatedData.fileId here
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+          body: formData,
+        }
+      );
       if (response.ok) {
         await fetchFiles();
         setEditingFile(null);
         setOpenEditModal(false);
       } else {
-        console.error("Failed to update file");
+        const errorData = await response.json();
+        console.error("Failed to update file", errorData);
       }
     } catch (error) {
       console.error("Error updating file:", error);
