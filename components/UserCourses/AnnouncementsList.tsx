@@ -1,20 +1,16 @@
 "use client";
 import React from "react";
-import {
-  Typography,
-  Card,
-  CardContent,
-  Box,
-  IconButton,
-} from "@mui/material";
-import { format } from "date-fns";
+import { Typography, Card, CardContent, Box, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Announcement {
   _id: number;
   title: string;
-  createdAt: string;
   description: string;
+  user: {
+    _id: string;
+    name: string;
+  };
 }
 
 interface AnnouncementsListProps {
@@ -30,16 +26,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({
   onDeleteAnnouncement,
   currentUserRole,
 }) => {
-  // Validate the date before formatting; return a fallback if invalid.
-  const formatDate = (date: string): string => {
-    const parsedDate = new Date(date);
-    if (isNaN(parsedDate.getTime())) {
-      console.error("Invalid date provided:", date);
-      return "Invalid Date";
-    }
-    return format(parsedDate, "MMMM dd, yyyy HH:mm:ss");
-  };
-
   return (
     <>
       <Typography variant="h5" gutterBottom sx={{ color: "#fff" }}>
@@ -71,8 +57,16 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({
               <Typography variant="h6" gutterBottom>
                 {announcement.title}
               </Typography>
-              <Typography variant="body2" sx={{ color: "#d3d3d3" }}>
-                Posted on: {formatDate(announcement.createdAt)}
+              <Typography
+                variant="body2"
+                noWrap
+                sx={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {announcement.description}
               </Typography>
             </CardContent>
             {(currentUserRole === "Admin" || currentUserRole === "Creator") && (

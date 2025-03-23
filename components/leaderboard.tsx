@@ -70,8 +70,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
   const maxLevel = Math.max(...combinedData.map((entry) => entry.level), 10);
 
   return (
-    <div className="p-4 bg-c5 rounded-lg shadow-lg w-full">
-      <h2 className="text-2xl font-bold text-white mb-4 text-center">Leaderboard</h2>
+    <div className="p-4 bg-white rounded-lg shadow-lg w-full">
+      <h2 className="text-2xl font-bold text-black mb-4 text-center">Leaderboard</h2>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={combinedData}

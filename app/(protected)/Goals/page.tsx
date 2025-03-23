@@ -13,12 +13,15 @@ interface Goal {
 }
 
 function ThirdRowPage() {
-  const PORT = process.env.NEXT_PUBLIC_PORT
+  const PORT = process.env.NEXT_PUBLIC_PORT;
   const [session, setSession] = useState<any>(null);
+  const [goalRefresh, setGoalRefresh] = useState(0);
   useSessionCheck(setSession);
 
+  // When a goal is added, trigger a refresh so that GoalTable fetches the new goal.
   const handleAddGoal = (goal: Goal) => {
     console.log("Added goal:", goal);
+    setGoalRefresh(prev => prev + 1);
   };
 
   function addDeadline(deadline: any): void {
@@ -29,7 +32,6 @@ function ThirdRowPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(deadlineData),
         });
-
         if (!response.ok) {
           throw new Error("Error creating reminder");
         }
@@ -44,14 +46,7 @@ function ThirdRowPage() {
 
   return (
     <div className="bg-c2" style={{ padding: "20px", minHeight: "100vh" }}>
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          alignItems: "flex-start",
-          marginTop: "20px",
-        }}
-      >
+      <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginTop: "20px" }}>
         <div style={{ flex: 1 }}>
           <AddGoalForm onAddGoal={handleAddGoal} />
         </div>
@@ -59,7 +54,7 @@ function ThirdRowPage() {
           <DeadlineForm onAddDeadline={addDeadline} />
         </div>
         <div style={{ flex: 1 }}>
-          <GoalTable />
+          <GoalTable externalRefresh={goalRefresh} />
         </div>
         <div style={{ flex: 1 }}>
           <Challengetable />

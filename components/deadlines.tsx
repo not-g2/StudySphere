@@ -1,5 +1,16 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from "@mui/material";
 
 type Deadline = {
   id: number | string;
@@ -14,21 +25,19 @@ function DeadlinesList() {
     const fetchDeadlines = async () => {
       try {
         const sessionData = Cookies.get("session");
-        
         if (!sessionData) {
           console.error("No session data found");
           return;
         }
-
         const session = JSON.parse(sessionData);
         const userId = session.user?.id;
-
         if (!userId) {
           console.error("User ID is missing in session data");
           return;
         }
-
-        const response = await fetch(`http://localhost:8000/api/users/${userId}/deadlines`);
+        const response = await fetch(
+          `http://localhost:8000/api/users/${userId}/deadlines`
+        );
         if (response.ok) {
           const data = await response.json();
           const formattedDeadlines = data.deadlines.map((deadline: any) => ({
@@ -49,29 +58,35 @@ function DeadlinesList() {
   }, []);
 
   return (
-    // Updated container: full width with padding instead of fixed max width
-    <div className="flex flex-col items-center py-8 w-full">
-      <h2 className="text-2xl font-bold mb-6 text-center text-white">Deadlines</h2>
-      <div className="w-full px-4">
-        <table className="w-full border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-          <thead>
-            <tr className="bg-t2 text-gray-100">
-              <th className="text-white px-4 py-2 font-semibold text-center">Deadline</th>
-              <th className="text-white px-4 py-2 font-semibold text-center">Date</th>
-            </tr>
-          </thead>
-          <tbody>
+    <div style={{ padding: "16px", width: "100%" }}>
+      {/* <Typography
+        variant="h4"
+        align="center"
+        gutterBottom
+        style={{ color: "#000" }}
+      >
+        Deadlines
+      </Typography> */}
+      <TableContainer component={Paper} style={{ backgroundColor: "#FFFFFF" }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell align="center">Deadline</TableCell>
+              <TableCell align="center">Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {deadlines.map((deadline) => (
-              <tr key={deadline.id} className="bg-c5 border-t text-gray-200">
-                <td className="px-4 py-2 text-center">{deadline.name}</td>
-                <td className="px-4 py-2 text-center">
+              <TableRow key={deadline.id}>
+                <TableCell align="center">{deadline.name}</TableCell>
+                <TableCell align="center">
                   {new Date(deadline.date).toLocaleDateString()}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 }

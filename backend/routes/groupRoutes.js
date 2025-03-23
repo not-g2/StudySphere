@@ -55,10 +55,10 @@ router.post("/create",authMiddleware,async(req,res)=>{
 });
 
 // join a group (works , tested on postman)
-router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
+router.post("/joingroup/:groupcode",authMiddleware,async(req,res)=>{
     try{
-        const {groupid} = req.params;
-        if (!groupid) {
+        const {groupcode} = req.params;
+        if (!groupcode) {
             return res.status(400).json({ message: "Group ID is required!" });
         }
         const userId = req.user.userID;
@@ -71,7 +71,7 @@ router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
             })
         }
 
-        const group = await Group.findById({_id : groupid});
+        const group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
             return res.status(404).json({
@@ -103,7 +103,7 @@ router.post("/joingroup/:groupid",authMiddleware,async(req,res)=>{
 
         // Add user to the group's members and update user's studyGroups list
         const updatedGroup = await Group.findOneAndUpdate(
-            { _id: groupid },
+            { _id: group._id},
             { $push: { members: { user: userId, rank: "Member" } } },
             { new: true } // Return the updated group
         );
@@ -389,7 +389,7 @@ router.post("/changemembership/:groupid/",authMiddleware,async(req,res)=>{
                 { "members.user": targetuserId }
             ]
         });
-        console.log(group)
+
         if(!group){
             return res.status(404).json({
                 message : "Specified Group doesnt exist!"
@@ -466,7 +466,7 @@ router.get("/allusergrps",authMiddleware,async(req,res)=>{
         //console.log(user.studyGroups.length())
 
         for(const group of user.studyGroups){
-            user.push({
+            usergrp.push({
                 _id : group._id,
                 name : group.name
             });
@@ -484,7 +484,7 @@ router.get("/allusergrps",authMiddleware,async(req,res)=>{
     }
 })
 
-// route to make an announcement in the group
+// route to make an announcement in the group (works on postman)
 router.post("/createanncmnt/:groupid",authMiddleware,async(req,res)=>{
     try{
         const userid = req.user.userID;
@@ -561,8 +561,8 @@ router.post("/createanncmnt/:groupid",authMiddleware,async(req,res)=>{
     }
 })
 
-// fetch all the announcements
-router.post("/fetchanncmnt/:groupid",authMiddleware,async(req,res)=>{
+// fetch all the announcements (works on postman)
+router.get("/fetchanncmnt/:groupid",authMiddleware,async(req,res)=>{
     try{
         const {groupid} = req.params;
         if (!groupid) {
@@ -583,7 +583,8 @@ router.post("/fetchanncmnt/:groupid",authMiddleware,async(req,res)=>{
         for(const anncmnt of group.announcements){
             allAnnouncements.push({
                 content : anncmnt.content,
-                user : anncmnt.createdBy
+                user : anncmnt.createdBy,
+                date : anncmnt.date
             })
         }
 
@@ -617,17 +618,17 @@ router.delete("/deleteanncmnt/:groupid/:anncmntid",authMiddleware,async(req,res)
         });
 
         if(!group){
-            return res.status().json({
+            return res.status(404).json({
                 message : 'Group not found'
             })
         }
 
-        const res = await Group.updateOne(
+        const result = await Group.updateOne(
             {_id : group._id},
             {$pull : {announcements : {announcementId : anncmntid}}}
         )
 
-        if(res.modifiedCount === 0){
+        if(result.modifiedCount === 0){
             return res.status(404).json({ message: "Announcement not found!" });
         }
 
@@ -642,7 +643,7 @@ router.delete("/deleteanncmnt/:groupid/:anncmntid",authMiddleware,async(req,res)
     }
 })
 
-// route for a member to leave the group
+// route for a member to leave the group (works on postman)
 router.delete("/leavegrp/:groupid/:successoruserid?",authMiddleware,async(req,res)=>{
     try{
         const userid = req.user.userID;
@@ -760,6 +761,7 @@ router.delete("/leavegrp/:groupid/:successoruserid?",authMiddleware,async(req,re
     }
 })
 
+// works on postman
 router.get("/getstatus/:groupid/:targetuserid",async(req,res)=>{
     try{
         const {groupid,targetuserid} = req.params;
@@ -795,7 +797,7 @@ router.get("/getstatus/:groupid/:targetuserid",async(req,res)=>{
 })
 
 // route to upload a file
-router.post("/uploadfile")
+// router.post("/uploadfile")
 
 
 // route to fetch all files

@@ -182,6 +182,7 @@ const DashboardPage = () => {
     }, [session]);
 
     const isSubmitted = (assignmentId: number) => {
+        console.log(submissions)
         return submissions.some(
             (submission) =>
                 submission.assignmentId._id === assignmentId &&

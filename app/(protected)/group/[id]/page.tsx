@@ -12,7 +12,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
@@ -54,59 +55,56 @@ type Session = {
   isAdmin: boolean;
 };
 
-// Popup component for adding announcement with a date
-interface AddAnnouncementPopupProps {
+// Popup component to select a successor when the creator leaves
+interface SelectSuccessorPopupProps {
   open: boolean;
-  handleClose: () => void;
-  onSubmit: (data: { announcementBody: string; announcementDate: string }) => void;
+  candidates: Member[]; // members excluding the creator
+  onClose: () => void;
+  onSubmit: (successorId: string) => void;
 }
 
-const AddAnnouncementPopup: React.FC<AddAnnouncementPopupProps> = ({
+const SelectSuccessorPopup: React.FC<SelectSuccessorPopupProps> = ({
   open,
-  handleClose,
+  candidates,
+  onClose,
   onSubmit,
 }) => {
-  const [announcementBody, setAnnouncementBody] = useState("");
-  // Default to today's date in yyyy-mm-dd format.
-  const getTodayDate = () => new Date().toISOString().split("T")[0];
-  const [announcementDate, setAnnouncementDate] = useState(getTodayDate());
+  const [selectedId, setSelectedId] = useState("");
 
-  const handleSubmit = () => {
-    onSubmit({ announcementBody, announcementDate });
-    setAnnouncementBody("");
-    setAnnouncementDate(getTodayDate());
-    handleClose();
+  const handleConfirm = () => {
+    if (selectedId) {
+      onSubmit(selectedId);
+      setSelectedId("");
+    }
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Add Announcement</DialogTitle>
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Select Successor</DialogTitle>
       <DialogContent>
-        <TextField
-          label="Announcement"
-          fullWidth
-          multiline
-          rows={4}
-          value={announcementBody}
-          onChange={(e) => setAnnouncementBody(e.target.value)}
-          margin="normal"
-        />
-        <TextField
-          label="Announcement Date"
-          type="date"
-          fullWidth
-          value={announcementDate}
-          onChange={(e) => setAnnouncementDate(e.target.value)}
-          margin="normal"
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
+        <Typography>
+          As you are the creator, you must choose a successor before leaving.
+        </Typography>
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel id="successor-select-label">Successor</InputLabel>
+          <Select
+            labelId="successor-select-label"
+            value={selectedId}
+            label="Successor"
+            onChange={(e) => setSelectedId(e.target.value)}
+          >
+            {candidates.map((member) => (
+              <MenuItem key={member.memberid} value={member.memberid}>
+                {member.name} ({member.rank})
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained">
-          Submit
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleConfirm} variant="contained" disabled={!selectedId}>
+          Confirm
         </Button>
       </DialogActions>
     </Dialog>
@@ -122,7 +120,7 @@ const DashboardNoAssignments = () => {
   const [currentUserRole, setCurrentUserRole] = useState<string>("");
   const [session, setSession] = useState<Session | null>(null);
   const [activeTab, setActiveTab] = useState<"dashboard" | "people">("dashboard");
-  const [openAddAnnouncementPopup, setOpenAddAnnouncementPopup] = useState(false);
+  const [openSuccessorPopup, setOpenSuccessorPopup] = useState(false);
 
   const router = useRouter();
   const params = useParams();
@@ -144,14 +142,12 @@ const DashboardNoAssignments = () => {
     setCurrentAnnouncement(null);
   };
 
-  // Open the add announcement popup
-  const handleAddAnnouncement = () => {
-    setOpenAddAnnouncementPopup(true);
-  };
-
-  // Submit announcement from popup (only for Admin/Creator)
-  const handleSubmitAnnouncement = async (data: { announcementBody: string; announcementDate: string }) => {
+  // Add announcement using prompt (only for Admin/Creator)
+  const handleAddAnnouncement = async () => {
     if (!session) return;
+    const announcementBody = prompt("Enter announcement text:");
+    if (!announcementBody) return;
+    
     try {
       const response = await fetch(
         `http://localhost:8000/api/groups/createanncmnt/${courseID}`,
@@ -161,11 +157,11 @@ const DashboardNoAssignments = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.user.token}`,
           },
-          // Including announcementDate along with announcementBody.
-          body: JSON.stringify({ announcementBody: data.announcementBody, announcementDate: data.announcementDate }),
+          body: JSON.stringify({ announcementBody }),
         }
       );
       if (response.ok) {
+        // Re-fetch announcements to update the list
         fetchAnnouncements();
       } else {
         console.error("Failed to add announcement");
@@ -261,11 +257,12 @@ const DashboardNoAssignments = () => {
         `http://localhost:8000/api/groups/fetchanncmnt/${courseID}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          method: "POST",
+          method: "GET",
         }
       );
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
         // Transform announcements if needed
         const transformedAnnouncements = data.allAnnouncements.map(
           (item: any, index: number) => {
@@ -356,8 +353,15 @@ const DashboardNoAssignments = () => {
   };
 
   // Leave group function
+  // If the current user is the creator, open the successor selection popup.
+  // Otherwise, call the leave group API directly.
   const handleLeaveGroup = async () => {
-    if (session) {
+    if (!session) return;
+    if (currentUserRole === "Creator") {
+      // Open popup to select a successor
+      setOpenSuccessorPopup(true);
+    } else {
+      // Not a creator, simply call leave group API without successor.
       try {
         const response = await fetch(
           `http://localhost:8000/api/groups/leavegrp/${courseID}`,
@@ -378,6 +382,31 @@ const DashboardNoAssignments = () => {
       } catch (error) {
         console.error("Network error leaving group:", error);
       }
+    }
+  };
+
+  // Callback for when a successor is selected by the creator.
+  const handleSuccessorSelected = async (successorId: string) => {
+    if (!session) return;
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/groups/leavegrp/${courseID}/${successorId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.user.token}`,
+          },
+        }
+      );
+      if (response.ok) {
+        router.push("/group");
+      } else {
+        const errorData = await response.json();
+        console.error("Error leaving group:", errorData);
+      }
+    } catch (error) {
+      console.error("Network error leaving group:", error);
     }
   };
 
@@ -451,11 +480,15 @@ const DashboardNoAssignments = () => {
         announcement={currentAnnouncement}
       />
 
-      {/* Add Announcement Popup */}
-      <AddAnnouncementPopup
-        open={openAddAnnouncementPopup}
-        handleClose={() => setOpenAddAnnouncementPopup(false)}
-        onSubmit={handleSubmitAnnouncement}
+      {/* Successor selection popup for creators leaving the group */}
+      <SelectSuccessorPopup
+        open={openSuccessorPopup}
+        candidates={members.filter((m) => m.memberid !== session?.user.id)} // exclude self
+        onClose={() => setOpenSuccessorPopup(false)}
+        onSubmit={(successorId) => {
+          setOpenSuccessorPopup(false);
+          handleSuccessorSelected(successorId);
+        }}
       />
     </Box>
   );
@@ -496,7 +529,6 @@ const DashboardNoAssignments = () => {
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {/* If current user is Creator, allow role changes */}
             {currentUserRole === "Creator" && member.rank !== "Creator" && (
               <Select
                 value={member.rank}
@@ -510,7 +542,6 @@ const DashboardNoAssignments = () => {
                 <MenuItem value="Admin">Admin</MenuItem>
               </Select>
             )}
-            {/* Allow deletion: Creator can remove anyone except self; Admin can remove only Members */}
             {((currentUserRole === "Creator" && member.rank !== "Creator") ||
               (currentUserRole === "Admin" && member.rank === "Member")) && (
               <IconButton
