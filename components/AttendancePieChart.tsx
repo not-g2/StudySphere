@@ -1,6 +1,7 @@
+"use client";
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Text } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Label } from 'recharts';
 
 interface AttendanceData {
   courseName: string;
@@ -29,12 +30,15 @@ const AttendancePieChart: React.FC = () => {
         return;
       }
       try {
-        const response = await fetch(`http://localhost:8000/api/attendance/breakdown/${session.user.id}`, {
-          headers: {
-            "Authorization": `Bearer ${session.user.token}`,
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `http://localhost:8000/api/attendance/breakdown/${session.user.id}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${session.user.token}`,
+              "Content-Type": "application/json",
+            }
           }
-        });
+        );
         if (response.ok) {
           const data = await response.json();
           setAttendanceData(data.attendanceByCourse);
@@ -50,44 +54,16 @@ const AttendancePieChart: React.FC = () => {
     }
   }, [session]);
 
-  const renderCustomLabel = (courseName: string, attendancePercentage: string) => {
-    return ({ x, y }: { x: number; y: number }) => (
-      <>
-        <Text
-          x={x}
-          y={y - 10}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize="14px"
-          fontWeight="bold"
-          fill="#ffffff"
-        >
-          {courseName}
-        </Text>
-        <Text
-          x={x}
-          y={y + 15}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize="16px"
-          fontWeight="bold"
-          fill="#ffffff"
-        >
-          {attendancePercentage}%
-        </Text>
-      </>
-    );
-  };
-
   return (
-    // Ensure the container is wide enough
-    <div className="w-full px-4">
+    // Card container with background color #F3F3F4
+    <div className="w-full px-4" style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", maxWidth: "800px", margin: "0 auto" }}>
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '40px',
-          padding: '20px 0'
+          // Use auto-fit to let columns wrap, with a fixed minimum width
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '5px', // Reduced gap horizontally and vertically
+          padding: '10px 0'
         }}
       >
         {attendanceData.map((data, index) => {
@@ -96,24 +72,55 @@ const AttendancePieChart: React.FC = () => {
             { name: 'Attended', value: percentage },
             { name: 'Missed', value: 100 - percentage },
           ];
+
+          // Compute the larger slice percentage (if less than 50, show absentee percentage)
+          const largerPercentage = percentage >= 50 ? percentage : 100 - percentage;
+
+          // Custom label to render in the center of the pie chart.
+          const renderCenterLabel = (props: any) => {
+            const { cx, cy } = props.viewBox;
+            return (
+              <>
+                <text
+                  x={cx}
+                  y={cy - 10}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  style={{ fill: "#000000", fontSize: "14px", fontWeight: "bold" }}
+                >
+                  {data.courseName}
+                </text>
+                <text
+                  x={cx}
+                  y={cy + 15}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  style={{ fill: "#000000", fontSize: "16px", fontWeight: "bold" }}
+                >
+                  {largerPercentage}%
+                </text>
+              </>
+            );
+          };
+
           return (
             <div key={index} className="text-center">
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
                   <Pie
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={70}
-                    outerRadius={90}
+                    innerRadius={50}
+                    outerRadius={70}
                     startAngle={90}
                     endAngle={-270}
                     dataKey="value"
                     labelLine={false}
-                    label={renderCustomLabel(data.courseName, data.attendancePercentage)}
                   >
                     <Cell key="attended" fill="#82ca9d" />
                     <Cell key="missed" fill="#8884d8" />
+                    <Label content={renderCenterLabel} position="center" />
                   </Pie>
                   <Tooltip />
                 </PieChart>
