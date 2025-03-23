@@ -891,6 +891,7 @@ router.get("/getallfiles/:groupid",authMiddleware,async(req,res)=>{
 // route to update a file (works , checked on postman)
 router.post("/updatefile/:groupid/:filesid", authMiddleware, uploadPDF.single("pdfFile"), async (req, res) => {
     try {
+        console.log("Request params:", req.params);
         const { groupid, filesid } = req.params;
         const userid = req.user.userID;
         const { title, description } = req.body;
