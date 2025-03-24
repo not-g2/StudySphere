@@ -10,7 +10,6 @@ import {
     TextField,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import default_profile_pic from "../../../public/default-profile.png";
 import Cookies from "js-cookie";
 import LogoutPage from "@/components/signout";
 
@@ -38,7 +37,7 @@ const ProfilePage: React.FC = () => {
             if (sessionData && !session) {
                 setSession(JSON.parse(sessionData));
             } else if (!sessionData) {
-                router.push("/auth/signin");
+                router.push("/");
             }
             if (session) {
                 const token = session?.user.token;
@@ -159,7 +158,7 @@ const ProfilePage: React.FC = () => {
                 p={4}
             >
                 <Avatar
-                    src={image || default_profile_pic.src}
+                    src={image || "default-profile.png"}
                     alt="Profile Picture"
                     sx={{ width: 120, height: 120, mb: 2, cursor: "pointer" }}
                     onClick={handleImageClick}

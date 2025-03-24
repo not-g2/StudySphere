@@ -36,5 +36,7 @@ export const config = {
         "/Goals",
         "/Schedule",
         "/Pomo",
+        "/groups",
+        "/Profile",
     ],
 };

@@ -2,7 +2,6 @@
 
 import Header from "../../components/homeheader";
 import AdminHeader from "../../components/adminheader";
-import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
 import "./output.css";
 import { usePathname } from "next/navigation";
@@ -21,11 +20,8 @@ export default function RootLayout({
 
     return (
         <div>
-            <SessionProvider session={session}>
-                {!isAuthRedirect &&
-                    (isAdminRoute ? <AdminHeader /> : <Header />)}
-                {children}
-            </SessionProvider>
+            {!isAuthRedirect && (isAdminRoute ? <AdminHeader /> : <Header />)}
+            {children}
         </div>
     );
 }
