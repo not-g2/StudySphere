@@ -12,7 +12,7 @@ import {
     Badge,
     Divider,
     Button,
-    Skeleton // <-- Import Skeleton here
+    Skeleton, // <-- Import Skeleton here
 } from "@mui/material";
 import Dropdown from "../components/dropdown";
 import { useRouter } from "next/navigation";
@@ -28,14 +28,17 @@ const skeletonBg = "#001125"; // Adjust this color as needed
 
 const Header: React.FC = () => {
     const PORT = process.env.NEXT_PUBLIC_PORT;
-    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(
+        null
+    );
     const router = useRouter();
     const [userImage, setUserImage] = useState<string | null>(null);
     // Start with undefined so we know when the session check is in progress.
     const [session, setSession] = useState<any | null | undefined>(undefined);
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState<number>(3);
-    const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
+    const [notificationAnchorEl, setNotificationAnchorEl] =
+        useState<null | HTMLElement>(null);
     const [animateBell, setAnimateBell] = useState<boolean>(true);
 
     // This hook sets session to an object if logged in, or null if not logged in, leaving it undefined while checking.
@@ -48,6 +51,7 @@ const Header: React.FC = () => {
         { label: "Rewards", path: "/Rewards" },
         { label: "Goals", path: "/Goals" },
         { label: "Schedule", path: "/Schedule" },
+        { label: "Pomodoro", path: "/Pomo" },
     ];
 
     const { time, isRunning, timerState, lastActiveState } = useTimer();
@@ -140,43 +144,42 @@ const Header: React.FC = () => {
         <AppBar
             position="static"
             sx={{
-                background: "linear-gradient(to bottom right, #0f173a, #001d30)",
+                background:
+                    "linear-gradient(to bottom right, #0f173a, #001d30)",
                 paddingX: 2,
             }}
         >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
                 {/* Navigation Links */}
                 <Box sx={{ display: "flex", gap: 3 }}>
-                    {session === undefined ? (
-                        navItems.map((item, index) => (
-                            <Skeleton
-                                key={index}
-                                variant="text"
-                                width={80}
-                                sx={{ bgcolor: skeletonBg, height: "1rem" }}
-                            />
-                        ))
-                    ) : (
-                        navItems.map((item) => (
-                            <Typography
-                                key={item.label}
-                                variant="h6"
-                                onClick={() => handleGo(item.path)}
-                                sx={{
-                                    color: "#fff",
-                                    fontSize: "1rem",
-                                    fontWeight: "500",
-                                    cursor: "pointer",
-                                    "&:hover": {
-                                        color: "#ffcc00",
-                                        transition: "0.3s ease-in-out",
-                                    },
-                                }}
-                            >
-                                {item.label}
-                            </Typography>
-                        ))
-                    )}
+                    {session === undefined
+                        ? navItems.map((item, index) => (
+                              <Skeleton
+                                  key={index}
+                                  variant="text"
+                                  width={80}
+                                  sx={{ bgcolor: skeletonBg, height: "1rem" }}
+                              />
+                          ))
+                        : navItems.map((item) => (
+                              <Typography
+                                  key={item.label}
+                                  variant="h6"
+                                  onClick={() => handleGo(item.path)}
+                                  sx={{
+                                      color: "#fff",
+                                      fontSize: "1rem",
+                                      fontWeight: "500",
+                                      cursor: "pointer",
+                                      "&:hover": {
+                                          color: "#ffcc00",
+                                          transition: "0.3s ease-in-out",
+                                      },
+                                  }}
+                              >
+                                  {item.label}
+                              </Typography>
+                          ))}
                 </Box>
 
                 {/* Timer */}

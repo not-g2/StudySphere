@@ -15,12 +15,20 @@ interface TimerContextType {
     animations: { animationData: any; text: string }[];
     lastActiveState: lastActiveState;
     setLastActiveState: (state: lastActiveState) => void;
+    tag: string;
+    setTag: (tags: string) => void;
+    Reset: () => void;
+    Start: () => void;
+    Pause: () => void;
 }
 
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
 export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
-    const [time, setTime] = useState(25 * 60);
+    const maxCycleCount = 3;
+    const focusTime = 25 * 60;
+    const breakTime = 5 * 60;
+    const [time, setTime] = useState(focusTime);
     const [isRunning, setIsRunning] = useState(false);
     const [timerState, setTimerState] = useState<TimerState>("paused");
     const [lastActiveState, setLastActiveState] = useState<
@@ -31,6 +39,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
     >([]);
     const [index, setIndex] = useState(0);
     const [cycleCount, setCycleCount] = useState(0);
+    const [tag, setTag] = useState("Default");
 
     const animationData = [
         {
@@ -106,20 +115,20 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
 
-        if (isRunning && cycleCount < 3) {
+        if (isRunning && cycleCount < maxCycleCount) {
             interval = setInterval(() => {
                 setTime((prevTime) => {
                     if (prevTime > 0) return prevTime - 1;
 
                     if (timerState === "focus") {
                         setTimerState("break");
-                        setTime(5 * 60);
-                        return 5 * 60;
+                        setTime(breakTime);
+                        return breakTime;
                     } else if (timerState === "break") {
                         const newCycleCount = cycleCount + 1;
                         setCycleCount(newCycleCount);
 
-                        if (newCycleCount >= 3) {
+                        if (newCycleCount >= maxCycleCount) {
                             setIsRunning(false);
                             setTimerState("paused");
                             setLastActiveState(null);
@@ -128,7 +137,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
                         }
 
                         setTimerState("focus");
-                        return 25 * 60;
+                        return focusTime;
                     }
 
                     return prevTime;
@@ -146,12 +155,14 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
         const savedIsRunning = localStorage.getItem("timer-isRunning");
         const savedState = localStorage.getItem("timer-state");
         const savedCycles = localStorage.getItem("timer-cycles");
+        const savedTag = localStorage.getItem("timer-tag");
 
         if (savedTime) setTime(parseInt(savedTime, 10));
         if (savedIsRunning) setIsRunning(savedIsRunning === "true");
         if (savedState)
             setTimerState(savedState as "focus" | "break" | "paused");
         if (savedCycles) setCycleCount(parseInt(savedCycles, 10));
+        if (savedTag) setTag(savedTag);
     }, []);
 
     useEffect(() => {
@@ -159,7 +170,33 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem("timer-isRunning", isRunning.toString());
         localStorage.setItem("timer-state", timerState);
         localStorage.setItem("timer-cycles", cycleCount.toString());
-    }, [time, isRunning, timerState, cycleCount]);
+        localStorage.setItem("timer-tag", tag);
+    }, [time, isRunning, timerState, cycleCount, tag]);
+
+    const Reset = () => {
+        var timeSpent = cycleCount * focusTime;
+        if (timerState === "focus") {
+            timeSpent += focusTime - time;
+        }
+        if (timerState === "break") {
+            timeSpent += focusTime;
+        }
+        setIsRunning(false);
+        setTimerState("paused");
+        setLastActiveState(null);
+        setTime(focusTime);
+        setTag("Default");
+    };
+
+    const Start = () => {
+        setIsRunning(true);
+        setTimerState("focus");
+    };
+
+    const Pause = () => {
+        setIsRunning(false);
+        setTimerState("paused");
+    };
 
     return (
         <TimerContext.Provider
@@ -174,6 +211,11 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
                 animations,
                 lastActiveState,
                 setLastActiveState,
+                tag,
+                setTag,
+                Reset,
+                Start,
+                Pause,
             }}
         >
             {children}
