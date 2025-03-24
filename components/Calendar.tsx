@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
+import interactionPlugin from "@fullcalendar/interaction";
 import Cookies from "js-cookie";
 import "../app/(protected)/output.css";
 
@@ -31,10 +31,11 @@ const getDateForDay = (day: string) => {
 interface EventData {
   title: string;
   start: string;
-  end: string;
+  end?: string;
+  allDay?: boolean;
   extendedProps?: {
-    day: string;
-    slotStartTime: string;
+    day?: string;
+    slotStartTime?: string;
     type?: string;
     description?: string;
   };
@@ -58,7 +59,7 @@ const MyCalendar = () => {
     fetchSession();
   }, []);
 
-  // Fetch timetable and reminders
+  // Fetch timetable, reminders, and deadlines
   useEffect(() => {
     if (!session) return;
     const userId = session.user?.id;
@@ -104,7 +105,7 @@ const MyCalendar = () => {
         if (response.ok) {
           const reminders = await response.json();
           const formattedReminders = reminders.map((reminder: any) => ({
-            title: `${reminder.name}`,
+            title: reminder.name,
             start: reminder.startdate,
             end: new Date(
               new Date(reminder.enddate).getTime() + 86400000
@@ -126,10 +127,35 @@ const MyCalendar = () => {
       }
     };
 
+    const fetchDeadlines = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/users/${userId}/deadlines`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          const formattedDeadlines = data.deadlines.map((deadline: any) => ({
+            title: `Deadline: ${deadline.assignmentTitle} (${deadline.courseName})`,
+            start: deadline.dueDate,
+            allDay: true,
+            extendedProps: {
+              type: "deadline",
+            },
+          }));
+          setEvents((prev) => [...prev, ...formattedDeadlines]);
+        } else {
+          console.error("Failed to fetch deadlines:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching deadlines:", error);
+      }
+    };
+
     // Reset events before re-fetching to avoid duplicates
     setEvents([]);
     fetchTimetable();
     fetchReminders();
+    fetchDeadlines();
   }, [session, refresh]);
 
   // Handle event clicks (for deletion or viewing details)
@@ -179,12 +205,31 @@ const MyCalendar = () => {
       alert(
         `Reminder: ${event.title}\nDescription: ${event.extendedProps.description}`
       );
+    } else if (eventType === "deadline") {
+      alert(
+        `Deadline: ${event.title}\nDue Date: ${
+          event.start ? event.start.toISOString().split("T")[0] : "N/A"
+        }`
+      );
     }
   };
 
   return (
-    <div className="p-6 bg-c5 rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-white mb-4">Schedule Calendar</h1>
+    <div className="p-6 bg-white rounded-lg shadow-lg">
+      {/* Global overrides for FullCalendar styling */}
+      <style jsx global>{`
+        .fc .fc-daygrid-day-frame {
+          background-color: white !important;
+          border: 1px solid black !important;
+        }
+        .fc .fc-daygrid-day-number {
+          color: black !important;
+        }
+        .fc .fc-event {
+          color: black !important;
+        }
+      `}</style>
+      <h1 className="text-2xl font-bold text-black mb-4">Schedule Calendar</h1>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -200,7 +245,7 @@ const MyCalendar = () => {
         height="auto"
         dayMaxEvents={true}
         eventContent={(eventInfo: EventContentArg) => (
-          <div className="whitespace-normal break-words text-white">
+          <div className="whitespace-normal break-words text-black">
             {eventInfo.event.title}
           </div>
         )}
