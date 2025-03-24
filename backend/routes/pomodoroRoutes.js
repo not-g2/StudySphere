@@ -40,10 +40,11 @@ router.get("/fetchalltags/:userid",authMiddleware,async(req,res)=>{
 // route to send the focus session data to the frontend for analytics 
 router.get("/fetchuseranalytics/:userid",authMiddleware,async(req,res)=>{
     try{
+        console.log("here")
         const {userid} = req.params;
-
+        
         const focusdata = await Pomodoro.findOne({user : userid}).select("focusSessionData user").populate("user","name").lean();
-
+        console.log("here")
         if(!focusdata){
             return res.status(404).json({
                 message : "No pomodoro data on the specified user"

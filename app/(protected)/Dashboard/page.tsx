@@ -23,6 +23,7 @@ function DashboardPage() {
   // Fetch profile details once session is available.
   useEffect(() => {
     if (session) {
+      console.log(session.user.id, " ", session.user.token)
       fetch("http://localhost:8000/api/profile", {
         headers: { Authorization: `Bearer ${session.user.token}` },
       })
@@ -31,7 +32,7 @@ function DashboardPage() {
         .catch((err) => console.error("Error fetching profile:", err));
     }
   }, [session]);
-
+  
   return (
     <div style={{ backgroundColor: "#F3F3F4", minHeight: "100vh" }}>
       <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "20px" }}>

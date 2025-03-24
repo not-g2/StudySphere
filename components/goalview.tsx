@@ -74,6 +74,10 @@ const GoalTable: React.FC = () => {
             name: goal.title,
             endDate: goal.dueDate,
           }));
+          // Sort goals by endDate descending (most recent first)
+          formattedGoals.sort(
+            (a: Goal, b: Goal) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+          );
           setGoals(formattedGoals);
         } catch (err) {
           console.error(err);
@@ -154,6 +158,12 @@ const GoalTable: React.FC = () => {
         ...prevGoals,
         { _id: savedGoal._id, name: savedGoal.title, endDate: savedGoal.dueDate }
       ]);
+      // Re-sort after adding new goal
+      setGoals(prevGoals =>
+        [...prevGoals].sort(
+          (a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+        )
+      );
       handleCloseDialog();
     } catch (err) {
       console.error(err);

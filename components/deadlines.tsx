@@ -10,16 +10,26 @@ import {
   TableRow,
   Paper,
   Typography,
+  Tooltip,
 } from "@mui/material";
 
 type Deadline = {
   id: number | string;
   name: string;
   date: string;
+  course: string;
 };
 
 function DeadlinesList() {
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
+
+  // Helper function to calculate days left until the deadline
+  const calculateDaysLeft = (deadlineDate: string): number => {
+    const now = new Date();
+    const due = new Date(deadlineDate);
+    const diffTime = due.getTime() - now.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
 
   useEffect(() => {
     const fetchDeadlines = async () => {
@@ -44,7 +54,12 @@ function DeadlinesList() {
             id: deadline.id || `${deadline.assignmentTitle}-${deadline.dueDate}`,
             name: deadline.assignmentTitle,
             date: deadline.dueDate,
+            course: deadline.courseName,
           }));
+          // Sort deadlines by date in increasing order
+          formattedDeadlines.sort((a: Deadline, b: Deadline) => {
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+          });
           setDeadlines(formattedDeadlines);
         } else {
           console.error("Failed to fetch deadlines", response.status);
@@ -59,31 +74,73 @@ function DeadlinesList() {
 
   return (
     <div style={{ padding: "16px", width: "100%" }}>
-      {/* <Typography
-        variant="h4"
-        align="center"
-        gutterBottom
-        style={{ color: "#000" }}
+      <TableContainer 
+        component={Paper} 
+        style={{ backgroundColor: "#FFFFFF", overflowX: "hidden" }}
       >
-        Deadlines
-      </Typography> */}
-      <TableContainer component={Paper} style={{ backgroundColor: "#FFFFFF" }}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell align="center">Deadline</TableCell>
-              <TableCell align="center">Date</TableCell>
+            {/* Integrated headline as the first header row */}
+            <TableRow style={{ backgroundColor: "#1976d2" }}>
+              <TableCell 
+                colSpan={2} 
+                align="center"
+                style={{ color: "#FFF", fontWeight: "bold", padding: "8px" }}
+              >
+                <Typography variant="h5" component="div" style={{ color: "#FFF" }}>
+                  Upcoming Deadlines
+                </Typography>
+              </TableCell>
+            </TableRow>
+            {/* Column headers */}
+            <TableRow style={{ backgroundColor: "#1976d2" }}>
+              <TableCell align="center" style={{ color: "#FFF", fontWeight: "bold" }}>
+                Deadline
+              </TableCell>
+              <TableCell align="center" style={{ color: "#FFF", fontWeight: "bold" }}>
+                Days Left
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {deadlines.map((deadline) => (
-              <TableRow key={deadline.id}>
-                <TableCell align="center">{deadline.name}</TableCell>
-                <TableCell align="center">
-                  {new Date(deadline.date).toLocaleDateString()}
-                </TableCell>
-              </TableRow>
-            ))}
+            {deadlines.map((deadline) => {
+              const daysLeft = calculateDaysLeft(deadline.date);
+              return (
+                <Tooltip
+                  key={deadline.id}
+                  title={
+                    <div>
+                      <Typography variant="body2">
+                        <strong>Course:</strong> {deadline.course}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Full Name:</strong> {deadline.name}
+                      </Typography>
+                    </div>
+                  }
+                  arrow
+                  placement="top"
+                >
+                  <TableRow
+                    style={{
+                      transition: "transform 0.2s",
+                      cursor: "pointer",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.02)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  >
+                    <TableCell align="center">{deadline.name}</TableCell>
+                    <TableCell align="center">
+                      {daysLeft >= 0 ? daysLeft : "Expired"}
+                    </TableCell>
+                  </TableRow>
+                </Tooltip>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
