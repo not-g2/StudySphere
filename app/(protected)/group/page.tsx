@@ -41,6 +41,7 @@ const GroupsDashboard = () => {
     if (session) {
       try {
         console.log(session.user.token);
+        console.log(PORT)
         const response = await fetch(
           `http://localhost:${PORT}/api/groups/allusergrps`,
           {

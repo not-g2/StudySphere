@@ -9,6 +9,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <TimerProvider>
         <html lang="en">
             <body>{children}</body>
+            
         </html>
         </TimerProvider>
     );
