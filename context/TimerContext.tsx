@@ -1,5 +1,8 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
+import useSessionCheck from "@/app/hooks/auth";
+import { toast } from "react-toastify";
+import { formatTimeHours } from "@/utils/formatTime";
 
 type TimerState = "focus" | "break" | "paused";
 type lastActiveState = "focus" | "break" | null;
@@ -25,6 +28,7 @@ interface TimerContextType {
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
 export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
+    const [session, setsession] = useState<any>(null);
     const maxCycleCount = 3;
     const focusTime = 25 * 60;
     const breakTime = 5 * 60;
@@ -40,7 +44,6 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
     const [index, setIndex] = useState(0);
     const [cycleCount, setCycleCount] = useState(0);
     const [tag, setTag] = useState("Default");
-
     const animationData = [
         {
             path: "/goals.json",
@@ -75,6 +78,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
             text: "Schedule regular breaks - Build breaks into your daily routine rather than waiting until you're exhausted or overwhelmed.",
         },
     ];
+    useSessionCheck(setsession);
 
     useEffect(() => {
         Promise.all(
@@ -129,10 +133,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
                         setCycleCount(newCycleCount);
 
                         if (newCycleCount >= maxCycleCount) {
-                            setIsRunning(false);
-                            setTimerState("paused");
-                            setLastActiveState(null);
-                            setCycleCount(0);
+                            Reset();
                             return prevTime;
                         }
 
@@ -180,6 +181,35 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
         }
         if (timerState === "break") {
             timeSpent += focusTime;
+        }
+
+        if (!session) return;
+        console.log(timeSpent, tag);
+
+        if (timeSpent && tag) {
+            fetch(
+                `http://localhost:8000/api/pomodoro/insertfocussessiondata/${session.user.id}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${session.user.token}`,
+                    },
+                    body: JSON.stringify({
+                        subject: tag,
+                        timespent: timeSpent,
+                        date: new Date().toISOString(),
+                    }),
+                }
+            )
+                .then((res) => res.json())
+                .then((data) =>
+                    toast.success(
+                        `You've spent ${formatTimeHours(timeSpent)}s on ${tag}`,
+                        { style: { color: "#16a34a" } }
+                    )
+                )
+                .catch((err) => toast.error("Error saving session:", err));
         }
         setIsRunning(false);
         setTimerState("paused");
