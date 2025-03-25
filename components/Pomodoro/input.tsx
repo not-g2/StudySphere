@@ -89,7 +89,7 @@ const TagInput: React.FC<TagInputProps> = ({
                 }}
             />
             {showDropdown && tags.length > 0 && (
-                <ul className="absolute -mt-10 z-10 w-full bg-gray-800 border border-gray-600 rounded-md shadow-md">
+                <ul className="absolute -mt-9 z-10 w-full bg-gray-800 border border-gray-600 rounded-md shadow-md">
                     {tags.map((tag, index) => (
                         <li
                             key={index}
