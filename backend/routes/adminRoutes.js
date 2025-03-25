@@ -9,9 +9,43 @@ const Assignment = require("../models/assignmentSchema");
 const Course = require("../models/courseModel");
 const User = require("../models/userModel");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
+const { upload } = require('../utils/cloudinary');  // Cloudinary setup for image upload
 const mongoose = require("mongoose");
 
 // Admins are hardcoded , we just need to verify them
+
+// route for admin to upload profile picture
+router.post("/uploadprofilepfp/:adminid",upload.single('profilePic'),async(req,res)=>{
+    try{
+        if (!req.file || !req.file.path) {
+            return res.status(400).json({ message: "Profile picture upload failed." });
+        }
+
+        const {adminid} = req.params;
+
+        const admin = await Admin.findById(adminid);
+
+        if(!admin){
+            return res.status(404).json({
+                message : "Admin not found!"
+            })
+        }
+        
+        admin.image.url = req.file.path;
+        await admin.save();
+
+        return res.status(200).json({
+            message : "Profile pic upload done!",
+            admin
+        })
+
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+})
 // login endpoint (Works)
 router.post("/login", async (req, res) => {
     try {

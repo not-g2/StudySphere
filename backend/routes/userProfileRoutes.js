@@ -57,11 +57,11 @@ router.post('/profile/upload', authMiddleware, upload.single('profilePic'), asyn
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        user.profilePic = req.file.path;  // Assuming `upload.single()` has set the path
+        user.profilePic = req.file.path;  
         user.image.url = req.file.path;
         await user.save();
 
-        res.json({ msg: 'Profile picture updated', profilePic: user.profilePic });
+        res.status(200).json({ msg: 'Profile picture updated', profilePic: user.profilePic });
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: 'Server Error' });

@@ -25,7 +25,7 @@ const timeTableRoute = require("./routes/timeTableRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const groupRoutes = require("./routes/groupRoutes");
-const pomodoroRoutes = require("./models/pomodoroSchema");
+const pomodoroRoutes = require("./routes/pomodoroRoutes");
 
 connectDB();
 const app = express();

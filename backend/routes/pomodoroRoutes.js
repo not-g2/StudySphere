@@ -4,7 +4,7 @@ const authMiddleware = require("../middleware/auth");
 const Pomodoro = require("../models/pomodoroSchema")
 const User = require("../models/userModel");
 
-// route to fetch all subjects in pomodoro
+// route to fetch all subjects in pomodoro (works , tested on postman)
 router.get("/fetchalltags/:userid",authMiddleware,async(req,res)=>{
     try{
         const {userid} = req.params;
@@ -21,7 +21,7 @@ router.get("/fetchalltags/:userid",authMiddleware,async(req,res)=>{
                 message : "No valid pomodoro session for user yet"
             })
         }
-        const subjectList = subjects?.focusSessionData.map(item => (item.subject) || [])
+        const subjectList =  [...new Set(subjects?.focusSessionData.map(item => item.subject))];
 
         return res.status(200).json({
             message : "all subjects fetched successfully!",
@@ -37,7 +37,7 @@ router.get("/fetchalltags/:userid",authMiddleware,async(req,res)=>{
     }
 })
 
-// route to send the focus session data to the frontend for analytics 
+// route to send the focus session data to the frontend for analytics (works , tested on postman)
 router.get("/fetchuseranalytics/:userid",authMiddleware,async(req,res)=>{
     try{
         const {userid} = req.params;
@@ -53,7 +53,7 @@ router.get("/fetchuseranalytics/:userid",authMiddleware,async(req,res)=>{
         return res.status(200).json({
             message : "fetched the data successfully",
             focusdata,
-            userId : userid
+            //userId : userid
         })
     } catch(error){
         console.error(error);
@@ -63,12 +63,10 @@ router.get("/fetchuseranalytics/:userid",authMiddleware,async(req,res)=>{
     }
 })
 
-// route for updating focus session data for user
+// route for updating focus session data for user (works , tested on postman)
 router.post("/insertfocussessiondata/:userid",authMiddleware,async(req,res)=>{
     try{
         const {userid} = req.params;
-        
-        // since we are using upsert in the query , we need to check if user is a valid user or not before hand
 
         const userExists = await User.findById(userid);
         if(!userExists){
@@ -84,20 +82,91 @@ router.post("/insertfocussessiondata/:userid",authMiddleware,async(req,res)=>{
             })
         }
 
-        const newpomodoro = await Pomodoro.findOneAndUpdate(
+        const receivedDateObj = new Date(date);
+        receivedDateObj.setUTCHours(0,0,0,0); // normalise to UTC midnight (we are doing this to normalise and standardise the dates everywhere)
+
+        const isUserPartOfPomodoro = await Pomodoro.findOne({
+            user : userid
+        })
+
+        if(!isUserPartOfPomodoro){
+            // this is the user's first time trying the pomodoro
+            const updatedPomodoro = await Pomodoro.findOneAndUpdate(
+                { user: userid }, 
+                {$push: { focusSessionData: { 
+                    subject : subject,
+                    timeSpent: timespent,
+                    date: receivedDateObj 
+                }}},
+                { new: true, upsert: true } // Create if not exists
+            );
+
+            return res.status(200).json({
+                message : "User recorded in the database!",
+                //updatedPomodoro
+            })
+        }
+
+        const pomodoro = await Pomodoro.find(
+            {user : userid,"focusSessionData.subject" : subject}
+        )
+
+        if(!pomodoro.length){
+            // this is the first time user is doing this subject
+            const updatedPomodoro = await Pomodoro.findOneAndUpdate(
+                {user : userid },
+                {$push : {focusSessionData : {
+                    subject : subject,
+                    timeSpent : timespent,
+                    date : receivedDateObj
+                }}},
+                {new : true}
+            )
+
+            return res.status(200).json({
+                message : "User data successfully added!",
+                updatedPomodoro
+            })
+        }
+
+        // if we are here , means that we already have some entries for a given subject for this user
+        let existingSession = null;
+        for(const doc of pomodoro){
+            existingSession = doc.focusSessionData.find(session => session.subject === subject && new Date(session.date).getTime() === receivedDateObj.getTime());
+
+            if(existingSession){
+                break;
+            }
+        }
+        
+        if(existingSession){
+            const updatedPomodoro = await Pomodoro.findOneAndUpdate(
+                { user: userid, focusSessionData: { $elemMatch: { subject: subject, date: receivedDateObj } } },
+                {$inc : {"focusSessionData.$.timeSpent" : timespent}},
+                {new : true}
+            )
+
+            return res.status(200).json({
+                message : "Updated timeSpent value in database",
+                //updatedPomodoro
+            })
+        }
+
+        // if we are here , it means that we have a user and he has focused on this subject earlier , but not on the date given
+        const updatedPomodoro = await Pomodoro.findOneAndUpdate(
             {user : userid},
             {$push : {focusSessionData : {
                 subject : subject,
                 timeSpent : timespent,
-                date : date
-            }
-            }},
-            {new : true,upsert : true} // upsert = update + insert , it will update doc if userid exists , otherwise add a new document 
+                date : receivedDateObj
+            }}},
+            {new : true}
         )
 
         return res.status(200).json({
-            message : "User session recorded"
-        })
+            message : "added a new entry for this day and subject for the given user",
+            //updatedPomodoro
+        })      
     } catch(error){
         console.error(error);
         return res.status(500).json({

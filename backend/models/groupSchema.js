@@ -37,7 +37,8 @@ const GroupSchema = new mongoose.Schema({
         announcementId : {type : String},
         date : {type : Date , default : Date.now()}
     }],
-    groupCode : {type:String,unique:true}
+    groupCode : {type:String,unique:true},
+    groupPfp : {type : String}
 })
 
 // this middleware is fine , but problem is that whenever any object in Group is saved using .save() , then this middleware will go through all the objects in group to check for announcements with no announcement id , which is expensive , so we will dynamically give

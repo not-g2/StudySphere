@@ -15,6 +15,10 @@ router.post("/create",authMiddleware,async(req,res)=>{
         const userId = req.user.userID;
         const {name}= req.body;
 
+        if (!name) {
+            return res.status(400).json({ message: "Group name is required!" });
+        }
+
         const user = await User.findById(userId);
 
         if(!user){
@@ -31,16 +35,20 @@ router.post("/create",authMiddleware,async(req,res)=>{
 
         const newGroup = new Group({
             name,
-            creator : userId,
-            members : [{user : userId, rank : "Creator"}]
-        })
+            creator: userId,
+            members: [{ user: userId, rank: "Creator" }],
+            groupPfp: user.image?.url || undefined 
+        });
 
         await newGroup.save();
 
-        user.groupCreated++;
-        await user.save();
-
-        await User.findByIdAndUpdate(userId, { $push: { studyGroups: newGroup._id } });
+        await User.findByIdAndUpdate(
+            userId, 
+            {
+                $inc: { groupCreated: 1 },
+                $push: { studyGroups: newGroup._id }
+            }
+        );
 
         res.status(201).json({
             message : "group created successfully!",
