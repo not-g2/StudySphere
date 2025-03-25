@@ -30,14 +30,14 @@ router.post("/signup", async (req, res) => {
         // hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const name = email.split('@')[0]; // default name , user can change it later
+        const name = email.split("@")[0]; // default name , user can change it later
         // create and save the user
         const newUser = new User({
-            name : name,
+            name: name,
             email,
             password: hashedPassword,
-            prevLoginDate : new Date(new Date().setUTCHours(0,0,0,0)),
-            streakCount : 1
+            prevLoginDate: new Date(new Date().setUTCHours(0, 0, 0, 0)),
+            streakCount: 1,
         });
 
         await newUser.save();
@@ -92,20 +92,22 @@ router.post("/login", async (req, res) => {
             expiresIn: "1h",
         });
 
-        const currDate = new Date(new Date().setUTCHours(0,0,0,0));
-        if(currDate.getTime() - user.prevLoginDate.getTime() === 86400000){
+        const currDate = new Date(new Date().setUTCHours(0, 0, 0, 0));
+        if (currDate.getTime() - user.prevLoginDate.getTime() === 86400000) {
             // the user logged in on the next day
             // increase the streak count
             user.prevLoginDate = currDate;
             user.streakCount++;
             await user.save();
-        }
-        else if(currDate.getTime() > user.prevLoginDate.getTime()+86400000){
+        } else if (
+            currDate.getTime() >
+            user.prevLoginDate.getTime() + 86400000
+        ) {
             // user did not log in the last day
             // reset the streak count
             user.prevLoginDate = currDate;
             user.streakCount = 1;
-            await user.save(); 
+            await user.save();
         }
 
         // Send response

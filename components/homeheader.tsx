@@ -22,6 +22,8 @@ import { motion } from "framer-motion";
 import useSessionCheck from "../app/hooks/auth"; // Use your custom hook
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
+import { toast } from "react-toastify";
+import Lottie from "lottie-react";
 
 // Define a darker blue for the skeleton background
 const skeletonBg = "#001125"; // Adjust this color as needed
@@ -40,6 +42,8 @@ const Header: React.FC = () => {
     const [notificationAnchorEl, setNotificationAnchorEl] =
         useState<null | HTMLElement>(null);
     const [animateBell, setAnimateBell] = useState<boolean>(true);
+    const [streak, setstreak] = useState(0);
+    const [flameanim, setflameanim] = useState(null);
 
     // This hook sets session to an object if logged in, or null if not logged in, leaving it undefined while checking.
     useSessionCheck(setSession);
@@ -95,7 +99,9 @@ const Header: React.FC = () => {
 
                 if (response.ok) {
                     const data = await response.json();
+                    toast.success(`Welcome back ${session.email}`);
                     setUserImage(data.image?.url || "");
+                    setstreak(data.streakCount);
                 } else {
                     console.error("Failed to fetch profile image");
                 }
@@ -140,17 +146,22 @@ const Header: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        fetch("/streakFlame.json")
+            .then((res) => res.json())
+            .then((data) => setflameanim(data))
+            .catch((err) => console.error("Failed to load animation:", err));
+    }, []);
+
     return (
         <AppBar
             position="static"
             sx={{
-                background:
-                    "linear-gradient(to bottom right, #0f173a, #001d30)",
+                background: "#000000",
                 paddingX: 2,
             }}
         >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-                {/* Navigation Links */}
                 <Box sx={{ display: "flex", gap: 3 }}>
                     {session === undefined
                         ? navItems.map((item, index) => (
@@ -191,9 +202,40 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* Right Side: Notifications and Auth Buttons/Profile */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                    }}
+                >
+                    <div className="relative flex items-center justify-center">
+                        <Lottie
+                            animationData={flameanim}
+                            className="w-12 h-12"
+                            style={{
+                                filter: "hue-rotate(180deg) brightness(1.2) saturate(1.5)",
+                            }}
+                        />
+                        <span className="absolute text-black font-bold text-lg">
+                            {streak}
+                        </span>
+                    </div>
+
                     <IconButton color="inherit" onClick={handleBellClick}>
-                        <Badge badgeContent={notifications} color="error">
+                        <Badge
+                            badgeContent={notifications}
+                            color="error"
+                            sx={{
+                                "& .MuiBadge-badge": {
+                                    transform: "translate(20%, -30%)",
+                                    fontSize: "0.75rem",
+                                    width: "20px",
+                                    height: "20px",
+                                    borderRadius: "50%",
+                                },
+                            }}
+                        >
                             <motion.div
                                 animate={
                                     animateBell
@@ -207,7 +249,7 @@ const Header: React.FC = () => {
                                     repeatDelay: 2,
                                 }}
                             >
-                                <NotificationsIcon />
+                                <NotificationsIcon sx={{ fontSize: 36 }} />{" "}
                             </motion.div>
                         </Badge>
                     </IconButton>
