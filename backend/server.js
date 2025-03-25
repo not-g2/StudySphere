@@ -26,6 +26,7 @@ const reminderRoutes = require("./routes/reminderRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 connectDB();
 const app = express();
@@ -63,6 +64,7 @@ app.use("/api/reminder", reminderRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/groups",groupRoutes);
 app.use("/api/pomodoro",pomodoroRoutes);
+app.use("/api/notifications",notificationRoutes);
 
 require("./cron/cron");
 app.listen(process.env.PORT || 8000, () => {
