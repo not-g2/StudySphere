@@ -83,6 +83,8 @@ const UserSchema = new mongoose.Schema({
         enum: ["present", "absent"],
         default: "absent",
     },
+    prevLoginDate : {type : Date},
+    streakCount : {type : Number , default : 0}
 });
 module.exports = mongoose.model("User", UserSchema);
 // export const User = mongoose.model("User",UserSchema);

@@ -15,7 +15,7 @@ router.post("/signup", async (req, res) => {
             });
         }
 
-        if (!process.env.JWT_secret) {
+        if (!process.env.JWT_SECRET) {
             throw new Error("JWT secret is not defined");
         }
 
@@ -36,6 +36,8 @@ router.post("/signup", async (req, res) => {
             name : name,
             email,
             password: hashedPassword,
+            prevLoginDate : new Date(new Date().setUTCHours(0,0,0,0)),
+            streakCount : 1
         });
 
         await newUser.save();
@@ -43,7 +45,7 @@ router.post("/signup", async (req, res) => {
         // generate the JWT token
         const token = JWT.sign(
             { userID: newUser._id },
-            process.env.JWT_secret,
+            process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
 
@@ -89,6 +91,22 @@ router.post("/login", async (req, res) => {
         const token = JWT.sign({ userID: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1h",
         });
+
+        const currDate = new Date(new Date().setUTCHours(0,0,0,0));
+        if(currDate.getTime() - user.prevLoginDate.getTime() === 86400000){
+            // the user logged in on the next day
+            // increase the streak count
+            user.prevLoginDate = currDate;
+            user.streakCount++;
+            await user.save();
+        }
+        else if(currDate.getTime() > user.prevLoginDate.getTime()+86400000){
+            // user did not log in the last day
+            // reset the streak count
+            user.prevLoginDate = currDate;
+            user.streakCount = 1;
+            await user.save(); 
+        }
 
         // Send response
         res.status(200).json({

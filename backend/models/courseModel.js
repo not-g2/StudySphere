@@ -18,6 +18,7 @@ const CourseSchema = new mongoose.Schema({
             //required: true,
         },
     },
+    courseCreatorPic : {type : String},
     courseCode: { type: String, unique: true }, // This is the field you're setting
 });
 

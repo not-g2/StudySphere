@@ -24,6 +24,8 @@ passport.use(
                         name: profile.displayName,
                         email: profile.emails[0].value,
                         password: "nopassword",
+                        prevLoginDate : new Date(new Date().setUTCHours(0,0,0,0)),
+                        streakCount : 1
                     });
                 } else {
                     // Add googleId to existing user
@@ -31,6 +33,20 @@ passport.use(
                         user.googleId = profile.id;
                         await user.save();
                     }
+                    const currDate = new Date(new Date().setUTCHours(0,0,0,0));
+                    if(currDate.getTime() - user.prevLoginDate.getTime() === 86400000){
+                        // the user logged in on the next day
+                        // increase the streak count
+                        user.prevLoginDate = currDate;
+                        user.streakCount++;
+                    }
+                    else if(currDate.getTime() > user.prevLoginDate.getTime()+86400000){
+                        // user did not log in the last day
+                        // reset the streak count
+                        user.prevLoginDate = currDate;
+                        user.streakCount = 1;
+                    }
+                    await user.save();    
                 }
                 // Generate JWT token
                 const token = jwt.sign(
@@ -47,28 +63,6 @@ passport.use(
         }
     )
 );
-
-// passport.use(new GitHubStrategy({
-//     clientID: process.env.GITHUB_ID,
-//     clientSecret: process.env.GITHUB_SECRET,
-//     callbackURL: 'http://localhost:8000/auth/github/callback'
-// }, async (accessToken, refreshToken, profile, done) => {
-//     try {
-//         // Check if user exists
-//         let user = await User.findOne({ githubId: profile.id });
-//         if (!user) {
-//             // Create new user if not found
-//             user = await User.create({
-//                 githubId: profile.id,
-//                 name: profile.displayName,
-//                 email: profile.emails[0].value
-//             });
-//         }
-//         done(null, user);
-//     } catch (err) {
-//         done(err, false);
-//     }
-// }));
 
 passport.use(
     new GitHubStrategy(
@@ -98,12 +92,28 @@ passport.use(
                         name: profile.displayName,
                         email: email,
                         password: "nopassword",
+                        prevLoginDate : new Date(new Date().setUTCHours(0,0,0,0)),
+                        streakCount : 1
                     });
                 } else {
                     if (!user.githubId) {
                         user.githubId = profile.id;
                         await user.save();
                     }
+                    const currDate = new Date(new Date().setUTCHours(0,0,0,0));
+                    if(currDate.getTime() - user.prevLoginDate.getTime() === 86400000){
+                        // the user logged in on the next day
+                        // increase the streak count
+                        user.prevLoginDate = currDate;
+                        user.streakCount++;
+                    }
+                    else if(currDate.getTime() > user.prevLoginDate.getTime()+86400000){
+                        // user did not log in the last day
+                        // reset the streak count
+                        user.prevLoginDate = currDate;
+                        user.streakCount = 1;
+                    }
+                    await user.save();
                 }
                 // Generate JWT token
                 const token = jwt.sign(
