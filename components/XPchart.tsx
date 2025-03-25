@@ -13,14 +13,25 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
     { name: 'Remaining', value: 100 - xp },
   ];
 
-  const COLORS = ['#00bfff', '#d6d6d6'];
+  // Use these colours: progress is a lighter blue, remaining is light gray.
+  const COLORS = ['#AC9AFC', '#d6d6d6'];
 
   const circleSize = 400;
   const innerRadius = 160;
   const outerRadius = 180;
 
   return (
-    <div style={{ position: 'relative', width: circleSize, height: circleSize }}>
+    <div
+      tabIndex={-1}
+      style={{
+        position: 'relative',
+        width: circleSize,
+        height: circleSize,
+        backgroundColor: '#896EFB', // re-added background color
+        borderRadius: '50%',         // make it circular
+        outline: 'none',             // remove focus outline
+      }}
+    >
       <PieChart width={circleSize} height={circleSize}>
         <Pie
           data={data}
@@ -90,7 +101,7 @@ const LevelProgressContainer: React.FC = () => {
         }
   
         const data = await response.json();
-        console.log("Fetched profile data:", data); // Debug line to ensure data is fetched correctly
+        console.log("Fetched profile data:", data);
   
         // Ensure xp is between 0 and 100 by dividing by 10 if it's above 100
         const adjustedXp = data.xp > 100 ? data.xp / 10 : data.xp;
@@ -102,7 +113,6 @@ const LevelProgressContainer: React.FC = () => {
       }
     };
   
-    // Call getProfile only when session is available
     if (session) {
       getProfile();
     }

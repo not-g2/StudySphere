@@ -55,15 +55,33 @@ const AttendancePieChart: React.FC = () => {
   }, [session]);
 
   return (
-    // Card container with background color #F3F3F4
-    <div className="w-full px-4" style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", maxWidth: "800px", margin: "0 auto" }}>
+    <div
+      className="w-full px-4"
+      style={{
+        backgroundColor: "#42A5F5", // Slightly darker background
+        padding: "20px",
+        borderRadius: "8px",
+        maxWidth: "800px",
+        margin: "0 auto",
+      }}
+    >
+      <h2
+        style={{
+          color: "#FFFFFF",
+          textAlign: "center",
+          marginBottom: "10px",
+          fontSize: "28px",
+          fontWeight: "bold",
+        }}
+      >
+        Attendance
+      </h2>
       <div
         style={{
           display: 'grid',
-          // Use auto-fit to let columns wrap, with a fixed minimum width
           gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '5px', // Reduced gap horizontally and vertically
-          padding: '10px 0'
+          gap: '5px',
+          padding: '10px 0',
         }}
       >
         {attendanceData.map((data, index) => {
@@ -73,10 +91,7 @@ const AttendancePieChart: React.FC = () => {
             { name: 'Missed', value: 100 - percentage },
           ];
 
-          // Compute the larger slice percentage (if less than 50, show absentee percentage)
-          const largerPercentage = percentage >= 50 ? percentage : 100 - percentage;
-
-          // Custom label to render in the center of the pie chart.
+          // Custom center label with white text
           const renderCenterLabel = (props: any) => {
             const { cx, cy } = props.viewBox;
             return (
@@ -86,7 +101,7 @@ const AttendancePieChart: React.FC = () => {
                   y={cy - 10}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  style={{ fill: "#000000", fontSize: "14px", fontWeight: "bold" }}
+                  style={{ fill: "#FFFFFF", fontSize: "14px", fontWeight: "bold" }}
                 >
                   {data.courseName}
                 </text>
@@ -95,9 +110,9 @@ const AttendancePieChart: React.FC = () => {
                   y={cy + 15}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  style={{ fill: "#000000", fontSize: "16px", fontWeight: "bold" }}
+                  style={{ fill: "#FFFFFF", fontSize: "16px", fontWeight: "bold" }}
                 >
-                  {largerPercentage}%
+                  {percentage}%
                 </text>
               </>
             );
@@ -118,8 +133,8 @@ const AttendancePieChart: React.FC = () => {
                     dataKey="value"
                     labelLine={false}
                   >
-                    <Cell key="attended" fill="#82ca9d" />
-                    <Cell key="missed" fill="#8884d8" />
+                    <Cell key="attended" fill="#0C4091" />
+                    <Cell key="missed" fill="#90CAF9" />
                     <Label content={renderCenterLabel} position="center" />
                   </Pie>
                   <Tooltip />

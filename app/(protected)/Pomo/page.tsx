@@ -2,29 +2,65 @@
 import Lottie from "lottie-react";
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
+import { useRef, useState } from "react";
+import { Button } from "@mui/material";
 
 export default function PomodoroTimer() {
     const {
         time,
-        setTime,
         isRunning,
-        setIsRunning,
         timerState,
-        setTimerState,
         animations,
         index,
         lastActiveState,
-        setLastActiveState,
+        tag,
+        setTag,
+        Reset,
+        Start,
+        Pause,
     } = useTimer();
 
+    const [taginput, setTaginput] = useState("");
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+    const handleAddTag = () => {
+        setTag(taginput.trim() === "" ? "Default" : taginput);
+    };
+
     return (
-        <div
-            className="flex flex-col items-center justify-center bg-gray-900 text-white"
-            style={{ height: "calc(100vh - 4rem)" }}
-        >
-            <h1 className="shadow-orange-500 text-lime-300 text-4xl pb-3">
-                Networking
-            </h1>
+        <div className="flex flex-col items-center justify-top bg-gray-900 text-white h-screen w-full">
+            <div className="flex flex-col items-center">
+                {tag === "Default" ? (
+                    <input
+                        className={`mt-10 mb-10 rounded-lg text-white w-60 h-10 text-lg text-center border border-gray-400 bg-transparent 
+        ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`} // Grays out when disabled
+                        placeholder="Enter Tag"
+                        value={taginput}
+                        onChange={(e) => setTaginput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && buttonRef.current) {
+                                buttonRef.current.click();
+                            }
+                        }}
+                        disabled={isRunning} // Disable input when timer is running
+                    />
+                ) : (
+                    <p
+                        className="mt-10 mb-10 rounded-lg text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] w-60 h-10 text-lg text-center flex items-center justify-center border-4 border-[#202E4B]"
+                        onClick={() => {
+                            if (!isRunning) setTag("Default"); // Prevent changing while running
+                        }}
+                    >
+                        {tag}
+                    </p>
+                )}
+            </div>
+
+            <Button
+                className="hidden"
+                ref={buttonRef}
+                onClick={handleAddTag}
+            ></Button>
             <div
                 className={`flex flex-col items-center justify-center text-5xl font-bold transition-all duration-700 ease-out ${
                     isRunning ||
@@ -72,8 +108,7 @@ export default function PomodoroTimer() {
             <div className="mt-6 flex space-x-4">
                 <button
                     onClick={() => {
-                        setIsRunning(true);
-                        setTimerState("focus");
+                        Start();
                     }}
                     className={
                         !isRunning
@@ -85,8 +120,7 @@ export default function PomodoroTimer() {
                 </button>
                 <button
                     onClick={() => {
-                        setIsRunning(false);
-                        setTimerState("paused");
+                        Pause();
                     }}
                     className={
                         isRunning
@@ -98,10 +132,7 @@ export default function PomodoroTimer() {
                 </button>
                 <button
                     onClick={() => {
-                        setIsRunning(false);
-                        setTimerState("paused");
-                        setLastActiveState(null);
-                        setTime(25 * 60);
+                        Reset();
                     }}
                     className="bg-red-500 px-4 py-2 rounded text-white"
                 >
