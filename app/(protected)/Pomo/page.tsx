@@ -2,8 +2,10 @@
 import Lottie from "lottie-react";
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
+import useSessionCheck from "@/app/hooks/auth";
+import TagInput from "@/components/Pomodoro/input";
 
 export default function PomodoroTimer() {
     const {
@@ -22,33 +24,33 @@ export default function PomodoroTimer() {
 
     const [taginput, setTaginput] = useState("");
     const buttonRef = useRef<HTMLButtonElement | null>(null);
+    const [session, setsession] = useState<any>(null);
+    useSessionCheck(setsession);
 
     const handleAddTag = () => {
         setTag(taginput.trim() === "" ? "Default" : taginput);
     };
 
+    useEffect(() => {
+        console.log("Updated tag:", tag);
+    }, [tag]);
+
     return (
         <div className="flex flex-col items-center justify-top bg-gray-900 text-white h-screen w-full">
             <div className="flex flex-col items-center">
-                {tag === "Default" ? (
-                    <input
-                        className={`mt-10 mb-10 rounded-lg text-white w-60 h-10 text-lg text-center border border-gray-400 bg-transparent 
-        ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`} // Grays out when disabled
-                        placeholder="Enter Tag"
-                        value={taginput}
-                        onChange={(e) => setTaginput(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" && buttonRef.current) {
-                                buttonRef.current.click();
-                            }
-                        }}
-                        disabled={isRunning} // Disable input when timer is running
+                {tag === "Default" && !isRunning ? (
+                    <TagInput
+                        buttonRef={buttonRef}
+                        settaginput={setTaginput}
+                        taginput={taginput}
+                        user_id={session ? session.user.id : null}
+                        user_token={session ? session.user.token : null}
                     />
                 ) : (
                     <p
                         className="mt-10 mb-10 rounded-lg text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] w-60 h-10 text-lg text-center flex items-center justify-center border-4 border-[#202E4B]"
                         onClick={() => {
-                            if (!isRunning) setTag("Default"); // Prevent changing while running
+                            if (!isRunning) setTag("Default");
                         }}
                     >
                         {tag}
@@ -133,6 +135,7 @@ export default function PomodoroTimer() {
                 <button
                     onClick={() => {
                         Reset();
+                        setTaginput("");
                     }}
                     className="bg-red-500 px-4 py-2 rounded text-white"
                 >
