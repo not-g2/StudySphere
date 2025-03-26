@@ -5,7 +5,8 @@ import useSessionCheck from "./hooks/auth";
 import Cookies from "js-cookie";
 import "./abc.css";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import PasswordInput from "@/components/SignUp/passwordInput";
+import { toast } from "react-toastify";
 
 function Page() {
     const router = useRouter();
@@ -127,7 +128,7 @@ function Page() {
 
     const isValidPassword = (password: string) => {
         const regex =
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
         return regex.test(password);
     };
 
@@ -135,7 +136,7 @@ function Page() {
         event.preventDefault();
 
         if (!isValidPassword(password)) {
-            setError(
+            toast.error(
                 "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
             );
             return;
@@ -196,32 +197,17 @@ function Page() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        <div style={{ position: "relative" }}>
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                style={{ width: "100%", paddingRight: "40px" }} // Add space for icon
+                        <div style={{ position: "relative", width: "100%" }}>
+                            <PasswordInput
+                                password={password}
+                                setPassword={setPassword}
+                                showPassword={showPassword}
+                                togglePasswordVisibility={
+                                    togglePasswordVisibility
+                                }
                             />
-                            <span
-                                onClick={togglePasswordVisibility}
-                                style={{
-                                    position: "absolute",
-                                    right: "10px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    cursor: "pointer",
-                                }}
-                            >
-                                {showPassword ? (
-                                    <VisibilityOff />
-                                ) : (
-                                    <Visibility />
-                                )}
-                            </span>
                         </div>
-                        {error && <p style={{ color: "red" }}>{error}</p>}
+
                         <button onClick={(e) => handleSubmitSignUp(e)}>
                             Sign Up
                         </button>
