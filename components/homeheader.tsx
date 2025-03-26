@@ -199,7 +199,10 @@ const Header: React.FC = () => {
                         </span>
                     </div>
 
-                    <Notifications />
+                    <Notifications
+                        id={session?.user?.id}
+                        token={session?.user?.token}
+                    />
 
                     {session === undefined ? (
                         <Box sx={{ display: "flex", gap: 1 }}>

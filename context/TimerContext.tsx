@@ -176,15 +176,14 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const Reset = () => {
         var timeSpent = cycleCount * focusTime;
-        if (timerState === "focus") {
+        if (timerState === "focus" || timerState === "paused") {
             timeSpent += focusTime - time;
-        }
-        if (timerState === "break") {
+        } else if (timerState === "break" || timerState === "paused") {
             timeSpent += focusTime;
         }
 
         if (!session) return;
-        console.log(timeSpent, tag);
+        console.log(timeSpent, tag, time, cycleCount);
 
         if (timeSpent && tag) {
             fetch(

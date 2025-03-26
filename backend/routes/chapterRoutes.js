@@ -1,28 +1,32 @@
 const express = require("express");
 const authMiddleware = require("../middleware/auth");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
-const Chapter = require("../models/chapterSchema"); 
+const Chapter = require("../models/chapterSchema");
 const router = express.Router();
 const generatePdfUrl = require("../utils/pdflinkhelper");
-const Course = require("../models/courseModel.js")
-const mongoose = require("mongoose")
+const Course = require("../models/courseModel.js");
+const mongoose = require("mongoose");
 const axios = require("axios");
 const Notification = require("../models/notificationSchema.js");
 
-router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async (req, res) => {
+router.post(
+    "/create/:courseID",
+    authMiddleware,
+    uploadPDF.single("pdfFile"),
+    async (req, res) => {
         try {
             const { title } = req.body;
-            const {courseID} = req.params;
+            const { courseID } = req.params;
             if (!req.file || !req.file.path) {
                 return res.status(400).json({ message: "PDF upload failed." });
             }
             //console.log(typeof(courseID))
             const course = await Course.findById(courseID);
             //console.log(course)
-            if(!course){
+            if (!course) {
                 return res.status(404).json({
-                    msg : "Course doesnt exist!"
-                })
+                    msg: "Course doesnt exist!",
+                });
             }
 
             const newChapter = new Chapter({
@@ -33,16 +37,21 @@ router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async
 
             await newChapter.save();
 
-            await Course.findByIdAndUpdate(
-                courseID,
-                {$push : {chapters : newChapter._id}}
-            )
+            await Course.findByIdAndUpdate(courseID, {
+                $push: { chapters: newChapter._id },
+            });
 
             // send notification to all users in the course about the new chapter upload
             await Notification.updateMany(
-                {user : {$in : course.students}},
-                {$push : {notifList : {content : `A new chapter has been uploaded in the ${course.name} course`}}}
-            )
+                { user: { $in: course.students } },
+                {
+                    $push: {
+                        notifList: {
+                            content: `A new chapter has been uploaded in the ${course.name} course`,
+                        },
+                    },
+                }
+            );
 
             res.status(201).json({
                 message: "Chapter saved successfully.",
@@ -60,9 +69,9 @@ router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async
 router.get("/get/:courseID", authMiddleware, async (req, res) => {
     try {
         const { courseID } = req.params;
-        const chapters = await chapterModel
-            .find({ course: courseID })
-            .select("title _id createdAt");
+        const chapters = await Chapter.find({ course: courseID }).select(
+            "title _id createdAt"
+        );
 
         res.status(200).json(chapters);
     } catch (error) {
@@ -78,7 +87,7 @@ router.get("/pdf/:chapterID", async (req, res) => {
 
     try {
         // Fetch the chapter from the database
-        const chapter = await chapterModel.findById(chapterID);
+        const chapter = await Chapter.findById(chapterID);
         console.log(chapter, chapterID);
         if (!chapter || !chapter.chapterPdf) {
             return res.status(404).json({ message: "PDF not found." });
