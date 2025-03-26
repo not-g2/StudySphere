@@ -103,6 +103,19 @@ router.post("/insertfocussessiondata/:userid",authMiddleware,async(req,res)=>{
                 { new: true, upsert: true } // Create if not exists
             );
 
+            userExists.auraPoints+=20;
+            userExists.xp+=20;
+
+            // calculate next level threshold
+            const nextLevelPoints = 100 * (userExists.level + 1) ** 2;
+            // Check if user qualifies for a level up
+            if (userExists.xp >= nextLevelPoints) {
+                userExists.level += 1; // Level up
+                console.log(`Congratulations! ${userExists.name} reached Level ${userExists.level}`);
+            }
+
+            await userExists.save();
+
             return res.status(200).json({
                 message : "User recorded in the database!",
                 //updatedPomodoro
@@ -113,7 +126,27 @@ router.post("/insertfocussessiondata/:userid",authMiddleware,async(req,res)=>{
             {user : userid,"focusSessionData.subject" : subject}
         )
 
+        // check if the user had a pomodoro session today
+        const checkSessionExists = await Pomodoro.findOne({
+            "focusSessionData.date" : receivedDateObj
+        })
+
         if(!pomodoro.length){
+            if(!checkSessionExists){
+                // since this is the first time user is doing pomodoro today , give them auraPoints
+                userExists.auraPoints+=20;
+                userExists.xp+=20;
+
+                // calculate next level threshold
+                const nextLevelPoints = 100 * (userExists.level + 1) ** 2;
+                // Check if user qualifies for a level up
+                if (userExists.xp >= nextLevelPoints) {
+                    userExists.level += 1; // Level up
+                    console.log(`Congratulations! ${userExists.name} reached Level ${userExists.level}`);
+                }
+
+                await userExists.save();
+            }
             // this is the first time user is doing this subject
             const updatedPomodoro = await Pomodoro.findOneAndUpdate(
                 {user : userid },
@@ -123,7 +156,7 @@ router.post("/insertfocussessiondata/:userid",authMiddleware,async(req,res)=>{
                     date : receivedDateObj
                 }}},
                 {new : true}
-            )
+            ) 
 
             return res.status(200).json({
                 message : "User data successfully added!",
@@ -132,6 +165,8 @@ router.post("/insertfocussessiondata/:userid",authMiddleware,async(req,res)=>{
         }
 
         // if we are here , means that we already have some entries for a given subject for this user
+
+        // perform linear search to find if current date already exists for the given subject
         let existingSession = null;
         for(const doc of pomodoro){
             existingSession = doc.focusSessionData.find(session => session.subject === subject && new Date(session.date).getTime() === receivedDateObj.getTime());
@@ -155,6 +190,22 @@ router.post("/insertfocussessiondata/:userid",authMiddleware,async(req,res)=>{
         }
 
         // if we are here , it means that we have a user and he has focused on this subject earlier , but not on the date given
+
+        if(!checkSessionExists){
+            // since this is the first time user is doing pomodoro today , give them auraPoints
+            userExists.auraPoints+=20;
+            userExists.xp+=20;
+
+            // calculate next level threshold
+            const nextLevelPoints = 100 * (userExists.level + 1) ** 2;
+            // Check if user qualifies for a level up
+            if (userExists.xp >= nextLevelPoints) {
+                userExists.level += 1; // Level up
+                console.log(`Congratulations! ${userExists.name} reached Level ${userExists.level}`);
+            }
+
+            await userExists.save();
+        }
         const updatedPomodoro = await Pomodoro.findOneAndUpdate(
             {user : userid},
             {$push : {focusSessionData : {

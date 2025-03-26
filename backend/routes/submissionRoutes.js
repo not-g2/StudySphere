@@ -28,13 +28,13 @@ router.post(
                 return res.status(404).json({ error: "Student not found" });
 
             student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
-            student.xp += student.auraPoints;
+            student.xp += rewardfunc(assignment.dueDate, Date.now());
 
             // calculate next level threshold
             const nextLevelPoints = 100 * (student.level + 1) ** 2;
 
             // Check if user qualifies for a level up
-            if (student.auraPoints >= nextLevelPoints) {
+            if (student.xp >= nextLevelPoints) {
                 student.level += 1; // Level up
                 console.log(
                     `Congratulations! ${student.name} reached Level ${student.level}`
@@ -125,9 +125,9 @@ router.put("/submission/:id/feedback", async (req, res) => {
         const nextLevelPoints = 100 * (student.level + 1) ** 2;
 
         // Check if user qualifies for a level up
-        if (student.auraPoints >= nextLevelPoints) {
+        if (student.xp >= nextLevelPoints) {
             student.level += 1; // Level up
-            student.auraPoints = 0; // reset the aura points every level
+            student.xp = 0; // reset the xp every level
             console.log(
                 `Congratulations! ${student.name} reached Level ${student.level}`
             );

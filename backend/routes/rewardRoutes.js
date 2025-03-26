@@ -65,7 +65,7 @@ router.delete("/rewards/:id", async (req, res) => {
     }
 });
 
-// redeema reward
+// redeem a reward
 router.post("/rewards/redeem/:id", async (req, res) => {
     try {
         const reward = await Reward.findById(req.params.id);

@@ -128,6 +128,13 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
                 .json({ msg: "Title, description, and course are required." });
         }
 
+        const courseExists = await Course.findById(course);
+        if(!courseExists){
+            return res.status(404).json({
+                message : "Course with given courseId doesnt exist!"
+            })
+        }
+
         // create an annoucement object
         const newannoucement = new Announcement({
             title,
@@ -137,6 +144,12 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
         });
 
         await newannoucement.save();
+
+        // we have to send notification to all the students in the course
+        await Notification.updateMany(
+            { user: { $in: courseExists.students } }, // Find all students in the given course
+            { $push: { notifList: { content: `You have a new announcement in ${courseExists.name} course` } } }
+        );
         res.status(201).json({
             msg: "Announcement posted successfully",
             announcement: newannoucement,
@@ -194,6 +207,13 @@ router.post(
             });
 
             const savedAssignment = await newAssignment.save();
+
+            // send notification to every user in the course about the upload of assignment by admin
+            await Notification.updateMany(
+                {user : {$in : courseExists.students}},
+                {$push : {notifList : {content : `A new assignment is uploaded in ${courseExists.name} course`}}}
+            )
+
             res.status(201).json({
                 message: "Assignment created successfully",
                 assignment: savedAssignment,

@@ -98,6 +98,19 @@ router.post("/login", async (req, res) => {
             // increase the streak count
             user.prevLoginDate = currDate;
             user.streakCount++;
+            user.auraPoints++;
+            user.xp++;
+
+            // calculate next level threshold
+            const nextLevelPoints = 100 * (user.level + 1) ** 2;
+            // Check if user qualifies for a level up
+            if (user.xp >= nextLevelPoints) {
+                user.level += 1; // Level up
+                console.log(
+                    `Congratulations! ${user.name} reached Level ${user.level}`
+                );
+            }
+
             await user.save();
         }
         else if(currDate.getTime() > user.prevLoginDate.getTime()+86400000){
@@ -105,6 +118,19 @@ router.post("/login", async (req, res) => {
             // reset the streak count
             user.prevLoginDate = currDate;
             user.streakCount = 1;
+            user.auraPoints++;
+            user.xp++;
+
+            // calculate next level threshold
+            const nextLevelPoints = 100 * (user.level + 1) ** 2;
+            // Check if user qualifies for a level up
+            if (user.xp >= nextLevelPoints) {
+                user.level += 1; // Level up
+                console.log(
+                    `Congratulations! ${user.name} reached Level ${user.level}`
+                );
+            }
+
             await user.save(); 
         }
 

@@ -5,6 +5,10 @@ const authMiddleware = require("../middleware/auth"); // Middleware to authentic
 const Course = require("../models/courseModel");
 const Admin = require("../models/adminModel");
 const Assignment = require("../models/assignmentSchema");
+const Chapter = require("../models/chapterSchema");
+const Announcement = require("../models/announcementSchema");
+const Notification = require("../models/notificationSchema");
+const Submission = require("../models/submissionSchema");
 
 router.post("/fetchcoursecode/:courseid/:adminId",authMiddleware,async(req,res)=>{
     try{
@@ -61,6 +65,73 @@ router.post("/create/:adminId", authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 });
+
+// route to delete a course
+router.delete("/deletecourse/:adminId/:courseId",authMiddleware,async(req,res)=>{
+    try{
+        const {adminId,courseId} = req.params;
+
+        const admin = await Admin.findOne({
+            _id : adminId,
+            course : courseId
+        })
+
+        if(!admin){
+            return res.status(400).json({
+                message : "Admin with given course not found."
+            })
+        }
+
+        // remove the course from the admin's course
+        await Admin.updateOne(
+            {_id : adminId, course : courseId},
+            {$pull : {course : courseId}}
+        )
+
+        // remove all students from the course
+        await User.updateMany(
+            {courses : courseId},
+            {$pull : {courses : courseId}}
+        )
+
+        // remove all the chapters from the course
+        await Chapter.deleteMany(
+            {course : courseId}
+        )
+
+        // remove all associated announcements for the course
+        await Announcement.deleteMany(
+            {course : courseId}
+        )
+
+        // remove all assignments from that course
+        // each submission is linked to an assignment , so we need to delete the associated submissions as well
+        const assignments = await Assignment.find({course : courseId});
+
+        const assignmentids = assignments.map(a => a._id);
+
+        await Submission.deleteMany(
+            {assignmentId : {$in : assignmentids}}
+        )
+
+        // now delete all the assignments for the course
+        await Assignment.deleteMany(
+            {course : courseId}
+        )
+
+        // now that all dependecies are deleted , we can delete the course now
+        await Course.findByIdAndDelete(courseId)
+
+        return res.status(200).json({
+            message : "Given course is successfully deleted!"
+        })
+    } catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error!"
+        })
+    }
+})
 
 // courses that the admin has
 router.get("/:adminID", authMiddleware, async (req, res) => {
@@ -172,13 +243,17 @@ router.get("/:courseId/assignments", async (req, res) => {
 
 //add a student to a Course
 router.put("/add-course", async (req, res) => {
-    const { studentId, courseCode } = req.body;
-
-    if (!studentId) {
-        return res.status(400).json({ message: "Student ID is required" });
-    }
-
     try {
+        const { studentId, courseCode } = req.body;
+
+        if (!studentId) {
+            return res.status(400).json({ message: "Student ID is required" });
+        }
+
+        if (!courseCode) {
+            return res.status(400).json({ message: "Course Code is required" });
+        }
+
         const course = await Course.findOne({ courseCode: courseCode });
 
         if (!course) {
@@ -199,6 +274,13 @@ router.put("/add-course", async (req, res) => {
         if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
+        
+        await Notification.updateOne(
+            {user : student._id},
+            {$push : {notifList : {content : `You have been added to  ${course.name} course`}}},
+            {new : true,upsert : true}
+        )
+
         student.courses.push(course._id);
         await student.save();
 

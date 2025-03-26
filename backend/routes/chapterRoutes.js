@@ -7,6 +7,7 @@ const generatePdfUrl = require("../utils/pdflinkhelper");
 const Course = require("../models/courseModel.js")
 const mongoose = require("mongoose")
 const axios = require("axios");
+const Notification = require("../models/notificationSchema.js");
 
 router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async (req, res) => {
         try {
@@ -15,9 +16,9 @@ router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async
             if (!req.file || !req.file.path) {
                 return res.status(400).json({ message: "PDF upload failed." });
             }
-            console.log(typeof(courseID))
+            //console.log(typeof(courseID))
             const course = await Course.findById(courseID);
-            console.log(course)
+            //console.log(course)
             if(!course){
                 return res.status(404).json({
                     msg : "Course doesnt exist!"
@@ -35,6 +36,12 @@ router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async
             await Course.findByIdAndUpdate(
                 courseID,
                 {$push : {chapters : newChapter._id}}
+            )
+
+            // send notification to all users in the course about the new chapter upload
+            await Notification.updateMany(
+                {user : {$in : course.students}},
+                {$push : {notifList : {content : `A new chapter has been uploaded in the ${course.name} course`}}}
             )
 
             res.status(201).json({

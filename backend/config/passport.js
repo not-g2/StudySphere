@@ -25,7 +25,7 @@ passport.use(
                         email: profile.emails[0].value,
                         password: "nopassword",
                         prevLoginDate : new Date(new Date().setUTCHours(0,0,0,0)),
-                        streakCount : 1
+                        streakCount : 1,
                     });
                 } else {
                     // Add googleId to existing user
@@ -45,6 +45,16 @@ passport.use(
                         // reset the streak count
                         user.prevLoginDate = currDate;
                         user.streakCount = 1;
+                    }
+                    user.auraPoints++;
+                    user.xp++;
+
+                    // calculate next level threshold
+                    const nextLevelPoints = 100 * (user.level + 1) ** 2;
+                    // Check if user qualifies for a level up
+                    if (user.xp >= nextLevelPoints) {
+                        user.level += 1; // Level up
+                        console.log(`Congratulations! ${user.name} reached Level ${user.level}`);
                     }
                     await user.save();    
                 }
@@ -112,6 +122,17 @@ passport.use(
                         // reset the streak count
                         user.prevLoginDate = currDate;
                         user.streakCount = 1;
+                    }
+
+                    user.auraPoints++;
+                    user.xp++;
+
+                    // calculate next level threshold
+                    const nextLevelPoints = 100 * (user.level + 1) ** 2;
+                    // Check if user qualifies for a level up
+                    if (user.xp >= nextLevelPoints) {
+                        user.level += 1; // Level up
+                        console.log(`Congratulations! ${user.name} reached Level ${user.level}`);
                     }
                     await user.save();
                 }

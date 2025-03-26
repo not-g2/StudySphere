@@ -7,6 +7,7 @@ const generatePdfUrl = require("../utils/pdflinkhelper");
 const User = require("../models/userModel");
 const Group = require("../models/groupSchema");
 const authMiddleware = require("../middleware/auth");
+const Notification = require("../models/notificationSchema")
 require('dotenv').config();
 
 // create a group (works , checked on postman)
@@ -554,6 +555,12 @@ router.post("/createanncmnt/:groupid",authMiddleware,async(req,res)=>{
 
         await group.save();
 
+        await Notification.findOneAndUpdate(
+            {user : user._id},
+            {$push : {notifList : {content : `You have a new announcement in ${group.name} group`}}},
+            {new : true,upsert : true}
+        )
+
         return res.status(200).json({
             message : "Announcement successfully created.",
             authorOfAnnouncement : user.name,
@@ -850,6 +857,12 @@ router.post("/uploadfile/:groupid",authMiddleware,uploadPDF.single("pdfFile"),as
                 fileLink : req.file.path,
                 postedBy : userid
             }}},{new : true}
+        )
+
+        await Notification.findOneAndUpdate(
+            {user : userid},
+            {$push : {notifList : {content : `A new file is uploaded in ${group.name} group`}}},
+            {new : true,upsert : true}
         )
 
         res.status(200).json({
