@@ -11,7 +11,28 @@ import {
 } from "recharts";
 
 // Array of 20 distinct colors for subjects.
-const colors = ["#7c3f6b", "#2fa8d4", "#d12e7f", "#a3c9e1", "#5f8b72", "#e27d3c", "#9b4a1d", "#3e7fcd", "#f4d231", "#c6a1b2", "#58e3c4", "#1f2d9a", "#d5c47e", "#a69b23", "#7f4d2e", "#e3f8a2", "#4b1d7c", "#c9e87b", "#27d4e5", "#9e2b4f"];
+const colors = [
+  "#7c3f6b",
+  "#2fa8d4",
+  "#d12e7f",
+  "#a3c9e1",
+  "#5f8b72",
+  "#e27d3c",
+  "#9b4a1d",
+  "#3e7fcd",
+  "#f4d231",
+  "#c6a1b2",
+  "#58e3c4",
+  "#1f2d9a",
+  "#d5c47e",
+  "#a69b23",
+  "#7f4d2e",
+  "#e3f8a2",
+  "#4b1d7c",
+  "#c9e87b",
+  "#27d4e5",
+  "#9e2b4f",
+];
 
 const SubjectTimeBarChart = ({ data }) => {
   // Calculate the past 7 days as weekday labels (e.g., "Mon", "Tue") in ascending order.
@@ -63,7 +84,8 @@ const SubjectTimeBarChart = ({ data }) => {
             <Tooltip
               contentStyle={{ backgroundColor: "#333333", border: "none", color: "white" }}
               labelStyle={{ color: "white" }}
-              formatter={(value) => `${(value / 60000).toFixed(2)} minutes`}
+              // Convert seconds to minutes by dividing by 60.
+              formatter={(value) => `${(value / 60).toFixed(2)} minutes`}
               labelFormatter={(label) => `Day: ${label}`}
             />
             <Legend wrapperStyle={{ color: "white" }} />

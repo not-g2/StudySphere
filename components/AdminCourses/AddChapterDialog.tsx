@@ -32,7 +32,7 @@ const AddChapterDialog = ({ open, onClose, courseID, onChapterAdded }: AddChapte
       formData.append("courseID", courseID);
       formData.append("pdfFile", chapterFile);
 
-      const response = await fetch("http://localhost:8000/api/chapter/create", {
+      const response = await fetch(`http://localhost:8000/api/chapter/create/${courseID}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${session.user.token}`,

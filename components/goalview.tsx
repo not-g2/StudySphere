@@ -173,8 +173,10 @@ const GoalTable: React.FC = () => {
 
   return (
     <>
-      <TableContainer component={Paper}>
-        <Table>
+      {/* Set maxHeight so that the table scrolls when there are more than 7 rows */}
+      <TableContainer component={Paper} style={{ maxHeight: '420px' }}>
+        {/* Add stickyHeader to keep the headers visible on scroll */}
+        <Table stickyHeader>
           <TableHead>
             {/* First header row: Goals title and plus icon in one row */}
             <TableRow>

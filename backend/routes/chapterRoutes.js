@@ -70,7 +70,7 @@ router.get("/get/:courseID", authMiddleware, async (req, res) => {
     try {
         const { courseID } = req.params;
         const chapters = await Chapter.find({ course: courseID }).select(
-            "title _id createdAt"
+            "title _id createdAt chapterPdf"
         );
 
         res.status(200).json(chapters);
@@ -109,6 +109,32 @@ router.get("/pdf/:chapterID", async (req, res) => {
     } catch (error) {
         console.error("Error fetching PDF:", error.message);
         res.status(500).json({ message: "Failed to retrieve the PDF." });
+    }
+});
+
+router.delete("/delete/:chapterID", authMiddleware, async (req, res) => {
+    try {
+        const { chapterID } = req.params;
+        // Find the chapter to get its associated course ID
+        const chapter = await Chapter.findById(chapterID);
+        if (!chapter) {
+            return res.status(404).json({ message: "Chapter not found." });
+        }
+
+        // Remove chapter reference from the course document
+        await Course.findByIdAndUpdate(chapter.course, {
+            $pull: { chapters: chapterID },
+        });
+
+        // Delete the chapter document
+        await Chapter.findByIdAndDelete(chapterID);
+
+        res.status(200).json({ message: "Chapter deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting chapter:", error);
+        res.status(500).json({
+            message: "An error occurred while deleting the chapter.",
+        });
     }
 });
 
