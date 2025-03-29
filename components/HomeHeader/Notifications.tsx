@@ -72,7 +72,7 @@ const Notifications: React.FC<NotificationsProps> = ({ id, token }) => {
                     }
                 );
                 const data = await response.json();
-                setNotifications(data.allNotifs);
+                setNotifications(data.allNotifs ? data.allNotifs : []);
                 console.log(data.allNotifs);
             } catch (error) {
                 console.log("Error getting notifications", error);
@@ -84,7 +84,6 @@ const Notifications: React.FC<NotificationsProps> = ({ id, token }) => {
 
     return (
         <div className="relative mr-1 mt-1">
-            {/* Bell Icon */}
             <motion.button
                 className="relative p-2 rounded focus:outline-none"
                 onClick={() => setNotificationOpen(!notificationOpen)}
@@ -105,7 +104,6 @@ const Notifications: React.FC<NotificationsProps> = ({ id, token }) => {
                 )}
             </motion.button>
 
-            {/* Notifications Dropdown */}
             {notificationOpen && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
