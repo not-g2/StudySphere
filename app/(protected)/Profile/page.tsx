@@ -4,7 +4,7 @@ import useSessionCheck from "@/app/hooks/auth";
 import BadgeCarousel from "@/components/Profile/BadgeCarousel";
 import CustomInputField from "@/components/Profile/CustomInputField";
 import { Avatar, Card, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 interface sessionProps {
@@ -36,6 +36,7 @@ const ProfilePage = () => {
     const [session, setSession] = useState<sessionProps | null>(null);
     useSessionCheck(setSession);
     const [user, setUser] = useState<userProps | null>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (!session) return;
@@ -63,7 +64,7 @@ const ProfilePage = () => {
         };
 
         fetchProfile();
-    }, [session]);
+    }, [session, user]);
 
     const UpdateProfile = async () => {
         if (!session) return;
@@ -85,10 +86,49 @@ const ProfilePage = () => {
                     toast.success("Successfully updated Profile");
                 })
                 .catch((error) => {
-                    toast.error(`Error Updating Profile ${error}`);
+                    toast.error(`Error Uploading Profile ${error}`);
                 });
         } catch (error) {
             toast.error(`Error Updating Profile ${error}`);
+        }
+    };
+
+    const UpdateProfilePic = async (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        if (!session) return;
+        if (event.target.files && event.target.files.length > 0) {
+            const file = event.target.files[0];
+            const formData = new FormData();
+            formData.append("profilePic", file);
+            await fetch(`http://localhost:8000/api/desc/profile/upload`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${session.user.token}`,
+                },
+                body: formData,
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        toast.error(
+                            `We've encountered a Problem ,
+                            ${response.statusText}`
+                        );
+                        return;
+                    }
+                    toast.success("Updated Profile Picture");
+                    return response.json();
+                })
+                .then((data) => {
+                    setUser((prevUser) =>
+                        prevUser
+                            ? { ...prevUser, image: { url: data.profilePic } }
+                            : prevUser
+                    );
+                })
+                .catch((error) => {
+                    console.error("Error Updating Profile Picture ", error);
+                });
         }
     };
 
@@ -107,6 +147,16 @@ const ProfilePage = () => {
                     alt="Profile Picture"
                     sx={{ width: 180, height: 180 }}
                     className="shadow-md border-4 border-gray-300"
+                    onClick={() => {
+                        inputRef.current?.click();
+                    }}
+                />
+                <input
+                    className="hidden"
+                    ref={inputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => UpdateProfilePic(e)}
                 />
 
                 {/* Stats Section */}

@@ -10,7 +10,6 @@ router.get("/profile", authMiddleware, async (req, res) => {
         const user = await User.findById(req.user.userID).select(
             "name email phoneNumber image streakCount auraPoints level achievements rewards xp image"
         );
-        console.log(user);
 
         if (!user) {
             return res.status(404).json({ msg: "User not found" });
