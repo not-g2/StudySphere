@@ -81,7 +81,6 @@ const Header: React.FC = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    toast.success(`Welcome back ${session.email}`);
                     setUserImage(data.image?.url || "");
                     setstreak(data.streakCount);
                 } else {
@@ -94,6 +93,14 @@ const Header: React.FC = () => {
 
         GetProfile();
     }, [session]);
+
+    useEffect(() => {
+        const toastMsg = localStorage.getItem("showToast");
+        if (toastMsg) {
+            toast.success(toastMsg);
+            localStorage.removeItem("showToast");
+        }
+    }, []);
 
     const renderTimer = (): JSX.Element => {
         switch (true) {

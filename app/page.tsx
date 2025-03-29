@@ -111,6 +111,7 @@ function Page() {
             .then((data) => {
                 if (data.token) {
                     storeSessionData(data);
+                    localStorage.setItem("showToast", `Welcome back ${email}`);
                     if (isAdmin === "Admin") {
                         window.location.href = "/admin";
                     } else {
