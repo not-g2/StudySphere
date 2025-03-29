@@ -5,6 +5,7 @@ import BadgeCarousel from "@/components/Profile/BadgeCarousel";
 import CustomInputField from "@/components/Profile/CustomInputField";
 import { Avatar, Card, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface sessionProps {
     user: {
@@ -63,6 +64,33 @@ const ProfilePage = () => {
 
         fetchProfile();
     }, [session]);
+
+    const UpdateProfile = async () => {
+        if (!session) return;
+        try {
+            await fetch(`http://localhost:8000/api/desc/profile`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${session.user.token}`,
+                },
+                body: JSON.stringify({
+                    name: user?.name,
+                    email: user?.email,
+                    phoneNumber: user?.phoneNumber,
+                }),
+            })
+                .then((response) => {
+                    if (!response.ok) return;
+                    toast.success("Successfully updated Profile");
+                })
+                .catch((error) => {
+                    toast.error(`Error Updating Profile ${error}`);
+                });
+        } catch (error) {
+            toast.error(`Error Updating Profile ${error}`);
+        }
+    };
 
     const handleFieldChange = (field: keyof userProps, value: string) => {
         if (user) {
@@ -129,6 +157,17 @@ const ProfilePage = () => {
                             }
                         />
                     </div>
+                    <button
+                        className={`mt-6 px-6 py-3 text-white font-semibold rounded-lg shadow-md transition ${
+                            user
+                                ? "bg-blue-600 hover:bg-blue-700"
+                                : "bg-gray-400 cursor-not-allowed"
+                        }`}
+                        disabled={!user}
+                        onClick={() => UpdateProfile()}
+                    >
+                        Save Changes
+                    </button>
                 </div>
 
                 <div className="w-full shadow-md rounded-lg bg-white p-6">

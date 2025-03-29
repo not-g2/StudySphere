@@ -38,7 +38,6 @@ const Header: React.FC = () => {
     useSessionCheck(setSession);
 
     const navItems = [
-        { label: "Home", path: "/" },
         { label: "Dashboard", path: "/Dashboard" },
         { label: "Courses", path: "/Courses" },
         { label: "Rewards", path: "/Rewards" },
