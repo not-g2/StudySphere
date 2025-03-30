@@ -4,6 +4,7 @@ const { upload } = require("../utils/cloudinary");
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
+const Badge = require("../models/badgeSchema");
 
 // signup endpoint
 router.post("/signup", async (req, res) => {
@@ -48,6 +49,8 @@ router.post("/signup", async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
+
+
 
         // send response
         res.status(201).json({

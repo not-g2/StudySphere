@@ -29,12 +29,9 @@ const UserSchema = new mongoose.Schema({
     courses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
     auraPoints: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
-    achievements: [
-        {
-            badge : {type : String},
-            content : {type : String}
-        }
-    ],
+    achievements : [{
+        badge : {type : mongoose.Schema.Types.ObjectId,ref : 'Badge'}
+    }],
     rewards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reward" }],
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: "Group" }],
     groupCreated: {
