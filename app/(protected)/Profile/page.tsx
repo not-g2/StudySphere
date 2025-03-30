@@ -29,7 +29,7 @@ interface userProps {
     };
     email: string;
     auraPoints: number;
-    achievements: string[];
+    unlockedBadges: Array<{ _id: string; badgeLink: string }>;
 }
 
 const ProfilePage = () => {
@@ -58,6 +58,7 @@ const ProfilePage = () => {
 
                 const data = await response.json();
                 setUser(data.user);
+                console.log(data.user);
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
@@ -221,7 +222,7 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="w-full shadow-md rounded-lg bg-white p-6">
-                    <BadgeCarousel />
+                    <BadgeCarousel images={user ? user.unlockedBadges : []} />
                 </div>
             </div>
         </div>
