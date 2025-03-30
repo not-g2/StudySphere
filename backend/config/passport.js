@@ -3,7 +3,9 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
-
+const Badge = require("../models/badgeSchema");
+const checkBadgeFromStreak = require("../helperfunction/badgeFromStreak");
+const checkBadgeFromLevel = require("../helperfunction/badgeFromLevel");
 passport.use(
     new GoogleStrategy(
         {
@@ -14,11 +16,14 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             try {
                 // Check if user exists
+                let badgeImages = [];
                 let user = await User.findOne({
                     email: profile.emails[0].value,
                 });
                 if (!user) {
                     // Create new user if not found
+                    const badge = await Badge.findById('67e407a602cd398c11be6875').select('badgeLink');
+                    badgeImages.push(badge);
                     user = await User.create({
                         googleId: profile.id,
                         name: profile.displayName,
@@ -26,6 +31,7 @@ passport.use(
                         password: "nopassword",
                         prevLoginDate : new Date(new Date().setUTCHours(0,0,0,0)),
                         streakCount : 1,
+                        unlockedBadges : ['67e407a602cd398c11be6875']
                     });
                 } else {
                     // Add googleId to existing user
@@ -46,6 +52,16 @@ passport.use(
                         user.prevLoginDate = currDate;
                         user.streakCount = 1;
                     }
+                    const badgeId = checkBadgeFromStreak(user.streakCount);
+                    if (badgeId) {
+                        let len1 = user.unlockedBadges.length;
+                        user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeId])];  
+                        let len2 = user.unlockedBadges.length;
+                        if(len1!==len2){
+                            const streakBadge = await Badge.findById(badgeId).select('badgeLink');
+                            badgeImages.push(streakBadge);
+                        }
+                    }
                     user.auraPoints++;
                     user.xp++;
 
@@ -54,6 +70,16 @@ passport.use(
                     // Check if user qualifies for a level up
                     if (user.xp >= nextLevelPoints) {
                         user.level += 1; // Level up
+                        const badgeIdFromLevel = checkBadgeFromLevel(user.level);
+                        if(badgeIdFromLevel){
+                            let len1 = user.unlockedBadges.length;
+                            user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeIdFromLevel])]; 
+                        }
+                        let len2 = user.unlockedBadges.length;
+                        if(len1!==len2){
+                            const levelBadge = await Badge.findById(badgeIdFromLevel).select('badgeLink');
+                            badgeImages.push(levelBadge);
+                        }
                         console.log(`Congratulations! ${user.name} reached Level ${user.level}`);
                     }
                     await user.save();    
@@ -103,7 +129,8 @@ passport.use(
                         email: email,
                         password: "nopassword",
                         prevLoginDate : new Date(new Date().setUTCHours(0,0,0,0)),
-                        streakCount : 1
+                        streakCount : 1,
+                        unlockedBadges : ['67e407a602cd398c11be6875']
                     });
                 } else {
                     if (!user.githubId) {
@@ -124,6 +151,12 @@ passport.use(
                         user.streakCount = 1;
                     }
 
+
+                    const badgeId = checkBadgeFromStreak(user.streakCount);
+                    if (badgeId) {
+                        user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeId])]; 
+                    }
+
                     user.auraPoints++;
                     user.xp++;
 
@@ -132,6 +165,11 @@ passport.use(
                     // Check if user qualifies for a level up
                     if (user.xp >= nextLevelPoints) {
                         user.level += 1; // Level up
+                        user.level += 1; // Level up
+                        const badgeIdFromLevel = checkBadgeFromLevel(user.level);
+                        if(badgeIdFromLevel){
+                            user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeIdFromLevel])]; 
+                        }
                         console.log(`Congratulations! ${user.name} reached Level ${user.level}`);
                     }
                     await user.save();

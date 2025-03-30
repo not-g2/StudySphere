@@ -60,7 +60,7 @@ router.post("/create/:courseID",authMiddleware,uploadPDF.single("pdfFile"),async
 router.get("/get/:courseID", authMiddleware, async (req, res) => {
     try {
         const { courseID } = req.params;
-        const chapters = await chapterModel
+        const chapters = await Chapter
             .find({ course: courseID })
             .select("title _id createdAt");
 
@@ -78,7 +78,7 @@ router.get("/pdf/:chapterID", async (req, res) => {
 
     try {
         // Fetch the chapter from the database
-        const chapter = await chapterModel.findById(chapterID);
+        const chapter = await Chapter.findById(chapterID);
         console.log(chapter, chapterID);
         if (!chapter || !chapter.chapterPdf) {
             return res.status(404).json({ message: "PDF not found." });

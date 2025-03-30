@@ -1,0 +1,7 @@
+We didnt know that we can use updateQuery , which will make changes/modifications to the database without fetching the DB multiple times. 
+
+The entire .GET(focusSessionData) route was firstly made using multiple DB calls.
+
+But then , we also knew about the fact that DB calls are expensive (visualise DB to be in another continent , so that would make each call to the DB very expensive). This would make our code less scalable . 
+
+Now , we are using updateQuery , through which we will store all the updates/changes in it , and in the end , just put it in findByIdAndUpdate().

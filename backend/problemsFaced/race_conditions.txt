@@ -1,0 +1,74 @@
+
+while making the badge awarding logic based on submission count , i realised my code is prone to race conditions.
+this is becuase my Write wasnt atomic.
+
+student.auraPoints += rewardfunc(assignment.dueDate, Date.now());
+            student.xp += rewardfunc(assignment.dueDate, Date.now());
+
+            // calculate next level threshold
+            const nextLevelPoints = 100 * (student.level + 1) ** 2;
+
+            // Check if user qualifies for a level up
+            if (student.xp >= nextLevelPoints) {
+                student.level += 1; // Level up
+                student.xp=0;
+                console.log(
+                    `Congratulations! ${student.name} reached Level ${student.level}`
+                );
+            }
+
+
+            const studentSubmissionCount = await Submission.find({studentId : student._id});
+
+            const badgeId = checkBadgeFromSubmissions(studentSubmissionCount.length);
+            if(badgeId){
+                student.unlockedBadges = [...new Set([...student.unlockedBadges],badgeId)];
+                await student.save();
+            }
+            // save the changes
+            await student.save();
+
+
+We realised that since we am doing so many changes before .save() , this is will lead to incosistent results when many requests modify the user / submission schema
+
+For now , strategy to handle this is by using using mongoDBs atomic operators like $push and $inc ,because they gurantee atomicity.
+
+Making updates like this (student.xp += rewardfxn()) does not ensure atomicity
+
+Our fix :- use multiple save statements like .findByIdAndUpdate() , and use $inc , $push , $addToSet etc 
+
+
+This was the idea , but then we realised that even this doesnt ensure atomicity.
+Without a transaction, if one operation fails (e.g., saving submission works but updating student XP fails), the system could be left in an inconsistent state.
+
+
+With a transaction, if anything goes wrong, the entire process is rolled back, ensuring data integrity. 
+
+Now , the idea is to use the concepts of transactions , since they follow ACID properties
+A = atomicity
+C = consistency
+I = Isolation
+D = Durability
+
+FINAL FIX : USE TRANSACTIONS 
+
+
+// SCENARIOES WHERE MULTIPLE REQUEST COULD HAPPEN 
+1️⃣ User Uses Pomodoro on Multiple Devices
+Suppose a user is logged into your platform on both their phone and laptop.
+
+They start two Pomodoro sessions at the same time.
+
+Both devices send requests at the same time to update their XP and totalPomodoroTime.
+
+2️⃣ Double Click / Rapid Refresh
+The user accidentally clicks the "End Session" button twice in quick succession.
+
+Two requests are sent to the server before the first one finishes processing.
+
+3️⃣ Slow Network / Retries
+A user submits a Pomodoro session, but their internet is slow.
+
+They don’t see an immediate response, so they press the submit button again.
+
+This sends two requests that update XP.

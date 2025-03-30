@@ -11,6 +11,7 @@ const User = require("../models/userModel");
 const { uploadPDF } = require("../utils/cloudinaryConfigPdfs");
 const { upload } = require('../utils/cloudinary');  // Cloudinary setup for image upload
 const mongoose = require("mongoose");
+const Notification = require("../models/notificationSchema")
 
 // Admins are hardcoded , we just need to verify them
 
@@ -148,13 +149,15 @@ router.post("/post/announcement", authMiddleware, async (req, res) => {
         // we have to send notification to all the students in the course
         await Notification.updateMany(
             { user: { $in: courseExists.students } }, // Find all students in the given course
-            { $push: { notifList: { content: `You have a new announcement in ${courseExists.name} course` } } }
+            { $push: { notifList: { content: `You have a new announcement in ${courseExists.name} course` } } },
+            {upsert : true }
         );
         res.status(201).json({
             msg: "Announcement posted successfully",
             announcement: newannoucement,
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ msg: "Error posting announcement" });
     }
 });
@@ -211,7 +214,8 @@ router.post(
             // send notification to every user in the course about the upload of assignment by admin
             await Notification.updateMany(
                 {user : {$in : courseExists.students}},
-                {$push : {notifList : {content : `A new assignment is uploaded in ${courseExists.name} course`}}}
+                {$push : {notifList : {content : `A new assignment is uploaded in ${courseExists.name} course`}}},
+                {upsert : true}
             )
 
             res.status(201).json({

@@ -1,0 +1,5 @@
+so , we enforced unique : true for an attribute in the schema , but then we realised we dont really need it , so we removed it from the schema , and then thought it would work , but to our surprise it wasn't working. 
+
+Upon investigating , we found that there is this thing called "Index Persistence" in MongoDb , which essentially means unique constraint remains in the database because the index is not automatically removed , eventhough mongoose no longer specifies it.
+
+Our fix :- Just go to mongoDb compass , open the schema , click on Indexes on the top , and then remove the attribute from the list!

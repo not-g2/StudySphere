@@ -29,9 +29,7 @@ const UserSchema = new mongoose.Schema({
     courses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
     auraPoints: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
-    achievements : [{
-        badge : {type : mongoose.Schema.Types.ObjectId,ref : 'Badge'}
-    }],
+    unlockedBadges : [{type : mongoose.Schema.Types.ObjectId,ref : 'Badge'}],
     rewards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reward" }],
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: "Group" }],
     groupCreated: {
@@ -84,7 +82,8 @@ const UserSchema = new mongoose.Schema({
         default: "absent",
     },
     prevLoginDate : {type : Date},
-    streakCount : {type : Number , default : 0}
+    streakCount : {type : Number , default : 0},
+    totalPomodoroTime : {type : Number , default : 0}
 });
 module.exports = mongoose.model("User", UserSchema);
 // export const User = mongoose.model("User",UserSchema);

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/userModel"); // Import User model
+const User = require("../models/userModel"); 
 const authMiddleware = require("../middleware/auth"); // Middleware to authenticate users
 const Course = require("../models/courseModel");
 const Admin = require("../models/adminModel");
@@ -9,6 +9,7 @@ const Chapter = require("../models/chapterSchema");
 const Announcement = require("../models/announcementSchema");
 const Notification = require("../models/notificationSchema");
 const Submission = require("../models/submissionSchema");
+const Badge = require("../models/badgeSchema");
 
 router.post("/fetchcoursecode/:courseid/:adminId",authMiddleware,async(req,res)=>{
     try{
@@ -39,8 +40,27 @@ router.post("/fetchcoursecode/:courseid/:adminId",authMiddleware,async(req,res)=
 })
 
 router.post("/create/:adminId", authMiddleware, async (req, res) => {
-    const { name, description, students } = req.body;
     try {
+        const { name, description, students } = req.body;
+        const admin = await Admin.findById(req.params.adminId);
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+        if(!name || !description || !students){
+            return res.status(400).json({
+                message : "Please give name , description and students"
+            })
+        }
+        // Validate if all student IDs are valid and exist
+        const validStudents = await User.find({ _id: { $in: students } }).select("_id courses");
+        const validStudentIds = validStudents.map(user => user._id.toString());
+
+        if (validStudentIds.length !== students.length) {
+            return res.status(400).json({
+                message: "One or more student IDs are invalid or do not exist",
+            });
+        }
+        
         const course = new Course({
             name,
             description,
@@ -48,9 +68,20 @@ router.post("/create/:adminId", authMiddleware, async (req, res) => {
             //courseCode
         });
         await course.save();
-        const admin = await Admin.findById(req.params.adminId);
-        if (!admin) {
-            return res.status(404).json({ message: "Admin not found" });
+
+        await User.updateMany(
+            {_id : {$in : validStudentIds}},
+            {$addToSet : {courses : course._id}}
+        )
+
+        for(const student of validStudents){
+            if(student.courses.length === 0){
+                await User.findByIdAndUpdate(
+                    student._id,
+                    {$addToSet : {unlockedBadges : '67e4089f02cd398c11be687b'}},
+                    {new : true}
+                )
+            }
         }
 
         admin.course.push(course._id);

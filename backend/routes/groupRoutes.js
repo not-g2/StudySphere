@@ -7,8 +7,14 @@ const generatePdfUrl = require("../utils/pdflinkhelper");
 const User = require("../models/userModel");
 const Group = require("../models/groupSchema");
 const authMiddleware = require("../middleware/auth");
-const Notification = require("../models/notificationSchema")
+const Notification = require("../models/notificationSchema");
+const checkBadgeFromGroupMembers = require("../helperfunction/badgeFromGroupMembers");
+const Badge = require("../models/badgeSchema");
 require('dotenv').config();
+
+// for groups , two types of badges can be earned 
+// 1. A creates a group for the first time
+// 2. The number of members in a group of the creator exceedes a certain threshold
 
 // create a group (works , checked on postman)
 router.post("/create",authMiddleware,async(req,res)=>{
@@ -19,6 +25,8 @@ router.post("/create",authMiddleware,async(req,res)=>{
         if (!name) {
             return res.status(400).json({ message: "Group name is required!" });
         }
+
+        let badgeImages = [];
 
         const user = await User.findById(userId);
 
@@ -42,18 +50,40 @@ router.post("/create",authMiddleware,async(req,res)=>{
         });
 
         await newGroup.save();
-
-        await User.findByIdAndUpdate(
-            userId, 
-            {
-                $inc: { groupCreated: 1 },
-                $push: { studyGroups: newGroup._id }
+        
+        if(user.groupCreated === 0){
+            let len1 = user.unlockedBadges.length || 0;
+            const updatedUser = await User.findByIdAndUpdate(
+                userId, 
+                {
+                    $inc: { groupCreated: 1 },
+                    $push: { studyGroups: newGroup._id },
+                    $addToSet : {unlockedBadges : '67e408be02cd398c11be687d'}
+                },
+                {new : true}
+            );
+            let len2 = updatedUser.unlockedBadges.length || 0;
+            if(len1!==len2){
+                // ensures that the user didnt get this badge b4
+                // this could happen in a scenario where user created a group for the very first time , deleted it and is now creating another group.
+                const badgeImageLink = await Badge.findById('67e408be02cd398c11be687d').select('badgeLink');
+                badgeImages.push(badgeImageLink);
             }
-        );
+        }
+        else{
+            await User.findByIdAndUpdate(
+                userId, 
+                {
+                    $inc: { groupCreated: 1 },
+                    $push: { studyGroups: newGroup._id }
+                }
+            );
+        }
 
         res.status(201).json({
             message : "group created successfully!",
-            newGroup
+            newGroup,
+            badgeImages
         })
         
 
@@ -82,6 +112,7 @@ router.post("/joingroup/:groupcode",authMiddleware,async(req,res)=>{
             })
         }
 
+        let badgeImages = [];
         const group = await Group.findOne({groupCode : groupcode});
 
         if(!group){
@@ -119,10 +150,43 @@ router.post("/joingroup/:groupcode",authMiddleware,async(req,res)=>{
             { new: true } // Return the updated group
         );
 
-        await User.findByIdAndUpdate(userId, { $push: { studyGroups: updatedGroup._id } });
+        if(user.studyGroups && user.studyGroups.length === 0){
+            let len1 = user.unlockedBadges.length || 0;
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                {$push : {studyGroups : updatedGroup._id},
+                $addToSet : {unlockedBadges : '67e408ae02cd398c11be687c'}
+                }
+            )
+            let len2 = updatedUser.unlockedBadges.length || 0;
+            if(len1 !== len2){
+                const badgeImageLink = await Badge.findById('67e408ae02cd398c11be687c').select('badgeLink');
+                badgeImages.push(badgeImageLink);
+            }
+        }
+        else{
+            await User.findByIdAndUpdate(
+                userId,
+                {$push : {studyGroups : updatedGroup._id}}
+            )
+        }
+
+        const latestUpdatedGroup = await Group.findById(group._id);
+        const groupMembersCount = latestUpdatedGroup.members.length;
+        const badgeId = checkBadgeFromGroupMembers(groupMembersCount);
+
+        // this is the badge that the creator can get if a number of people join his group
+        if(badgeId){
+            await User.findByIdAndUpdate(
+                latestUpdatedGroup.creator,
+                {$addToSet : {unlockedBadges : badgeId}}
+            )
+        }
+
         return res.status(200).json({
             msg : "user successfully added",
-            updatedGroup
+            updatedGroup,
+            badgeImages
         })
 
 
