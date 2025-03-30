@@ -41,7 +41,7 @@ router.post("/signup", async (req, res) => {
             password: hashedPassword,
             prevLoginDate: new Date(new Date().setUTCHours(0, 0, 0, 0)),
             streakCount: 1,
-            unlockedBadges : ['67e407a602cd398c11be6875']
+            unlockedBadges: ["67e407a602cd398c11be6875"],
         });
 
         await newUser.save();
@@ -52,8 +52,6 @@ router.post("/signup", async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
-
-
 
         // send response
         res.status(201).json({
@@ -112,10 +110,14 @@ router.post("/login", async (req, res) => {
             const badgeId = checkBadgeFromStreak(user.streakCount);
             if (badgeId) {
                 let len1 = user.unlockedBadges.length;
-                user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeId])]; 
+                user.unlockedBadges = [
+                    ...new Set([...user.unlockedBadges, badgeId]),
+                ];
                 let len2 = user.unlockedBadges.length;
-                if(len1!==len2){
-                    const streakBadge = await Badge.findById(badgeId).select('badgeLink');
+                if (len1 !== len2) {
+                    const streakBadge = await Badge.findById(badgeId).select(
+                        "badgeLink"
+                    );
                     badgeImages.push(streakBadge);
                 }
             }
@@ -126,12 +128,16 @@ router.post("/login", async (req, res) => {
             if (user.xp >= nextLevelPoints) {
                 user.level += 1; // Level up
                 const badgeIdFromLevel = checkBadgeFromLevel(user.level);
-                if(badgeIdFromLevel){
+                if (badgeIdFromLevel) {
                     let len1 = user.unlockedBadges.length;
-                    user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeIdFromLevel])]; 
+                    user.unlockedBadges = [
+                        ...new Set([...user.unlockedBadges, badgeIdFromLevel]),
+                    ];
                     let len2 = user.unlockedBadges.length;
-                    if(len1!==len2){
-                        const levelBadge = await Badge.findById(badgeIdFromLevel).select('badgeLink');
+                    if (len1 !== len2) {
+                        const levelBadge = await Badge.findById(
+                            badgeIdFromLevel
+                        ).select("badgeLink");
                         badgeImages.push(levelBadge);
                     }
                 }
@@ -141,7 +147,9 @@ router.post("/login", async (req, res) => {
             }
 
             await user.save();
-        } else if (currDate.getTime() > user.prevLoginDate.getTime() + 86400000
+        } else if (
+            currDate.getTime() >
+            user.prevLoginDate.getTime() + 86400000
         ) {
             // user did not log in the last day
             // reset the streak count
@@ -152,7 +160,7 @@ router.post("/login", async (req, res) => {
 
             // const badgeId = checkBadgeFromStreak(user.streakCount);
             // if (badgeId) {
-            //     user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeId])]; 
+            //     user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeId])];
             // }
 
             // calculate next level threshold
@@ -161,12 +169,16 @@ router.post("/login", async (req, res) => {
             if (user.xp >= nextLevelPoints) {
                 user.level += 1; // Level up
                 const badgeIdFromLevel = checkBadgeFromLevel(user.level);
-                if(badgeIdFromLevel){
+                if (badgeIdFromLevel) {
                     let len1 = user.unlockedBadges.length;
-                    user.unlockedBadges = [...new Set([...user.unlockedBadges, badgeIdFromLevel])]; 
+                    user.unlockedBadges = [
+                        ...new Set([...user.unlockedBadges, badgeIdFromLevel]),
+                    ];
                     let len2 = user.unlockedBadges.length;
-                    if(len1!==len2){
-                        const levelBadge = await Badge.findById(badgeIdFromLevel).select('badgeLink');
+                    if (len1 !== len2) {
+                        const levelBadge = await Badge.findById(
+                            badgeIdFromLevel
+                        ).select("badgeLink");
                         badgeImages.push(levelBadge);
                     }
                 }
@@ -175,16 +187,14 @@ router.post("/login", async (req, res) => {
                 );
             }
 
-            await user.save(); 
+            await user.save();
         }
-
         // Send response
         res.status(200).json({
             msg: "Login successful",
             token,
-            user,
-            badgeImages
-            //user: { id: user._id, email: user.email, isAdmin: false },
+            badgeImages,
+            user: { id: user._id, email: user.email, isAdmin: false },
         });
     } catch (error) {
         console.error(error);
