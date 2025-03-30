@@ -1,4 +1,3 @@
-"use client";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import {
@@ -73,10 +72,15 @@ function DeadlinesList() {
   }, []);
 
   return (
-    <div style={{ padding: "16px", width: "100%" }}>
+    <>
       <TableContainer 
         component={Paper} 
-        style={{ backgroundColor: "#FFFFFF", overflowX: "hidden" }}
+        style={{ 
+          backgroundColor: "#FFFFFF", 
+          overflowX: "hidden", 
+          overflowY: "auto", 
+          maxHeight: "400px"  // Increased for 7 rows
+        }}
       >
         <Table>
           <TableHead>
@@ -144,7 +148,7 @@ function DeadlinesList() {
           </TableBody>
         </Table>
       </TableContainer>
-    </div>
+    </>
   );
 }
 

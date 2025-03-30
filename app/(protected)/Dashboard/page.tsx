@@ -128,43 +128,44 @@ function DashboardPage() {
 
                 {/* Second Row: Leaderboard, DeadlinesList, and GoalTable */}
                 <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "20px",
+                    alignItems: "flex-start", // Ensures all child elements start at the same vertical position
+                }}
+            >
+                <div
                     style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: "20px",
+                        flex: 1,
+                        backgroundColor: "#FFFFFF",
+                        padding: "20px",
+                        borderRadius: "8px",
                     }}
                 >
-                    <div
-                        style={{
-                            flex: 1,
-                            backgroundColor: "#F3F3F4",
-                            padding: "20px",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        <Leaderboard session={session} />
-                    </div>
-                    <div
-                        style={{
-                            flex: 1,
-                            backgroundColor: "#F3F3F4",
-                            padding: "20px",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        <DeadlinesList />
-                    </div>
-                    <div
-                        style={{
-                            flex: 1,
-                            backgroundColor: "#F3F3F4",
-                            padding: "20px",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        <GoalTable externalRefresh={0} />
-                    </div>
+                    <Leaderboard session={session} />
                 </div>
+                <div
+                    style={{
+                        flex: 1,
+                        backgroundColor: "#FFFFFF",
+                        padding: "20px",
+                        borderRadius: "8px",
+                    }}
+                >
+                    <DeadlinesList />
+                </div>
+                <div
+                    style={{
+                        flex: 1,
+                        backgroundColor: "#FFFFFF",
+                        padding: "20px",
+                        borderRadius: "8px",
+                    }}
+                >
+                    <GoalTable externalRefresh={0} />
+                </div>
+            </div>
 
                 {/* Third Row: Analytics - Radar Chart and Bar Chart side by side */}
                 <div
@@ -178,7 +179,7 @@ function DashboardPage() {
                     <div
                         style={{
                             width: "600px",
-                            backgroundColor: "#F3F3F4",
+                            backgroundColor: "#FFFFFF",
                             padding: "20px",
                             borderRadius: "8px",
                         }}

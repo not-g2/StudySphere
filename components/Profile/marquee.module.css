@@ -1,0 +1,27 @@
+.marquee_track {
+    display: grid;
+    grid-template-columns: calc(var(--num-items) * 160px) [track] 0px [resting];
+    width: max-content;
+    overflow: hidden;
+}
+
+.marquee_item {
+    grid-area: resting;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: marquee_move 20s linear infinite;
+    animation-delay: calc(20s / var(--num-items) * var(--item-position) * -1);
+}
+
+.marquee {
+    width: 100%;
+    container-type: inline-size;
+    overflow: hidden;
+}
+
+@keyframes marquee_move {
+    to {
+        transform: translateX(calc(calc(var(--num-items) * 160px * -1) - 100%));
+    }
+}

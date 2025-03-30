@@ -7,26 +7,20 @@ import {
     Avatar,
     Box,
     IconButton,
-    MenuItem,
-    Menu,
-    Badge,
-    Divider,
     Button,
-    Skeleton, // <-- Import Skeleton here
+    Skeleton,
 } from "@mui/material";
 import Dropdown from "../components/dropdown";
 import { useRouter } from "next/navigation";
 import LogoutPage from "./signout";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import { motion } from "framer-motion";
 import useSessionCheck from "../app/hooks/auth"; // Use your custom hook
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
 import { toast } from "react-toastify";
 import Lottie from "lottie-react";
+import Notifications from "./HomeHeader/Notifications";
 
-// Define a darker blue for the skeleton background
-const skeletonBg = "#001125"; // Adjust this color as needed
+const skeletonBg = "#001125";
 
 const Header: React.FC = () => {
     const PORT = process.env.NEXT_PUBLIC_PORT;
@@ -35,21 +29,15 @@ const Header: React.FC = () => {
     );
     const router = useRouter();
     const [userImage, setUserImage] = useState<string | null>(null);
-    // Start with undefined so we know when the session check is in progress.
     const [session, setSession] = useState<any | null | undefined>(undefined);
     const [open, setOpen] = useState(false);
-    const [notifications, setNotifications] = useState<number>(3);
-    const [notificationAnchorEl, setNotificationAnchorEl] =
-        useState<null | HTMLElement>(null);
     const [animateBell, setAnimateBell] = useState<boolean>(true);
     const [streak, setstreak] = useState(0);
     const [flameanim, setflameanim] = useState(null);
 
-    // This hook sets session to an object if logged in, or null if not logged in, leaving it undefined while checking.
     useSessionCheck(setSession);
 
     const navItems = [
-        { label: "Home", path: "/" },
         { label: "Dashboard", path: "/Dashboard" },
         { label: "Courses", path: "/Courses" },
         { label: "Rewards", path: "/Rewards" },
@@ -69,14 +57,8 @@ const Header: React.FC = () => {
         setProfileAnchorEl(event.currentTarget);
     };
 
-    const handleBellClick = (event: React.MouseEvent<HTMLElement>) => {
-        event.stopPropagation();
-        setNotificationAnchorEl(event.currentTarget);
-    };
-
     const handleClose = () => {
         setProfileAnchorEl(null);
-        setNotificationAnchorEl(null);
     };
 
     const handleSignOut = () => {
@@ -99,7 +81,6 @@ const Header: React.FC = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    toast.success(`Welcome back ${session.email}`);
                     setUserImage(data.image?.url || "");
                     setstreak(data.streakCount);
                 } else {
@@ -113,11 +94,13 @@ const Header: React.FC = () => {
         GetProfile();
     }, [session]);
 
-    const markAsRead = () => {
-        setNotifications(0);
-        setAnimateBell(false);
-        handleClose();
-    };
+    useEffect(() => {
+        const toastMsg = localStorage.getItem("showToast");
+        if (toastMsg) {
+            toast.success(toastMsg);
+            localStorage.removeItem("showToast");
+        }
+    }, []);
 
     const renderTimer = (): JSX.Element => {
         switch (true) {
@@ -222,37 +205,10 @@ const Header: React.FC = () => {
                         </span>
                     </div>
 
-                    <IconButton color="inherit" onClick={handleBellClick}>
-                        <Badge
-                            badgeContent={notifications}
-                            color="error"
-                            sx={{
-                                "& .MuiBadge-badge": {
-                                    transform: "translate(20%, -30%)",
-                                    fontSize: "0.75rem",
-                                    width: "20px",
-                                    height: "20px",
-                                    borderRadius: "50%",
-                                },
-                            }}
-                        >
-                            <motion.div
-                                animate={
-                                    animateBell
-                                        ? { rotate: [0, -10, 10, -10, 10, 0] }
-                                        : {}
-                                }
-                                transition={{
-                                    duration: 0.5,
-                                    ease: "easeInOut",
-                                    repeat: animateBell ? Infinity : 0,
-                                    repeatDelay: 2,
-                                }}
-                            >
-                                <NotificationsIcon sx={{ fontSize: 36 }} />{" "}
-                            </motion.div>
-                        </Badge>
-                    </IconButton>
+                    <Notifications
+                        id={session?.user?.id}
+                        token={session?.user?.token}
+                    />
 
                     {session === undefined ? (
                         <Box sx={{ display: "flex", gap: 1 }}>
