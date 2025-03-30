@@ -81,8 +81,8 @@ const Header: React.FC = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    setUserImage(data.image?.url || "");
-                    setstreak(data.streakCount);
+                    setUserImage(data.user.image?.url || "");
+                    setstreak(data.user.streakCount);
                 } else {
                     console.error("Failed to fetch profile image");
                 }

@@ -57,14 +57,14 @@ const ProfilePage = () => {
                 if (!response.ok) throw new Error("Failed to fetch user data");
 
                 const data = await response.json();
-                setUser(data);
+                setUser(data.user);
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
         };
 
         fetchProfile();
-    }, [session, user]);
+    }, [session]);
 
     const UpdateProfile = async () => {
         if (!session) return;
