@@ -7,16 +7,19 @@ const authMiddleware = require("../middleware/auth"); // Middleware to authentic
 // Get user profile by user ID
 router.get("/profile", authMiddleware, async (req, res) => {
     try {
-        const user = await User.findById(req.user.userID).select('name email phoneNumber image streakCount unlockedBadges').populate("unlockedBadges" , "badgeLink");
+        const user = await User.findById(req.user.userID)
+            .select(
+                "name email phoneNumber image streakCount unlockedBadges level xp auraPoints"
+            )
+            .populate("unlockedBadges", "badgeLink");
 
         if (!user) {
             return res.status(404).json({ msg: "User not found" });
         }
 
-
         res.status(200).json({
-            message : "Profile fetched successfully!",
-            user
+            message: "Profile fetched successfully!",
+            user,
         });
     } catch (error) {
         console.error(error);
