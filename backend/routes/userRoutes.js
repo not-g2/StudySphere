@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/userModel");
 const Assignment = require("../models/assignmentSchema");
+const Submission = require("../models/submissionSchema");
 const authMiddleware = require('../middleware/auth');
 
 // Route to fetch all deadlines (assignment due dates) for a specific user
-// TO ADD :- MAKE SURE TO NOT INCCLUDE ASSIGNMENTS THAT ARE NOT YET SUBMITTED
-router.get("/:userId/deadlines", async (req, res) => {
+router.get("/:userId/deadlines",authMiddleware, async (req, res) => {
     try {
         // Find the user by ID and populate the courses field
         const user = await User.findById(req.params.userId).populate("courses");
@@ -14,11 +14,21 @@ router.get("/:userId/deadlines", async (req, res) => {
         if (!user) return res.status(404).json({ error: "User not found" });
 
         // Find all assignments that belong to the user's courses
-        const deadlines = await Assignment.find({
+        let allDeadlines = await Assignment.find({
             course: { $in: user.courses }, // Get assignments where the course is in the user's courses array
-        })
-            .select("title dueDate course")
-            .populate("course", "name");
+        }).populate('course');
+
+        let userSubmissions = await Submission.find({studentId : user._id}).select('assignmentId');
+        userSubmissions = new Set(userSubmissions.map(item => item.assignmentId.toString()));
+
+        // fetch only deadlines for which user has not submitted an assignment yet
+        const deadlines = [];
+        for(const assignment of allDeadlines){
+            if(userSubmissions.has(assignment._id.toString())){
+                continue;
+            }
+            deadlines.push(assignment);
+        }
 
         // Send back the deadlines in a structured format
         res.status(200).json({

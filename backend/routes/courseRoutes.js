@@ -14,7 +14,7 @@ const Badge = require("../models/badgeSchema");
 router.post("/fetchcoursecode/:courseid/:adminId",authMiddleware,async(req,res)=>{
     try{
         const {courseid,adminId}=req.params;
-        
+
         const admin = await Admin.findById(adminId);
         if (!admin) {
             return res.status(404).json({ message: "Admin not found" });
@@ -322,30 +322,57 @@ router.put("/add-course", async (req, res) => {
     }
 });
 
-router.post("/fetchcoursecode/:courseid/:adminId",authMiddleware,async(req,res)=>{
+// remove a student from the course
+router.delete("/removeuser/:adminid/:userid/:courseid",authMiddleware,async(req,res)=>{
     try{
-        const {courseid,adminId}=req.params;
+        const {adminid,userid,courseid} = req.params;
 
-        const admin = await Admin.findById(adminId);
-        if (!admin) {
-            return res.status(404).json({ message: "Admin not found" });
-        }
-
-        const course = await Course.findById(courseid);
-        if(!course){
+        const admin = await Admin.findById(adminid);
+        if(!admin){
             return res.status(404).json({
-                message : "course not found"
+                message : "Admin not found!"
             })
         }
 
-        return res.status(200).json({
-            coursecode : course.courseCode
-        })
+        const user = await User.findById(userid);
 
-    }catch(error){
+        if(!user){
+            return res.status(404).json({
+                message : "Student not found!"
+            })
+        }
+
+        const course = await Course.findById(courseid);
+
+        if(!course){
+            return res.status(404).json({
+                message : "Course not found!"
+            })
+        }
+
+        const isRemoved = await Course.updateOne(
+            {_id : courseid , students : userid},
+            {$pull : {students : userid}}
+        )
+
+        if(!isRemoved.modifiedCount){
+            return res.status(404).json({
+                message : "user is not a part of this course"
+            })
+        }
+
+        await User.updateOne(
+            {_id : userid , courses : courseid},
+            {$pull : {courses : courseid}}
+        )
+
+        return res.status(200).json({
+            message : "User successfully removed from course!"
+        })
+    } catch(error){
         console.error(error);
-        return res.status(401).json({
-            message : "course not found"
+        return res.status(500).json({
+            message : "Internal server error!"
         })
     }
 })

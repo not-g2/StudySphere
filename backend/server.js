@@ -66,6 +66,7 @@ app.use("/api/groups",groupRoutes);
 app.use("/api/pomodoro",pomodoroRoutes);
 app.use("/api/notifications",notificationRoutes);
 
+
 require("./cron/cron");
 app.listen(process.env.PORT || 8000, () => {
     console.log(`server is running on port ${process.env.PORT || 8000}`);

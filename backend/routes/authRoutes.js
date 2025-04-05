@@ -7,7 +7,6 @@ const JWT = require("jsonwebtoken");
 const Badge = require("../models/badgeSchema");
 const checkBadgeFromStreak = require("../helperfunction/badgeFromStreak");
 const checkBadgeFromLevel = require("../helperfunction/badgeFromLevel");
-
 // signup endpoint
 router.post("/signup", async (req, res) => {
     try {
