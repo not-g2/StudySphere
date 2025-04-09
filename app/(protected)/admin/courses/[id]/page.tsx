@@ -141,7 +141,7 @@ const DashboardPage = () => {
 
     const handleViewSubmissions = async (assignment: Assignment) => {
         if (!session) return;
-        console.log(session)
+        console.log(session);
         setSelectedAssignment(assignment);
         setSubmissionsLoading(true);
         try {
@@ -561,7 +561,6 @@ const DashboardPage = () => {
         try {
             await Promise.all(
                 attendanceData.map(async (record) => {
-                    
                     const response = await fetch(
                         "http://localhost:8000/api/adminauth/post/mark",
                         {
@@ -826,7 +825,7 @@ const DashboardPage = () => {
                 open={openAssm}
                 handleClose={handleCloseAssignment}
                 assignment={currentAssignment}
-                adminId={session?.user.id}
+                studentId={session?.user.id}
             />
 
             <SubmissionsDialog

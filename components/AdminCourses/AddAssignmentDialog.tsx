@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface AddAssignmentDialogProps {
   open: boolean;
   onClose: () => void;
-  courseID: string;
+  courseID: string | string[] | undefined;
   onAssignmentAdded?: () => void;
 }
 

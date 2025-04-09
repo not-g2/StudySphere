@@ -22,10 +22,10 @@ interface Assignment {
     _id: number;
     title: string;
     dueDate: string;
-    course: string;
-    description: string;
-    link: string;
-    createdAt: string;
+    course?: string;
+    description?: string;
+    link?: string;
+    createdAt?: string;
 }
 
 interface Chapter {
@@ -127,7 +127,7 @@ const DashboardPage = () => {
                     );
                     if (response.ok) {
                         const data = await response.json();
-                        console.log(data)
+                        console.log(data);
                         setannouncements(data);
                     } else {
                         console.error("Failed to get Announcement details");
@@ -183,7 +183,7 @@ const DashboardPage = () => {
     }, [session]);
 
     const isSubmitted = (assignmentId: number) => {
-        console.log(submissions)
+        console.log(submissions);
         return submissions.some(
             (submission) =>
                 submission.assignmentId._id === assignmentId &&
