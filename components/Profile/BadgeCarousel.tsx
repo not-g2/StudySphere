@@ -9,6 +9,7 @@ interface InfiniteScrollProps {
 }
 
 export default function InfiniteScroll({ images }: InfiniteScrollProps) {
+    console.log(images);
     const marqueeRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
     const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -46,33 +47,39 @@ export default function InfiniteScroll({ images }: InfiniteScrollProps) {
                 <Modal isOpen={isOpen} onClose={onClose} ownedBadges={images} />
             </div>
 
-            {images.length > 0 ? (
+            {images.length > 0 && shouldAnimate ? (
                 <div className={styles.marquee} ref={marqueeRef}>
                     <div className={styles.marquee_track} ref={trackRef}>
-                        {shouldAnimate
-                            ? images.map((image, index) => (
-                                  <div
-                                      key={image._id}
-                                      className={styles.marquee_item}
-                                      style={
-                                          {
-                                              "--item-position": `${index - 1}`,
-                                          } as React.CSSProperties
-                                      }
-                                  >
-                                      <img
-                                          src={image.badgeLink}
-                                          alt="Achievement Badge"
-                                          className="w-40 h-40 rounded-lg shadow-md border-4 border-gray-300"
-                                      />
-                                  </div>
-                              ))
-                            : images.map((image, index) => (
-                                  <div key={image._id}>
-                                      <img src={image.badgeLink} />
-                                  </div>
-                              ))}
+                        {images.map((image, index) => (
+                            <div
+                                key={image._id}
+                                className={styles.marquee_item}
+                                style={
+                                    {
+                                        "--item-position": `${index - 1}`,
+                                    } as React.CSSProperties
+                                }
+                            >
+                                <img
+                                    src={image.badgeLink}
+                                    alt="Achievement Badge"
+                                    className="w-40 h-40 rounded-lg shadow-md border-4 border-gray-300"
+                                />
+                            </div>
+                        ))}
                     </div>
+                </div>
+            ) : images.length > 0 ? (
+                <div className="flex flex-row">
+                    {images.map((image, index) => (
+                        <div key={image._id}>
+                            <img
+                                src={image.badgeLink}
+                                alt="Badge"
+                                className="w-40 h-40 rounded-lg shadow-md border-4 border-gray-300"
+                            />
+                        </div>
+                    ))}
                 </div>
             ) : (
                 <p className="text-lg text-gray-500">No Achievements Found</p>
