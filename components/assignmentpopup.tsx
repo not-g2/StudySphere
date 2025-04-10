@@ -22,16 +22,7 @@ import { AttachFile, Delete } from "@mui/icons-material";
 import pdf from "../public/pdf.png";
 import { format } from "date-fns";
 import Cookies from "js-cookie";
-
-interface Assignment {
-    _id: number;
-    title: string;
-    dueDate: string;
-    course: string;
-    description: string;
-    link: string;
-    createdAt: string;
-}
+import { Assignment } from "@/types/assignment";
 
 interface PopupFormProps {
     open: boolean;
@@ -117,7 +108,7 @@ const PopupForm: React.FC<PopupFormProps> = ({
             formData.append("assignmentId", assignment?._id.toString());
             formData.append("studentId", studentId);
             formData.append("pdfFile", files);
-            console.log(files)
+            console.log(files);
             const token = session.user.token;
             const response = await fetch(
                 "http://localhost:8000/api/submissions/submit",

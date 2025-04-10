@@ -8,13 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { format } from "date-fns";
-
-interface Announcement {
-  _id: number;
-  title: string;
-  createdAt: string;
-  description: string;
-}
+import { Announcement } from "@/types/announcements";
 
 interface PopupFormProps {
   open: boolean;

@@ -1,8 +1,6 @@
 "use client";
 
 import { Card, CardMedia, CardContent, Typography, Grid } from "@mui/material";
-import pic1 from "../../public/reward1.jpeg";
-import pic2 from "../../public/reward2.jpeg";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
@@ -16,10 +14,9 @@ interface reward {
 
 const RewardsDisplay = () => {
     const PORT = process.env.NEXT_PUBLIC_PORT;
-    console.log(PORT);
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
-    const [rewards, setRewards] = useState([]);
+    const [rewards, setRewards] = useState<reward[] | []>([]);
 
     useSessionCheck(setSession); // ✅ Use session check hook
 
@@ -78,8 +75,9 @@ const RewardsDisplay = () => {
 
                 const data = await response.json();
                 alert(`${data.message}, Coupon Code ${data.coupon_id}`);
-            } catch (error) {
-                alert(`Error: ${error.message}`);
+            } catch (error: unknown) {
+                const e = error as Error;
+                alert(`Error: ${e.message}`);
             }
         };
 

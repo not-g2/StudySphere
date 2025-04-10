@@ -10,24 +10,8 @@ import AnnouncementsList from "@/components/UserCourses/AnnouncementsList";
 import ChaptersList from "@/components/UserCourses/ChaptersList";
 import AnnouncementPopup from "@/components/announcmentpopup";
 import AssignmentPopup from "@/components/assignmentpopup";
-
-interface Announcement {
-    _id: number;
-    title: string;
-    createdAt: string;
-    description: string;
-}
-
-interface Assignment {
-    _id: number;
-    title: string;
-    dueDate: string;
-    course?: string;
-    description?: string;
-    link?: string;
-    createdAt?: string;
-}
-
+import { Announcement } from "@/types/announcements";
+import { Assignment } from "@/types/assignment";
 interface Chapter {
     _id: number;
     title: string;

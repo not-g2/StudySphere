@@ -2,16 +2,7 @@
 import React from "react";
 import { Typography, Card, CardContent, Box, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-interface Announcement {
-    _id: number;
-    title: string;
-    description: string;
-    user: {
-        _id: string;
-        name: string;
-    };
-}
+import { Announcement } from "@/types/announcements";
 
 interface AnnouncementsListProps {
     announcements: Announcement[];

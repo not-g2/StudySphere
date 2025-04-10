@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { PieChart, Pie, Cell } from 'recharts';
-
-interface LevelProgressProps {
-  level: number;
-  xp: number;
-}
+import { LevelProgressProps } from '@/types/levelProgress';
 
 const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
   const data = [
@@ -67,7 +63,7 @@ const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
   );
 };
 
-const LevelProgressContainer: React.FC = () => {
+const LevelProgressContainer: React.FC<LevelProgressProps> = () => {
   const [level, setLevel] = useState<number>(0);
   const [xp, setXp] = useState<number>(0);
   const [session, setSession] = useState<any>(null);

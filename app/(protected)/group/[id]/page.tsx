@@ -25,28 +25,13 @@ import { useRouter, useParams } from "next/navigation";
 import Banner from "@/components/UserCourses/Banner";
 import AnnouncementsList from "@/components/UserCourses/AnnouncementsList";
 import AnnouncementPopup from "@/components/announcmentpopup";
-
-interface Announcement {
-  _id: number;
-  title: string;
-  createdAt: string;
-  description: string;
-}
-
+import { Session } from "@/types/session";
+import { Announcement } from "@/types/announcements";
 interface Member {
   memberid: string;
   name: string;
   rank: string;
 }
-
-type Session = {
-  user: {
-    id: string;
-    token: string;
-  };
-  email: string;
-  isAdmin: boolean;
-};
 
 // Popup component to select a successor when the creator leaves
 interface SelectSuccessorPopupProps {

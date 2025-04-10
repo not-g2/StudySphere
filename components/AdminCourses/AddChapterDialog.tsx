@@ -41,7 +41,12 @@ const AddChapterDialog = ({
             const session = JSON.parse(sessionData);
             const formData = new FormData();
             formData.append("title", chapterTitle);
-            formData.append("courseID", courseID);
+            if (typeof courseID !== "string") {
+                alert("Invalid course ID.");
+                return;
+            }
+            formData.append("course", courseID);
+
             formData.append("pdfFile", chapterFile);
 
             const response = await fetch(

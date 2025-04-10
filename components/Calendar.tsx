@@ -99,9 +99,11 @@ const MyCalendar = () => {
                     );
                     setEvents((prev) => [...prev, ...formattedEvents]);
                 } else {
+                    const data = await response.json();
                     console.error(
                         "Failed to fetch timetable:",
-                        response.status
+                        response.status,
+                        data.message
                     );
                 }
             } catch (error) {

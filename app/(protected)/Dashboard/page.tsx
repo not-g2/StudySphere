@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import useSessionCheck from "../../hooks/auth";
 import DeadlinesList from "@/components/deadlines";
@@ -9,17 +8,20 @@ import AttendancePieChart from "@/components/AttendancePieChart";
 import GoalTable from "@/components/goalview";
 import FocusRadarChart from "@/components/Dashboard/pomoradarchart"; // Existing radar chart component
 import SubjectTimeBarChart from "@/components/Dashboard/subjecttimechart"; // New bar chart component
+import { Session } from "@/types/session";
+import { LevelProgressProps } from "@/types/levelProgress";
 
 // Dynamically import components that shouldn’t be server‑side rendered.
 const Leaderboard = dynamic(() => import("@/components/leaderboard"), {
     ssr: false,
 });
+
 const LevelProgress = dynamic(() => import("@/components/XPchart"), {
     ssr: false,
 });
 
 function DashboardPage() {
-    const [session, setSession] = useState(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState({ xp: 0, level: 0, auraPoints: 0 });
     const [focusData, setFocusData] = useState([]);
     const router = useRouter();
@@ -30,7 +32,7 @@ function DashboardPage() {
     // Fetch profile details (including auraPoints) and focus analytics once session is available.
     useEffect(() => {
         if (session) {
-            console.log(session.user.id, " ", session.user.token);
+            console.log(session);
             fetch("http://localhost:8000/api/users/profile", {
                 headers: { Authorization: `Bearer ${session.user.token}` },
             })
@@ -128,44 +130,44 @@ function DashboardPage() {
 
                 {/* Second Row: Leaderboard, DeadlinesList, and GoalTable */}
                 <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "20px",
-                    alignItems: "flex-start", // Ensures all child elements start at the same vertical position
-                }}
-            >
-                <div
                     style={{
-                        flex: 1,
-                        backgroundColor: "#FFFFFF",
-                        padding: "20px",
-                        borderRadius: "8px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "20px",
+                        alignItems: "flex-start", // Ensures all child elements start at the same vertical position
                     }}
                 >
-                    <Leaderboard session={session} />
+                    <div
+                        style={{
+                            flex: 1,
+                            backgroundColor: "#FFFFFF",
+                            padding: "20px",
+                            borderRadius: "8px",
+                        }}
+                    >
+                        <Leaderboard session={session} />
+                    </div>
+                    <div
+                        style={{
+                            flex: 1,
+                            backgroundColor: "#FFFFFF",
+                            padding: "20px",
+                            borderRadius: "8px",
+                        }}
+                    >
+                        <DeadlinesList />
+                    </div>
+                    <div
+                        style={{
+                            flex: 1,
+                            backgroundColor: "#FFFFFF",
+                            padding: "20px",
+                            borderRadius: "8px",
+                        }}
+                    >
+                        <GoalTable />
+                    </div>
                 </div>
-                <div
-                    style={{
-                        flex: 1,
-                        backgroundColor: "#FFFFFF",
-                        padding: "20px",
-                        borderRadius: "8px",
-                    }}
-                >
-                    <DeadlinesList />
-                </div>
-                <div
-                    style={{
-                        flex: 1,
-                        backgroundColor: "#FFFFFF",
-                        padding: "20px",
-                        borderRadius: "8px",
-                    }}
-                >
-                    <GoalTable externalRefresh={0} />
-                </div>
-            </div>
 
                 {/* Third Row: Analytics - Radar Chart and Bar Chart side by side */}
                 <div
