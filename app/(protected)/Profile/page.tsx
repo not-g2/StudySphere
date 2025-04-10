@@ -231,7 +231,7 @@ const ProfilePage = () => {
 
 // **Reusable Stats Card Component**
 const StatCard = ({ label, value }: { label: string; value?: number }) => (
-    <Card className="bg-[#1A1A1A] text-white p-5 text-center shadow-md rounded-md">
+    <Card className="bg-darkbg text-white p-5 text-center shadow-md rounded-md">
         <Typography
             variant="body2"
             color="gray"
