@@ -44,6 +44,7 @@ const Header: React.FC = () => {
         { label: "Goals", path: "/Goals" },
         { label: "Schedule", path: "/Schedule" },
         { label: "Pomodoro", path: "/Pomo" },
+        { label: "Groups", path: "/group" },
     ];
 
     const { time, isRunning, timerState, lastActiveState } = useTimer();
