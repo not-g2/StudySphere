@@ -4,8 +4,14 @@ import useSessionCheck from "@/app/hooks/auth";
 import BadgeCarousel from "@/components/Profile/BadgeCarousel";
 import CustomInputField from "@/components/Profile/CustomInputField";
 import { Avatar, Card, Typography } from "@mui/material";
+import dynamic from "next/dynamic";
 import React, { useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
+const toast = {
+    success: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.success(msg)),
+    error: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.error(msg)),
+};
 
 interface sessionProps {
     user: {
@@ -245,4 +251,4 @@ const StatCard = ({ label, value }: { label: string; value?: number }) => (
     </Card>
 );
 
-export default ProfilePage;
+export default dynamic(() => Promise.resolve(ProfilePage), { ssr: false });

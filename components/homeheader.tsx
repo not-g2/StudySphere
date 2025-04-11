@@ -16,7 +16,12 @@ import LogoutPage from "./signout";
 import useSessionCheck from "../app/hooks/auth"; // Use your custom hook
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
-import { toast } from "react-toastify";
+const toast = {
+    success: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.success(msg)),
+    error: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.error(msg)),
+};
 import Lottie from "lottie-react";
 import Notifications from "./HomeHeader/Notifications";
 

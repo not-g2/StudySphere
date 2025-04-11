@@ -1,9 +1,10 @@
 "use client";
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 import { ReactNode } from "react";
 import "./globals.css";
 import "./(protected)/output.css";
 import { TimerProvider } from "@/context/TimerContext";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import dynamic from "next/dynamic";
 

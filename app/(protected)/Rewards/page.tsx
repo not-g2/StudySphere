@@ -4,6 +4,7 @@ import { Card, CardMedia, CardContent, Typography, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
+import dynamic from "next/dynamic";
 
 interface reward {
     title: string;
@@ -13,7 +14,7 @@ interface reward {
 }
 
 const RewardsDisplay = () => {
-    const PORT = process.env.NEXT_PUBLIC_PORT;
+    const PORT = 8000;
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
     const [rewards, setRewards] = useState<reward[] | []>([]);
@@ -158,4 +159,4 @@ const RewardsDisplay = () => {
     );
 };
 
-export default RewardsDisplay;
+export default dynamic(() => Promise.resolve(RewardsDisplay), { ssr: false });
