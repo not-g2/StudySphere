@@ -6,6 +6,7 @@ import DeadlineForm from "@/components/Deadlineform";
 import GoalTable from "@/components/goalview";
 import Challengetable from "@/components/challenge";
 import useSessionCheck from "../../hooks/auth";
+import dynamic from "next/dynamic";
 
 interface Goal {
     name: string;
@@ -74,4 +75,4 @@ function ThirdRowPage() {
     );
 }
 
-export default ThirdRowPage;
+export default dynamic(() => Promise.resolve(ThirdRowPage), { ssr: false });
