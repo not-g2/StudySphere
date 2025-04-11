@@ -14,7 +14,7 @@ interface reward {
 }
 
 const RewardsDisplay = () => {
-    const PORT = process.env.NEXT_PUBLIC_PORT;
+    const PORT = 8000;
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
     const [rewards, setRewards] = useState<reward[] | []>([]);
@@ -158,6 +158,5 @@ const RewardsDisplay = () => {
         </Grid>
     );
 };
-
 
 export default dynamic(() => Promise.resolve(RewardsDisplay), { ssr: false });
