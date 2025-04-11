@@ -1,5 +1,6 @@
 "use client";
 import { CircularProgress, Box, Typography } from "@mui/material";
+import dynamic from "next/dynamic";
 
 const Loading: React.FC = () => {
     return (
@@ -21,4 +22,4 @@ const Loading: React.FC = () => {
     );
 };
 
-export default Loading;
+export default dynamic(() => Promise.resolve(Loading), { ssr: false });

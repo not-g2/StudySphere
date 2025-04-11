@@ -12,6 +12,7 @@ import AnnouncementPopup from "@/components/announcmentpopup";
 import AssignmentPopup from "@/components/assignmentpopup";
 import { Announcement } from "@/types/announcements";
 import { Assignment } from "@/types/assignment";
+import dynamic from "next/dynamic";
 interface Chapter {
     _id: number;
     title: string;
@@ -235,4 +236,4 @@ const DashboardPage = () => {
     );
 };
 
-export default DashboardPage;
+export default dynamic(() => Promise.resolve(DashboardPage), { ssr: false });
