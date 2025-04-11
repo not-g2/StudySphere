@@ -1,34 +1,22 @@
 "use client";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 import React, { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
+import dynamicc from "next/dynamic";
 import { useRouter } from "next/navigation";
 import useSessionCheck from "../../hooks/auth";
-const DeadlinesList = dynamic(() => import("@/components/deadlines"), {
-    ssr: false,
-});
-const AttendancePieChart = dynamic(() => import("@/components/AttendancePieChart"), {
-    ssr: false,
-});
-const GoalTable = dynamic(() => import("@/components/goalview"), {
-    ssr: false,
-});
-const FocusRadarChart = dynamic(() => import("@/components/Dashboard/pomoradarchart"), {
-    ssr: false,
-});
-const SubjectTimeBarChart = dynamic(() => import("@/components/Dashboard/subjecttimechart"), {
-    ssr: false,
-});
 import { Session } from "@/types/session";
-import { LevelProgressProps } from "@/types/levelProgress";
 
 // Dynamically import components that shouldn’t be server‑side rendered.
-const Leaderboard = dynamic(() => import("@/components/leaderboard"), {
-    ssr: false,
-});
-
-const LevelProgress = dynamic(() => import("@/components/XPchart"), {
-    ssr: false,
-});
+const DeadlinesList = dynamicc(() => import("@/components/deadlines"), { ssr: false });
+const AttendancePieChart = dynamicc(() => import("@/components/AttendancePieChart"), { ssr: false });
+const GoalTable = dynamicc(() => import("@/components/goalview"), { ssr: false });
+const FocusRadarChart = dynamicc(() => import("@/components/Dashboard/pomoradarchart"), { ssr: false });
+const SubjectTimeBarChart = dynamicc(() => import("@/components/Dashboard/subjecttimechart"), { ssr: false });
+const Leaderboard = dynamicc(() => import("@/components/leaderboard"), { ssr: false });
+const LevelProgress = dynamicc(() => import("@/components/XPchart"), { ssr: false });
 
 function DashboardPage() {
     const [session, setSession] = useState<Session | null>(null);
@@ -39,10 +27,8 @@ function DashboardPage() {
     // Use custom hook for session checking.
     useSessionCheck(setSession);
 
-    // Fetch profile details (including auraPoints) and focus analytics once session is available.
     useEffect(() => {
-        if (session) {
-            console.log(session);
+        if (session && typeof window !== "undefined") {
             fetch("http://localhost:8000/api/users/profile", {
                 headers: { Authorization: `Bearer ${session.user.token}` },
             })
@@ -56,12 +42,9 @@ function DashboardPage() {
                 )
                 .catch((err) => console.error("Error fetching profile:", err));
 
-            fetch(
-                `http://localhost:8000/api/pomodoro/fetchuseranalytics/${session.user.id}`,
-                {
-                    headers: { Authorization: `Bearer ${session.user.token}` },
-                }
-            )
+            fetch(`http://localhost:8000/api/pomodoro/fetchuseranalytics/${session.user.id}`, {
+                headers: { Authorization: `Bearer ${session.user.token}` },
+            })
                 .then((res) => res.json())
                 .then((data) => {
                     if (data.focusdata && data.focusdata.focusSessionData) {
@@ -91,14 +74,13 @@ function DashboardPage() {
                         marginBottom: "20px",
                     }}
                 >
-                    {/* Left container with LevelProgress and Aura Points */}
                     <div
                         style={{
                             flex: 1,
                             marginRight: "20px",
                             display: "flex",
                             alignItems: "center",
-                            backgroundColor: "#896EFB", // Specified purple colour
+                            backgroundColor: "#896EFB",
                             padding: "20px",
                             borderRadius: "8px",
                             boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
@@ -106,25 +88,20 @@ function DashboardPage() {
                         }}
                     >
                         <div style={{ flex: 1 }}>
-                            <LevelProgress
-                                level={profile.level}
-                                xp={profile.xp}
-                            />
+                            <LevelProgress level={profile.level} xp={profile.xp} />
                         </div>
                         <div
                             style={{
                                 width: "200px",
                                 marginLeft: "20px",
-                                backgroundColor: "#A18BFC", // Lighter shade of #896EFB
+                                backgroundColor: "#A18BFC",
                                 padding: "20px",
                                 borderRadius: "8px",
                                 textAlign: "center",
                                 color: "white",
                             }}
                         >
-                            <h3
-                                style={{ margin: "0 0 10px", fontSize: "16px" }}
-                            >
+                            <h3 style={{ margin: "0 0 10px", fontSize: "16px" }}>
                                 Aura Points
                             </h3>
                             <p style={{ fontSize: "20px", margin: 0 }}>
@@ -132,7 +109,6 @@ function DashboardPage() {
                             </p>
                         </div>
                     </div>
-                    {/* Right container with AttendancePieChart */}
                     <div style={{ flex: 1, marginLeft: "20px" }}>
                         <AttendancePieChart />
                     </div>
@@ -144,7 +120,7 @@ function DashboardPage() {
                         display: "flex",
                         justifyContent: "space-between",
                         gap: "20px",
-                        alignItems: "flex-start", // Ensures all child elements start at the same vertical position
+                        alignItems: "flex-start",
                     }}
                 >
                     <div
@@ -222,4 +198,4 @@ function DashboardPage() {
     );
 }
 
-export default dynamic(() => Promise.resolve(DashboardPage), { ssr: false });
+export default dynamicc(() => Promise.resolve(DashboardPage), { ssr: false });
