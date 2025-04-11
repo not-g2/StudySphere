@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import ClassCodePopup from "../../../components/classAdd";
 import useSessionCheck from "../../hooks/auth";
 import { Session } from "@/types/session";
+import dynamic from "next/dynamic";
 interface classItem {
     _id: string;
     name: string;
@@ -294,11 +295,11 @@ const ClassesPage = () => {
     const [openClassCodePopup, setOpenClassCodePopup] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
 
-    useSessionCheck(setSession);
-
     const handleCardClick = (classId: string) => {
         router.push(`/Courses/${classId}`);
     };
+
+    useSessionCheck(setSession);
 
     useEffect(() => {
         const getClasses = async () => {
@@ -444,4 +445,4 @@ const ClassesPage = () => {
     );
 };
 
-export default ClassesPage;
+export default dynamic(() => Promise.resolve(ClassesPage), { ssr: false });
