@@ -1,7 +1,11 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 import React, { useState } from "react";
 import clsx from "clsx";
+import dynamicc from "next/dynamic";
 
 interface ClassCodePopupProps {
     open: boolean;
@@ -104,4 +108,6 @@ const ClassCodePopup: React.FC<ClassCodePopupProps> = ({
     );
 };
 
-export default ClassCodePopup;
+export default dynamicc(() => Promise.resolve(ClassCodePopup), {
+    ssr: false,
+});
