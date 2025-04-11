@@ -4,6 +4,7 @@ import { Card, CardMedia, CardContent, Typography, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
+import dynamic from "next/dynamic";
 
 interface reward {
     title: string;
@@ -158,4 +159,5 @@ const RewardsDisplay = () => {
     );
 };
 
-export default RewardsDisplay;
+
+export default dynamic(() => Promise.resolve(RewardsDisplay), { ssr: false });

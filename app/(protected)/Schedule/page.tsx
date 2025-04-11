@@ -6,6 +6,7 @@ import MyCalendar from "../../../components/Calendar";
 import DeadlineForm from "@/components/Deadlineform";
 import SubjectSchedulerModal from "@/components/timetable";
 import useSessionCheck from "../../hooks/auth";
+import dynamic from "next/dynamic";
 
 const TimeTablePage: React.FC = () => {
     const [session, setSession] = useState<any>(null);
@@ -64,4 +65,4 @@ const TimeTablePage: React.FC = () => {
     );
 };
 
-export default TimeTablePage;
+export default dynamic(() => Promise.resolve(TimeTablePage), { ssr: false });

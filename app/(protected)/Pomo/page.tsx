@@ -6,8 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
 import useSessionCheck from "@/app/hooks/auth";
 import TagInput from "@/components/Pomodoro/input";
+import dynamic from "next/dynamic";
 
-export default function PomodoroTimer() {
+function PomodoroTimer() {
     const {
         time,
         isRunning,
@@ -145,3 +146,5 @@ export default function PomodoroTimer() {
         </div>
     );
 }
+
+export default dynamic(() => Promise.resolve(PomodoroTimer), { ssr: false });

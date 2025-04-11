@@ -212,4 +212,4 @@ function DashboardPage() {
     );
 }
 
-export default DashboardPage;
+export default dynamic(() => Promise.resolve(DashboardPage), { ssr: false });
