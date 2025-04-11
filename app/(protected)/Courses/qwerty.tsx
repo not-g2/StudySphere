@@ -1,4 +1,8 @@
 "use client";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 import {
     Box,
     Grid,
@@ -15,7 +19,7 @@ import { useEffect, useState } from "react";
 import ClassCodePopup from "../../../components/classAdd";
 import useSessionCheck from "../../hooks/auth";
 import { Session } from "@/types/session";
-import dynamic from "next/dynamic";
+import dynamicimport from "next/dynamic";
 interface classItem {
     _id: string;
     name: string;
@@ -445,4 +449,4 @@ const ClassesPage = () => {
     );
 };
 
-export default dynamic(() => Promise.resolve(ClassesPage), { ssr: false });
+export default dynamicimport(() => Promise.resolve(ClassesPage), { ssr: false });
