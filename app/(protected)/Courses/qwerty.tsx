@@ -13,13 +13,13 @@ import {
     Button,
     Skeleton,
 } from "@mui/material";
-//import { keyframes } from "@mui/system";
+import { keyframes } from "@mui/system";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import ClassCodePopup from "../../../components/classAdd";
-import dynamicimport from "next/dynamic";
+import useSessionCheck from "../../hooks/auth";
 import { Session } from "@/types/session";
+import dynamicImport from "next/dynamic";
 
 interface classItem {
     _id: string;
@@ -55,16 +55,16 @@ interface ClassCardProps {
     index: number;
 }
 
-// const fadeInUp = keyframes`
-//   from {
-//     opacity: 0;
-//     transform: translateY(20px);
-//   }
-//   to {
-//     opacity: 1;
-//     transform: translateY(0);
-//   }
-// `;
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
 const ClassCard: React.FC<ClassCardProps> = ({
     classItem,
@@ -85,46 +85,72 @@ const ClassCard: React.FC<ClassCardProps> = ({
     const backgroundGradient = gradients[index % gradients.length];
 
     useEffect(() => {
-        const fetchAnnouncement = async () => {
-            try {
-                const response = await fetch(
-                    `http://localhost:8000/api/announce/${classItem._id}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                        method: "GET",
+        if (typeof window !== "undefined") {
+            const fetchAnnouncement = async () => {
+                try {
+                    const response = await fetch(
+                        `http://localhost:8000/api/announce/${classItem._id}`,
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            method: "GET",
+                        }
+                    );
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.length > 0) {
+                            setAnnouncement(data[0]);
+                        } else {
+                            setAnnouncement(null);
+                        }
+                    } else {
+                        console.error("Failed to get Announcement details");
+                        setAnnouncement(null);
                     }
-                );
-                const data = await response.json();
-                setAnnouncement(data.length > 0 ? data[0] : null);
-            } catch {
-                setAnnouncement(null);
-            }
-        };
+                } catch (error) {
+                    console.error(
+                        "Error fetching Announcement details:",
+                        error
+                    );
+                    setAnnouncement(null);
+                }
+            };
 
-        const fetchAssignment = async () => {
-            try {
-                const response = await fetch(
-                    `http://localhost:8000/api/assgn/course/${classItem._id}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                        method: "GET",
+            const fetchAssignment = async () => {
+                try {
+                    const response = await fetch(
+                        `http://localhost:8000/api/assgn/course/${classItem._id}`,
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            method: "GET",
+                        }
+                    );
+                    if (response.ok) {
+                        const data = await response.json();
+                        const today = new Date().toISOString().split("T")[0];
+                        const dueToday = data.find((assgn: Assignment) => {
+                            return (
+                                assgn.dueDate.split("T")[0] === today ||
+                                assgn.dueDate === today
+                            );
+                        });
+                        if (dueToday) {
+                            setAssignment(dueToday);
+                        } else {
+                            setAssignment(null);
+                        }
+                    } else {
+                        console.error("Failed to get Assignment details");
+                        setAssignment(null);
                     }
-                );
-                const data = await response.json();
-                const today = new Date().toISOString().split("T")[0];
-                const dueToday = data.find(
-                    (assgn: Assignment) =>
-                        assgn.dueDate.split("T")[0] === today ||
-                        assgn.dueDate === today
-                );
-                setAssignment(dueToday || null);
-            } catch {
-                setAssignment(null);
-            }
-        };
+                } catch (error) {
+                    console.error("Error fetching Assignment details:", error);
+                    setAssignment(null);
+                }
+            };
 
-        fetchAnnouncement();
-        fetchAssignment();
+            fetchAnnouncement();
+            fetchAssignment();
+        }
     }, [classItem._id, token]);
 
     return (
@@ -144,7 +170,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
                     cursor: "pointer",
                     background: backgroundGradient,
                     opacity: 0,
-                    //animation: `${fadeInUp} 0.5s ease forwards`,
+                    animation: `${fadeInUp} 0.5s ease forwards`,
                     animationDelay: `${index * 0.2}s`,
                 }}
                 onClick={() => handleCardClick(classItem._id)}
@@ -191,18 +217,26 @@ const ClassCard: React.FC<ClassCardProps> = ({
                                 >
                                     Announcement:
                                 </Typography>
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        color: "black",
-                                    }}
-                                >
-                                    {announcement?.heading ||
-                                        "No announcements"}
-                                </Typography>
+                                {announcement ? (
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            color: "black",
+                                        }}
+                                    >
+                                        {announcement.heading}
+                                    </Typography>
+                                ) : (
+                                    <Typography
+                                        variant="body2"
+                                        sx={{ color: "black" }}
+                                    >
+                                        No announcements
+                                    </Typography>
+                                )}
                                 <Typography
                                     variant="body2"
                                     sx={{
@@ -213,13 +247,21 @@ const ClassCard: React.FC<ClassCardProps> = ({
                                 >
                                     Assignment:
                                 </Typography>
-                                <Typography
-                                    variant="body2"
-                                    sx={{ color: "black" }}
-                                >
-                                    {assignment?.title ||
-                                        "No assignment due today"}
-                                </Typography>
+                                {assignment ? (
+                                    <Typography
+                                        variant="body2"
+                                        sx={{ color: "black" }}
+                                    >
+                                        {assignment.title}
+                                    </Typography>
+                                ) : (
+                                    <Typography
+                                        variant="body2"
+                                        sx={{ color: "black" }}
+                                    >
+                                        No assignment due today
+                                    </Typography>
+                                )}
                             </Box>
                         </CardContent>
                     </Grid>
@@ -258,26 +300,16 @@ const ClassesPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
 
     const handleCardClick = (classId: string) => {
-        router.push(`/Courses/${classId}`);
+        if (typeof window !== "undefined") {
+            router.push(`/Courses/${classId}`);
+        }
     };
 
-    // Embedded session check
-    useEffect(() => {
-        const sessionData = Cookies.get("session");
-        if (sessionData) {
-            try {
-                setSession(JSON.parse(sessionData));
-            } catch {
-                router.push("/");
-            }
-        } else {
-            router.push("/");
-        }
-    }, [router]);
+    useSessionCheck(setSession);
 
     useEffect(() => {
-        const getClasses = async () => {
-            if (session) {
+        if (session && typeof window !== "undefined") {
+            const getClasses = async () => {
                 setLoading(true);
                 try {
                     const response = await fetch(
@@ -292,36 +324,51 @@ const ClassesPage = () => {
                     if (response.ok) {
                         const data = await response.json();
                         setClassesData(data.coursesList);
+                    } else {
+                        console.error("Failed to get Classes details");
                     }
                 } catch (error) {
                     console.error("Error Getting Classes Details:", error);
                 } finally {
                     setLoading(false);
                 }
-            }
-        };
+            };
 
-        getClasses();
-    }, [session, openClassCodePopup]);
+            getClasses();
+        }
+    }, [session, openClassCodePopup, PORT]);
 
-    const handleCloseClassCodePopup = () => setOpenClassCodePopup(false);
+    const handleCloseClassCodePopup = () => {
+        setOpenClassCodePopup(false);
+    };
 
     const onJoinClass = async (classCode: string) => {
-        if (!session) return;
-        try {
-            await fetch(`http://localhost:${PORT}/api/courses/add-course`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${session.user.token}`,
-                },
-                body: JSON.stringify({
-                    studentId: session.user.id,
-                    courseCode: classCode,
-                }),
-            });
-        } catch (err) {
-            console.error("Network error:", err);
+        if (session) {
+            const requestData = {
+                studentId: session.user.id,
+                courseCode: classCode,
+            };
+
+            try {
+                const response = await fetch(
+                    `http://localhost:${PORT}/api/courses/add-course`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${session.user.token}`,
+                        },
+                        body: JSON.stringify(requestData),
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error adding student to course:", errorData);
+                }
+            } catch (error) {
+                console.error("Network error:", error);
+            }
         }
     };
 
@@ -341,7 +388,11 @@ const ClassesPage = () => {
                     justifyContent="space-between"
                     sx={{ width: "100vw" }}
                 >
-                    <Typography variant="h4" className="text-black mt-2 mb-4">
+                    <Typography
+                        variant="h4"
+                        gutterBottom
+                        className="text-black mt-2 mb-4"
+                    >
                         Your Classes
                     </Typography>
                     <Button
@@ -361,7 +412,7 @@ const ClassesPage = () => {
                     sx={{ flexGrow: 1 }}
                 >
                     {loading ? (
-                        Array.from({ length: 4 }).map((_, index) => (
+                        Array.from(new Array(4)).map((_, index) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
                                 <Skeleton
                                     variant="rectangular"
@@ -399,6 +450,6 @@ const ClassesPage = () => {
     );
 };
 
-export default dynamicimport(() => Promise.resolve(ClassesPage), {
+export default dynamicImport(() => Promise.resolve(ClassesPage), {
     ssr: false,
 });
