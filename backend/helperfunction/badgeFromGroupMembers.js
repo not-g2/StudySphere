@@ -4,7 +4,7 @@ function checkBadgeFromGroupMembers(groupmembers) {
         50 : '67e408dd02cd398c11be687f',
         100 : '67e408e502cd398c11be6880'
     };
-    return badgeMap[strkcnt] || null;  // Return badge ID if exists, else null
+    return badgeMap[groupmembers] || null;  // Return badge ID if exists, else null
 }
 
 module.exports = checkBadgeFromGroupMembers;
