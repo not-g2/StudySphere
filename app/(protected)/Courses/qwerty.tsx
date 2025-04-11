@@ -13,7 +13,7 @@ import {
     Button,
     Skeleton,
 } from "@mui/material";
-import { keyframes } from "@mui/system";
+//import { keyframes } from "@mui/system";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
@@ -55,16 +55,16 @@ interface ClassCardProps {
     index: number;
 }
 
-const fadeInUp = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+// const fadeInUp = keyframes`
+//   from {
+//     opacity: 0;
+//     transform: translateY(20px);
+//   }
+//   to {
+//     opacity: 1;
+//     transform: translateY(0);
+//   }
+// `;
 
 const ClassCard: React.FC<ClassCardProps> = ({
     classItem,
@@ -144,7 +144,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
                     cursor: "pointer",
                     background: backgroundGradient,
                     opacity: 0,
-                    animation: `${fadeInUp} 0.5s ease forwards`,
+                    //animation: `${fadeInUp} 0.5s ease forwards`,
                     animationDelay: `${index * 0.2}s`,
                 }}
                 onClick={() => handleCardClick(classItem._id)}
