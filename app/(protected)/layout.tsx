@@ -1,11 +1,13 @@
 "use client";
-
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+import dynamicc from "next/dynamic";
 import Header from "../../components/homeheader";
 import AdminHeader from "../../components/adminheader";
 import { ReactNode } from "react";
 import "./output.css";
 import { usePathname } from "next/navigation";
-export default function RootLayout({
+function RootLayout({
     children,
     session,
 }: {
@@ -25,3 +27,5 @@ export default function RootLayout({
         </div>
     );
 }
+
+export default dynamicc(() => Promise.resolve(RootLayout), { ssr: false });
