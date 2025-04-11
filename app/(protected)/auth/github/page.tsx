@@ -1,10 +1,11 @@
+// app/auth/github/page.tsx
 "use client";
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import useSessionCheck from "../../../hooks/auth";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import useSessionCheck from "../../../hooks/auth";
 
 export default function GithubAuthSuccess() {
     const searchParams = useSearchParams();
@@ -19,7 +20,6 @@ export default function GithubAuthSuccess() {
         if (sessionData) {
             try {
                 const decodedSession = JSON.parse(atob(sessionData));
-
                 import("js-cookie").then((Cookies) => {
                     Cookies.default.set(
                         "session",
@@ -33,7 +33,7 @@ export default function GithubAuthSuccess() {
                     router.push("/Dashboard");
                 });
             } catch (err) {
-                console.error("Failed to decode session or set cookie:", err);
+                console.error("Session decoding failed:", err);
             }
         }
     }, [searchParams]);
@@ -51,7 +51,7 @@ export default function GithubAuthSuccess() {
         >
             <CircularProgress />
             <Typography variant="h6" color="gray">
-                Signing you in with Github...
+                Signing you in with GitHub...
             </Typography>
         </Box>
     );
