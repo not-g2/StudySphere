@@ -1,7 +1,4 @@
 "use client";
+import Qwerty from "./qwerty";
 
-import dynamic from "next/dynamic";
-
-const clientPage = dynamic(() => import("./qwerty"), { ssr: false });
-
-export default clientPage;
+export default Qwerty;
