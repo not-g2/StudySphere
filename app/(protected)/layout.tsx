@@ -5,7 +5,8 @@ import AdminHeader from "../../components/adminheader";
 import { ReactNode } from "react";
 import "./output.css";
 import { usePathname } from "next/navigation";
-export default function RootLayout({
+import dynamic from "next/dynamic";
+function RootLayout({
     children,
     session,
 }: {
@@ -25,3 +26,5 @@ export default function RootLayout({
         </div>
     );
 }
+
+export default dynamic(() => Promise.resolve(RootLayout), { ssr: false });
