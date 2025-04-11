@@ -237,3 +237,11 @@
 // };
 
 // export default dynamic(() => Promise.resolve(DashboardPage), { ssr: false });
+
+import React from "react";
+
+const page = () => {
+    return <div>page</div>;
+};
+
+export default page;
