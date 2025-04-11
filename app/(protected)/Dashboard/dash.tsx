@@ -3,11 +3,21 @@ import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import useSessionCheck from "../../hooks/auth";
-import DeadlinesList from "@/components/deadlines";
-import AttendancePieChart from "@/components/AttendancePieChart";
-import GoalTable from "@/components/goalview";
-import FocusRadarChart from "@/components/Dashboard/pomoradarchart"; // Existing radar chart component
-import SubjectTimeBarChart from "@/components/Dashboard/subjecttimechart"; // New bar chart component
+const DeadlinesList = dynamic(() => import("@/components/deadlines"), {
+    ssr: false,
+});
+const AttendancePieChart = dynamic(() => import("@/components/AttendancePieChart"), {
+    ssr: false,
+});
+const GoalTable = dynamic(() => import("@/components/goalview"), {
+    ssr: false,
+});
+const FocusRadarChart = dynamic(() => import("@/components/Dashboard/pomoradarchart"), {
+    ssr: false,
+});
+const SubjectTimeBarChart = dynamic(() => import("@/components/Dashboard/subjecttimechart"), {
+    ssr: false,
+});
 import { Session } from "@/types/session";
 import { LevelProgressProps } from "@/types/levelProgress";
 
