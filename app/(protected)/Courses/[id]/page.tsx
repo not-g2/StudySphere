@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 // import { Typography, Grid, Box } from "@mui/material";
 // import { useState, useEffect } from "react";
 // import Cookies from "js-cookie";

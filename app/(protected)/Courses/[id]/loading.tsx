@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 // import dynamic from "next/dynamic";
 
 // const Loading: React.FC = () => {
@@ -12,12 +12,10 @@
 
 // export default dynamic(() => Promise.resolve(Loading), { ssr: false });
 
-import React from 'react'
+import React from "react";
 
 const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+    return <div>page</div>;
+};
 
-export default page
+export default page;
