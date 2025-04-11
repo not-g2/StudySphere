@@ -1,13 +1,18 @@
+// app/auth/google/page.tsx
 "use client";
-export const dynamic = "force-dynamic"; // Disable static pre-rendering
+export const dynamic = "force-dynamic";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import useSessionCheck from "../../../hooks/auth";
 
 export default function GoogleAuthSuccess() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const [session, setSession] = useState(null);
+
+    useSessionCheck(setSession);
 
     useEffect(() => {
         const sessionData = searchParams.get("session");
@@ -15,7 +20,6 @@ export default function GoogleAuthSuccess() {
         if (sessionData) {
             try {
                 const decodedSession = JSON.parse(atob(sessionData));
-
                 import("js-cookie").then((Cookies) => {
                     Cookies.default.set(
                         "session",
@@ -29,7 +33,7 @@ export default function GoogleAuthSuccess() {
                     router.push("/Dashboard");
                 });
             } catch (err) {
-                console.error("Failed to decode or set cookie:", err);
+                console.error("Session decoding failed:", err);
             }
         }
     }, [searchParams]);
