@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { Bell, X } from "lucide-react";
 import { motion } from "framer-motion";

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import path from "path";
+"use client";
 
 interface BadgeTierProps {
     title: string;
