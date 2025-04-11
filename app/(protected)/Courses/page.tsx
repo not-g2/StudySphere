@@ -288,7 +288,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
 };
 
 const ClassesPage = () => {
-    const PORT = process.env.NEXT_PUBLIC_PORT;
+    const PORT = 8000;
     const router = useRouter();
     const [classesData, setClassesData] = useState<classItem[]>([]);
     const [session, setSession] = useState<Session | null>(null);
@@ -446,4 +446,3 @@ const ClassesPage = () => {
 };
 
 export default dynamic(() => Promise.resolve(ClassesPage), { ssr: false });
-
