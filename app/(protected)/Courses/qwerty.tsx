@@ -3,11 +3,22 @@
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
+import {
+    Box,
+    Grid,
+    Card,
+    CardContent,
+    Typography,
+    CardMedia,
+    Button,
+    Skeleton,
+} from "@mui/material";
+import { keyframes } from "@mui/system";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import useSessionCheck from "../../hooks/auth";
-import dynamicq from "next/dynamic";
+import Cookies from "js-cookie";
 import ClassCodePopup from "../../../components/classAdd";
+import dynamicimport from "next/dynamic";
 import { Session } from "@/types/session";
 
 interface classItem {
@@ -19,8 +30,12 @@ interface classItem {
     createdAt: string;
     __v: number;
     coursePic: {
-        publicId: { type: string };
-        url: { type: string };
+        publicId: {
+            type: string;
+        };
+        url: {
+            type: string;
+        };
     };
 }
 
@@ -40,6 +55,17 @@ interface ClassCardProps {
     index: number;
 }
 
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 const ClassCard: React.FC<ClassCardProps> = ({
     classItem,
     token,
@@ -48,6 +74,15 @@ const ClassCard: React.FC<ClassCardProps> = ({
 }) => {
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
     const [assignment, setAssignment] = useState<Assignment | null>(null);
+
+    const gradients = [
+        "linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%)",
+        "linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%)",
+        "linear-gradient(135deg, #c0c0aa 0%, #1cefff 100%)",
+        "linear-gradient(135deg, #7f7fd5 0%, #86a8e7 50%, #91eae4 100%)",
+        "linear-gradient(135deg, #1c92d2 0%, #f2fcfe 100%)",
+    ];
+    const backgroundGradient = gradients[index % gradients.length];
 
     useEffect(() => {
         const fetchAnnouncement = async () => {
@@ -59,10 +94,8 @@ const ClassCard: React.FC<ClassCardProps> = ({
                         method: "GET",
                     }
                 );
-                if (response.ok) {
-                    const data = await response.json();
-                    setAnnouncement(data?.[0] || null);
-                } else setAnnouncement(null);
+                const data = await response.json();
+                setAnnouncement(data.length > 0 ? data[0] : null);
             } catch {
                 setAnnouncement(null);
             }
@@ -77,15 +110,14 @@ const ClassCard: React.FC<ClassCardProps> = ({
                         method: "GET",
                     }
                 );
-                if (response.ok) {
-                    const data = await response.json();
-                    const today = new Date().toISOString().split("T")[0];
-                    const dueToday = data.find(
-                        (assgn: Assignment) =>
-                            assgn.dueDate.split("T")[0] === today
-                    );
-                    setAssignment(dueToday || null);
-                } else setAssignment(null);
+                const data = await response.json();
+                const today = new Date().toISOString().split("T")[0];
+                const dueToday = data.find(
+                    (assgn: Assignment) =>
+                        assgn.dueDate.split("T")[0] === today ||
+                        assgn.dueDate === today
+                );
+                setAssignment(dueToday || null);
             } catch {
                 setAssignment(null);
             }
@@ -95,63 +127,125 @@ const ClassCard: React.FC<ClassCardProps> = ({
         fetchAssignment();
     }, [classItem._id, token]);
 
-    const gradients = [
-        "bg-gradient-to-br from-green-300 to-green-100",
-        "bg-gradient-to-br from-blue-200 to-blue-100",
-        "bg-gradient-to-br from-cyan-200 to-sky-100",
-        "bg-gradient-to-br from-indigo-300 to-teal-200",
-        "bg-gradient-to-br from-blue-400 to-blue-100",
-    ];
-
     return (
-        <div
-            onClick={() => handleCardClick(classItem._id)}
-            className={`w-full max-w-sm h-[300px] rounded-xl shadow-md p-4 cursor-pointer animate-fade-up ${
-                gradients[index % gradients.length]
-            }`}
-            style={{
-                animationDelay: `${index * 0.2}s`,
-                animationFillMode: "forwards",
-            }}
+        <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            display="flex"
+            justifyContent="center"
         >
-            <div className="flex flex-col justify-between h-full">
-                <div>
-                    <h2 className="text-lg font-bold text-black">
-                        {classItem.name}
-                    </h2>
-                    <p className="text-sm text-black mt-1 line-clamp-2">
-                        {classItem.description}
-                    </p>
-
-                    <div className="mt-2">
-                        <p className="font-semibold text-black">
-                            Announcement:
-                        </p>
-                        <p className="text-black text-sm">
-                            {announcement
-                                ? announcement.heading
-                                : "No announcements"}
-                        </p>
-
-                        <p className="font-semibold mt-2 text-black">
-                            Assignment:
-                        </p>
-                        <p className="text-black text-sm">
-                            {assignment
-                                ? assignment.title
-                                : "No assignment due today"}
-                        </p>
-                    </div>
-                </div>
-                <div className="flex justify-center items-center">
-                    <img
-                        src="/teach1.jpg"
-                        alt={`${classItem.name} cover`}
-                        className="w-28 h-28 object-cover rounded-full border-2 border-black"
-                    />
-                </div>
-            </div>
-        </div>
+            <Card
+                sx={{
+                    width: "100%",
+                    height: "300px",
+                    cursor: "pointer",
+                    background: backgroundGradient,
+                    opacity: 0,
+                    animation: `${fadeInUp} 0.5s ease forwards`,
+                    animationDelay: `${index * 0.2}s`,
+                }}
+                onClick={() => handleCardClick(classItem._id)}
+            >
+                <Grid container sx={{ height: "100%" }}>
+                    <Grid
+                        item
+                        xs={7}
+                        sx={{
+                            padding: 2,
+                            display: "flex",
+                            flexDirection: "column",
+                        }}
+                    >
+                        <CardContent sx={{ padding: 0 }}>
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    fontSize: "1.2rem",
+                                    fontWeight: "bold",
+                                    color: "black",
+                                }}
+                            >
+                                {classItem.name}
+                            </Typography>
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    fontSize: "1rem",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden",
+                                    marginTop: 1,
+                                    color: "black",
+                                }}
+                            >
+                                {classItem.description}
+                            </Typography>
+                            <Box mt={1}>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ fontWeight: "bold", color: "black" }}
+                                >
+                                    Announcement:
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        color: "black",
+                                    }}
+                                >
+                                    {announcement?.heading ||
+                                        "No announcements"}
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontWeight: "bold",
+                                        mt: 1,
+                                        color: "black",
+                                    }}
+                                >
+                                    Assignment:
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ color: "black" }}
+                                >
+                                    {assignment?.title ||
+                                        "No assignment due today"}
+                                </Typography>
+                            </Box>
+                        </CardContent>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={5}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                    >
+                        <CardMedia
+                            component="img"
+                            image={"/teach1.jpg"}
+                            alt={`${classItem.name} cover`}
+                            sx={{
+                                width: "120px",
+                                height: "120px",
+                                objectFit: "cover",
+                                borderRadius: "50%",
+                                border: "2px solid #010101",
+                            }}
+                        />
+                    </Grid>
+                </Grid>
+            </Card>
+        </Grid>
     );
 };
 
@@ -161,12 +255,25 @@ const ClassesPage = () => {
     const [classesData, setClassesData] = useState<classItem[]>([]);
     const [session, setSession] = useState<Session | null>(null);
     const [openClassCodePopup, setOpenClassCodePopup] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    const handleCardClick = (classId: string) =>
+    const handleCardClick = (classId: string) => {
         router.push(`/Courses/${classId}`);
+    };
 
-    useSessionCheck(setSession);
+    // Embedded session check
+    useEffect(() => {
+        const sessionData = Cookies.get("session");
+        if (sessionData) {
+            try {
+                setSession(JSON.parse(sessionData));
+            } catch {
+                router.push("/");
+            }
+        } else {
+            router.push("/");
+        }
+    }, [router]);
 
     useEffect(() => {
         const getClasses = async () => {
@@ -182,8 +289,10 @@ const ClassesPage = () => {
                             method: "GET",
                         }
                     );
-                    const data = await response.json();
-                    setClassesData(data?.coursesList || []);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setClassesData(data.coursesList);
+                    }
                 } catch (error) {
                     console.error("Error Getting Classes Details:", error);
                 } finally {
@@ -191,51 +300,77 @@ const ClassesPage = () => {
                 }
             }
         };
+
         getClasses();
-    }, [session, openClassCodePopup, PORT]);
+    }, [session, openClassCodePopup]);
 
     const handleCloseClassCodePopup = () => setOpenClassCodePopup(false);
 
     const onJoinClass = async (classCode: string) => {
-        if (session) {
-            try {
-                await fetch(`http://localhost:${PORT}/api/courses/add-course`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session.user.token}`,
-                    },
-                    body: JSON.stringify({
-                        studentId: session.user.id,
-                        courseCode: classCode,
-                    }),
-                });
-            } catch (error) {
-                console.error("Network error:", error);
-            }
+        if (!session) return;
+        try {
+            await fetch(`http://localhost:${PORT}/api/courses/add-course`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${session.user.token}`,
+                },
+                body: JSON.stringify({
+                    studentId: session.user.id,
+                    courseCode: classCode,
+                }),
+            });
+        } catch (err) {
+            console.error("Network error:", err);
         }
     };
 
     return (
-        <div className="bg-[#001D3D] min-h-screen w-full">
-            <div className="bg-gray-100 text-black p-6 flex flex-col items-center">
-                <div className="flex justify-between w-full max-w-7xl items-center">
-                    <h1 className="text-3xl font-semibold">Your Classes</h1>
-                    <button
+        <div className="bg-[#001D3D] h-full">
+            <Box
+                className="bg-[#F3F3F4] text-black p-4 flex flex-col items-start"
+                sx={{
+                    minHeight: "100vh",
+                    width: "100vw",
+                    alignItems: "center",
+                }}
+            >
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{ width: "100vw" }}
+                >
+                    <Typography variant="h4" className="text-black mt-2 mb-4">
+                        Your Classes
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
                         onClick={() => setOpenClassCodePopup(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md"
+                        sx={{ ml: 2, mr: 4 }}
                     >
                         Join Class
-                    </button>
-                </div>
+                    </Button>
+                </Box>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 w-full max-w-7xl">
+                <Grid
+                    container
+                    spacing={4}
+                    justifyContent="flex-start"
+                    sx={{ flexGrow: 1 }}
+                >
                     {loading ? (
-                        Array.from({ length: 4 }).map((_, idx) => (
-                            <div
-                                key={idx}
-                                className="w-full h-[300px] bg-gray-300 animate-pulse rounded-lg"
-                            ></div>
+                        Array.from({ length: 4 }).map((_, index) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                                <Skeleton
+                                    variant="rectangular"
+                                    width="100%"
+                                    height="300px"
+                                    animation="wave"
+                                    sx={{ borderRadius: "4px" }}
+                                />
+                            </Grid>
                         ))
                     ) : classesData.length > 0 ? (
                         classesData.map((classItem, index) => (
@@ -248,20 +383,22 @@ const ClassesPage = () => {
                             />
                         ))
                     ) : (
-                        <p className="text-lg text-gray-500 mt-4">
+                        <Typography variant="h6" color="textSecondary">
                             No classes available.
-                        </p>
+                        </Typography>
                     )}
-                </div>
+                </Grid>
 
                 <ClassCodePopup
                     open={openClassCodePopup}
                     handleClose={handleCloseClassCodePopup}
                     onJoinClass={onJoinClass}
                 />
-            </div>
+            </Box>
         </div>
     );
 };
 
-export default dynamicq(() => Promise.resolve(ClassesPage), { ssr: false });
+export default dynamicimport(() => Promise.resolve(ClassesPage), {
+    ssr: false,
+});
