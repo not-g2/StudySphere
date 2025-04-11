@@ -453,6 +453,7 @@
 // export default dynamicImport(() => Promise.resolve(ClassesPage), {
 //     ssr: false,
 // });
+"use client";
 
 import React from "react";
 

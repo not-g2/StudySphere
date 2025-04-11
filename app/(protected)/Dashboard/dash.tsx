@@ -199,7 +199,7 @@
 // }
 
 // export default dynamicc(() => Promise.resolve(DashboardPage), { ssr: false });
-
+"use client";
 import React from "react";
 
 const dash = () => {
