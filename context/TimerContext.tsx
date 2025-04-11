@@ -1,8 +1,14 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import useSessionCheck from "@/app/hooks/auth";
-import { toast } from "react-toastify";
 import { formatTimeHours } from "@/utils/formatTime";
+
+const toast = {
+    success: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.success(msg)),
+    error: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.error(msg)),
+};
 
 type TimerState = "focus" | "break" | "paused";
 type lastActiveState = "focus" | "break" | null;
@@ -204,11 +210,10 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
                 .then((res) => res.json())
                 .then((data) =>
                     toast.success(
-                        `You've spent ${formatTimeHours(timeSpent)}s on ${tag}`,
-                        { style: { color: "#16a34a" } }
+                        `You've spent ${formatTimeHours(timeSpent)}s on ${tag}`
                     )
                 )
-                .catch((err) => toast.error("Error saving session:", err));
+                .catch((err) => toast.error(`Error saving session: ${err}`));
         }
         setIsRunning(false);
         setTimerState("paused");

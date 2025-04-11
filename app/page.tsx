@@ -6,7 +6,12 @@ import Cookies from "js-cookie";
 import "./abc.css";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import PasswordInput from "@/components/SignUp/passwordInput";
-import { toast } from "react-toastify";
+const toast = {
+    success: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.success(msg)),
+    error: (msg: string) =>
+        import("react-toastify").then((mod) => mod.toast.error(msg)),
+};
 
 function Page() {
     const router = useRouter();
