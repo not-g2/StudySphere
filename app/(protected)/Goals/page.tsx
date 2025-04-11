@@ -14,7 +14,6 @@ interface Goal {
 }
 
 function ThirdRowPage() {
-    const PORT = process.env.NEXT_PUBLIC_PORT;
     const [session, setSession] = useState<any>(null);
     const [goalRefresh, setGoalRefresh] = useState(0);
     useSessionCheck(setSession);
@@ -26,6 +25,7 @@ function ThirdRowPage() {
     };
 
     function addDeadline(deadline: any): void {
+        const PORT = process.env.NEXT_PUBLIC_PORT;
         async function createReminder(deadlineData: any) {
             try {
                 const response = await fetch(
