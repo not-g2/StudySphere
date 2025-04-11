@@ -1,6 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
 import { ReactNode } from "react";
 import "./globals.css";
 import "./(protected)/output.css";
