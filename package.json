@@ -20,6 +20,7 @@
         "@mui/joy": "^5.0.0-beta.48",
         "@mui/material": "^6.1.5",
         "@mui/x-date-pickers": "^7.28.0",
+        "@tanstack/react-query": "^5.72.2",
         "@types/react-big-calendar": "^1.8.12",
         "axios": "^1.8.4",
         "bcrpyt": "^2.0.0",

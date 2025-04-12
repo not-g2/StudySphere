@@ -3,6 +3,7 @@
 import Header from "../../components/homeheader";
 import AdminHeader from "../../components/adminheader";
 import { ReactNode } from "react";
+import { TimerProvider } from "@/context/TimerContext";
 import "./output.css";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -21,8 +22,11 @@ function RootLayout({
 
     return (
         <div>
-            {!isAuthRedirect && (isAdminRoute ? <AdminHeader /> : <Header />)}
-            {children}
+            <TimerProvider>
+                {!isAuthRedirect &&
+                    (isAdminRoute ? <AdminHeader /> : <Header />)}
+                {children}
+            </TimerProvider>
         </div>
     );
 }

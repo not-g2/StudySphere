@@ -6,66 +6,28 @@ import CustomInputField from "@/components/Profile/CustomInputField";
 import { Avatar, Card, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-
-interface sessionProps {
-    user: {
-        id: string | null;
-        token: string | null;
-    };
-    isAdmin: boolean | null;
-    email: string | null;
-}
-
-interface userProps {
-    _id: string;
-    xp: number;
-    streakCount: number;
-    rewards: string[];
-    phoneNumber: string;
-    name: string;
-    level: number;
-    image: {
-        url: string;
-    };
-    email: string;
-    auraPoints: number;
-    unlockedBadges: Array<{ _id: string; badgeLink: string }>;
-}
+import { Session } from "@/types/session";
+import { useQuery } from "@tanstack/react-query";
+import fetchProfile from "@/utils/fetchProfile";
+import { userProps } from "@/types/user";
 
 const ProfilePage = () => {
-    const [session, setSession] = useState<sessionProps | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
     useSessionCheck(setSession);
     const [user, setUser] = useState<userProps | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const { data } = useQuery({
+        queryKey: ["userProfile"],
+        queryFn: () => fetchProfile(session?.user?.token || ""),
+        enabled: !!session?.user?.token,
+    });
+
     useEffect(() => {
-        if (!session) return;
-
-        const fetchProfile = async () => {
-            try {
-                const response = await fetch(
-                    "http://localhost:8000/api/desc/profile",
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-
-                if (!response.ok) throw new Error("Failed to fetch user data");
-
-                const data = await response.json();
-                setUser(data.user);
-                console.log(data.user);
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-            }
-        };
-
-        fetchProfile();
-    }, [session]);
+        if (data?.user) {
+            setUser(data.user);
+        }
+    }, [data]);
 
     const UpdateProfile = async () => {
         if (!session) return;
@@ -231,7 +193,7 @@ const ProfilePage = () => {
 
 // **Reusable Stats Card Component**
 const StatCard = ({ label, value }: { label: string; value?: number }) => (
-    <Card className="bg-darkbg text-white p-5 text-center shadow-md rounded-md">
+    <Card className="!bg-darkbg text-white p-5 text-center shadow-md rounded-md">
         <Typography
             variant="body2"
             color="gray"
