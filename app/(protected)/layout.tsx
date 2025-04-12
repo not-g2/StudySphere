@@ -6,7 +6,6 @@ import { ReactNode } from "react";
 import "./output.css";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-import { ToastContainer } from "react-toastify";
 
 function RootLayout({
     children,
@@ -24,7 +23,6 @@ function RootLayout({
     return (
         <div>
             {!isAuthRedirect && (isAdminRoute ? <AdminHeader /> : <Header />)}
-            <ToastContainer position="bottom-left" autoClose={5000} />
             {children}
         </div>
     );

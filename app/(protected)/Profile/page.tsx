@@ -7,7 +7,7 @@ import { Avatar, Card, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Session } from "@/types/session";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import fetchProfile from "@/utils/fetchProfile";
 import { userProps } from "@/types/user";
 
@@ -16,6 +16,7 @@ const ProfilePage = () => {
     useSessionCheck(setSession);
     const [user, setUser] = useState<userProps | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const queryClient = useQueryClient();
 
     const { data } = useQuery({
         queryKey: ["userProfile"],
@@ -47,6 +48,9 @@ const ProfilePage = () => {
                 .then((response) => {
                     if (!response.ok) return;
                     toast.success("Successfully updated Profile");
+                    queryClient.invalidateQueries({
+                        queryKey: ["userProfile"],
+                    });
                 })
                 .catch((error) => {
                     toast.error(`Error Uploading Profile ${error}`);
@@ -88,6 +92,9 @@ const ProfilePage = () => {
                             ? { ...prevUser, image: { url: data.profilePic } }
                             : prevUser
                     );
+                    queryClient.invalidateQueries({
+                        queryKey: ["userProfile"],
+                    });
                 })
                 .catch((error) => {
                     console.error("Error Updating Profile Picture ", error);

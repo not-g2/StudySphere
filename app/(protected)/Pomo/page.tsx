@@ -1,4 +1,3 @@
-"use client";
 import Lottie from "lottie-react";
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
