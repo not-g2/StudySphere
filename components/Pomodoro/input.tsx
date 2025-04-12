@@ -26,7 +26,7 @@ const TagInput: React.FC<TagInputProps> = ({
 
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/pomodoro/fetchalltags/${user_id}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/pomodoro/fetchalltags/${user_id}`,
                     {
                         method: "GET",
                         headers: {

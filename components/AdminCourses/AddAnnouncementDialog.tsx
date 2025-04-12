@@ -41,7 +41,7 @@ const AddAnnouncementDialog = ({
             }
             const session = JSON.parse(sessionData);
             const response = await fetch(
-                "http://localhost:8000/api/adminauth/post/announcement",
+                `${process.env.NEXT_PUBLIC_URL}/api/adminauth/post/announcement`,
                 {
                     method: "POST",
                     headers: {

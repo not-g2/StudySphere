@@ -47,11 +47,11 @@ function Page() {
     };
 
     const handleGoogleSignIn = () => {
-        router.push("http://localhost:8000/auth/google");
+        router.push(`${process.env.NEXT_PUBLIC_URL}/auth/google`);
     };
 
     const handleGitHubSignIn = () => {
-        router.push("http://localhost:8000/auth/github");
+        router.push(`${process.env.NEXT_PUBLIC_URL}/auth/github`);
     };
 
     useSessionCheck(setSession);
@@ -99,8 +99,8 @@ function Page() {
         event.preventDefault();
         const endpoint =
             isAdmin === "Admin"
-                ? "http://localhost:8000/api/adminauth/login"
-                : "http://localhost:8000/api/auth/login";
+                ? `${process.env.NEXT_PUBLIC_URL}/api/adminauth/login`
+                : `${process.env.NEXT_PUBLIC_URL}/api/auth/login`;
 
         fetch(endpoint, {
             method: "POST",
@@ -145,7 +145,7 @@ function Page() {
 
         try {
             const response = await fetch(
-                "http://localhost:8000/api/auth/signup",
+                `${process.env.NEXT_PUBLIC_URL}/api/auth/signup`,
                 {
                     method: "POST",
                     headers: {

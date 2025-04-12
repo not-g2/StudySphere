@@ -20,7 +20,7 @@ const ChaptersList: React.FC<ChaptersListProps> = ({ chapters }) => {
 
     const viewPdf = (chapterID: number) => {
         window.open(
-            `http://localhost:8000/api/chapter/pdf/${chapterID}`,
+            `${process.env.NEXT_PUBLIC_URL}/api/chapter/pdf/${chapterID}`,
             "_blank"
         );
     };

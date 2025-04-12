@@ -18,7 +18,7 @@ const getRewards = (token: string) => {
 
     const PORT = process.env.NEXT_PUBLIC_PORT || "8000";
 
-    return fetch(`http://localhost:${PORT}/api/rewd/rewards`, {
+    return fetch(`${process.env.NEXT_PUBLIC_URL}/api/rewd/rewards`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -59,7 +59,7 @@ const RewardsDisplay = () => {
         const redeemReward = async (rewardId: any, userId: any) => {
             try {
                 const response = await fetch(
-                    `http://localhost:${PORT}/api/rewd/rewards/redeem/${rewardId}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/rewd/rewards/redeem/${rewardId}`,
                     {
                         method: "POST",
                         headers: {

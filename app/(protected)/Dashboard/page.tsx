@@ -25,7 +25,7 @@ function DashboardPage() {
     useEffect(() => {
         if (session) {
             console.log(session);
-            fetch("http://localhost:8000/api/users/profile", {
+            fetch(`${process.env.NEXT_PUBLIC_URL}/api/users/profile`, {
                 headers: { Authorization: `Bearer ${session.user.token}` },
             })
                 .then((res) => res.json())
@@ -39,7 +39,7 @@ function DashboardPage() {
                 .catch((err) => console.error("Error fetching profile:", err));
 
             fetch(
-                `http://localhost:8000/api/pomodoro/fetchuseranalytics/${session.user.id}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/pomodoro/fetchuseranalytics/${session.user.id}`,
                 {
                     headers: { Authorization: `Bearer ${session.user.token}` },
                 }

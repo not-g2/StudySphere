@@ -36,7 +36,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
             if (!session) return;
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/data/top-10-aura",
+                    `${process.env.NEXT_PUBLIC_URL}/api/data/top-10-aura`,
                     {
                         headers: {
                             Authorization: `Bearer ${session.user.token}`,
