@@ -33,7 +33,7 @@ const ProfilePage = () => {
     const UpdateProfile = async () => {
         if (!session) return;
         try {
-            await fetch(`http://localhost:8000/api/desc/profile`, {
+            await fetch(`${process.env.NEXT_PUBLIC_URL}/api/desc/profile`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,13 +68,16 @@ const ProfilePage = () => {
             const file = event.target.files[0];
             const formData = new FormData();
             formData.append("profilePic", file);
-            await fetch(`http://localhost:8000/api/desc/profile/upload`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${session.user.token}`,
-                },
-                body: formData,
-            })
+            await fetch(
+                `${process.env.NEXT_PUBLIC_URL}/api/desc/profile/upload`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${session.user.token}`,
+                    },
+                    body: formData,
+                }
+            )
                 .then((response) => {
                     if (!response.ok) {
                         toast.error(

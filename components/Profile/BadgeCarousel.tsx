@@ -9,7 +9,6 @@ interface InfiniteScrollProps {
 }
 
 export default function InfiniteScroll({ images }: InfiniteScrollProps) {
-    console.log(images);
     const marqueeRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
     const [shouldAnimate, setShouldAnimate] = useState(false);

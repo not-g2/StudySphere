@@ -51,7 +51,7 @@ const AddChapterDialog = ({
             formData.append("pdfFile", chapterFile);
 
             const response = await fetch(
-                `http://localhost:8000/api/chapter/create/${courseID}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/chapter/create/${courseID}`,
                 {
                     method: "POST",
                     headers: {

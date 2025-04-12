@@ -187,7 +187,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (timeSpent && tag) {
             fetch(
-                `http://localhost:8000/api/pomodoro/insertfocussessiondata/${session.user.id}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/pomodoro/insertfocussessiondata/${session.user.id}`,
                 {
                     method: "POST",
                     headers: {

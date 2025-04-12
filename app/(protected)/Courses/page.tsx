@@ -85,7 +85,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
         const fetchAnnouncement = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/announce/${classItem._id}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/announce/${classItem._id}`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                         method: "GET",
@@ -112,7 +112,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
         const fetchAssignment = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/assgn/course/${classItem._id}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/assgn/course/${classItem._id}`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                         method: "GET",
