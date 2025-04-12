@@ -20,20 +20,21 @@ function checkBadgeFromPomodoroTime(totalTimeSpent){
     let left = 0 , right = arr.length;
     while(left<right){
         let mid = Math.floor((left+right)/2);
-        if(arr[mid]<totalTimeSpent){
+        if(arr[mid]<=totalTimeSpent){
             left = mid+1;
         }
         else{
             right = mid;
         }
     }
+    left--;
 
     if (left === arr.length) left = arr.length - 1;
     return badgeId[arr[left]];
 }
 
 // testing the function
-console.log(checkBadgeFromPomodoroTime(1502));
-console.log(checkBadgeFromPomodoroTime(200));
-console.log(checkBadgeFromPomodoroTime(604686799));
+// console.log(checkBadgeFromPomodoroTime(86400));
+// console.log(checkBadgeFromPomodoroTime(200));
+// console.log(checkBadgeFromPomodoroTime(604686799));
 module.exports = checkBadgeFromPomodoroTime;
