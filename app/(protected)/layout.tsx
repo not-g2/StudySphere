@@ -6,6 +6,7 @@ import { ReactNode } from "react";
 import "./output.css";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
+
 function RootLayout({
     children,
     session,

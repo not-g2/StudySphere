@@ -2,7 +2,7 @@
 import Lottie from "lottie-react";
 import { useTimer } from "@/context/TimerContext";
 import { formatTime } from "@/utils/formatTime";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@mui/material";
 import useSessionCheck from "@/app/hooks/auth";
 import TagInput from "@/components/Pomodoro/input";
@@ -30,10 +30,6 @@ export default function PomodoroTimer() {
     const handleAddTag = () => {
         setTag(taginput.trim() === "" ? "Default" : taginput);
     };
-
-    useEffect(() => {
-        console.log("Updated tag:", tag);
-    }, [tag]);
 
     return (
         <div className="flex flex-col items-center justify-top bg-gray-900 text-white h-screen w-full">
@@ -67,7 +63,7 @@ export default function PomodoroTimer() {
                 className={`flex flex-col items-center justify-center text-5xl font-bold transition-all duration-700 ease-out ${
                     isRunning ||
                     (timerState === "paused" && lastActiveState != null)
-                        ? "w-2/3 h-[66vh] scale-100 rounded-[7%] border-4 animate-border-pulse"
+                        ? "w-2/3 h-[66vh] scale-100 rounded-[7%] border-4"
                         : "w-64 h-64 scale-100 rounded-[50%] border-4"
                 } ${
                     isRunning && timerState === "focus"
