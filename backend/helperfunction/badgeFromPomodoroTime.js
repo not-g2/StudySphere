@@ -8,6 +8,15 @@ function checkBadgeFromPomodoroTime(totalTimeSpent){
 
     // apply binary search on the time spent to find the correct time (O(logN))
     let arr = [1500,10800,86400,604800];
+
+    // if the user has not used the pomodoro enough
+    if(totalTimeSpent<arr[0]){
+        return null;
+    }
+    // if user has spent more time than needed for the max badge , 
+    if(totalTimeSpent>arr[arr.length-1]){
+        return badgeId[arr[arr.length-1]];
+    }
     let left = 0 , right = arr.length;
     while(left<right){
         let mid = Math.floor((left+right)/2);
@@ -23,4 +32,8 @@ function checkBadgeFromPomodoroTime(totalTimeSpent){
     return badgeId[arr[left]];
 }
 
+// testing the function
+console.log(checkBadgeFromPomodoroTime(1502));
+console.log(checkBadgeFromPomodoroTime(200));
+console.log(checkBadgeFromPomodoroTime(604686799));
 module.exports = checkBadgeFromPomodoroTime;
