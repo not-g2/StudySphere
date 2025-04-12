@@ -7,6 +7,11 @@ import { TimerProvider } from "@/context/TimerContext";
 import "./output.css";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
 function RootLayout({
     children,
     session,
@@ -22,11 +27,13 @@ function RootLayout({
 
     return (
         <div>
-            <TimerProvider>
-                {!isAuthRedirect &&
-                    (isAdminRoute ? <AdminHeader /> : <Header />)}
-                {children}
-            </TimerProvider>
+            <QueryClientProvider client={queryClient}>
+                <TimerProvider>
+                    {!isAuthRedirect &&
+                        (isAdminRoute ? <AdminHeader /> : <Header />)}
+                    {children}
+                </TimerProvider>
+            </QueryClientProvider>
         </div>
     );
 }
