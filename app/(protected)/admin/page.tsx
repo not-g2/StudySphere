@@ -40,7 +40,7 @@ const StudentBadge: React.FC<{ courseId: string; token: string }> = ({
         const fetchStudentCount = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/courses/${courseId}/students`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/courses/${courseId}/students`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (!response.ok) {
@@ -75,7 +75,7 @@ const AnnouncementsPreview: React.FC<{ courseId: string; token: string }> = ({
         const fetchAnnouncements = async () => {
             try {
                 const res = await fetch(
-                    `http://localhost:8000/api/announce/${courseId}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/announce/${courseId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (!res.ok) {
@@ -136,7 +136,7 @@ const CourseCode: React.FC<{
         const fetchCourseCode = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/courses/fetchcoursecode/${courseId}/${adminId}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/courses/fetchcoursecode/${courseId}/${adminId}`,
                     {
                         method: "POST",
                         headers: { Authorization: `Bearer ${token}` },
@@ -195,7 +195,7 @@ const MyCourses: React.FC = () => {
             const fetchCourses = async () => {
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/courses/${session.user.id}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/courses/${session.user.id}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",
@@ -230,7 +230,7 @@ const MyCourses: React.FC = () => {
         try {
             const adminId = session.user.id;
             const response = await fetch(
-                `http://localhost:8000/api/courses/create/${adminId}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/courses/create/${adminId}`,
                 {
                     method: "POST",
                     headers: {

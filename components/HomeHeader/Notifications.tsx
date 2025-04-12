@@ -24,7 +24,7 @@ const Notifications: React.FC<NotificationsProps> = ({ id, token }) => {
         if (!notifId) return;
 
         fetch(
-            `http://localhost:8000/api/notifications/deletenotification/${id}/${notifId}`,
+            `${process.env.NEXT_PUBLIC_URL}/api/notifications/deletenotification/${id}/${notifId}`,
             {
                 method: "DELETE",
                 headers: {
@@ -63,7 +63,7 @@ const Notifications: React.FC<NotificationsProps> = ({ id, token }) => {
         const fetchNotifications = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/notifications/getallnotifications/${id}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/notifications/getallnotifications/${id}`,
                     {
                         method: "GET",
                         headers: {

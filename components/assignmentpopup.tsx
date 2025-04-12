@@ -112,7 +112,7 @@ const PopupForm: React.FC<PopupFormProps> = ({
             console.log(files);
             const token = session.user.token;
             const response = await fetch(
-                "http://localhost:8000/api/submissions/submit",
+                `${process.env.NEXT_PUBLIC_URL}/api/submissions/submit`,
                 {
                     method: "POST",
                     headers: { Authorization: `Bearer ${token}` },

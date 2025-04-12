@@ -82,7 +82,7 @@ const DashboardPage = () => {
                 // Fetch assignments
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/assgn/course/${courseID}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/assgn/course/${courseID}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",
@@ -103,7 +103,7 @@ const DashboardPage = () => {
                 // Fetch announcements
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/announce/${courseID}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/announce/${courseID}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",
@@ -123,7 +123,7 @@ const DashboardPage = () => {
                 // Fetch chapters
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/chapter/get/${courseID}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/chapter/get/${courseID}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",
@@ -142,7 +142,7 @@ const DashboardPage = () => {
                 // Fetch submissions
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/submissions/submissions/${session.user.id}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/submissions/submissions/${session.user.id}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",

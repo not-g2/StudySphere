@@ -146,7 +146,7 @@ const DashboardPage = () => {
         setSubmissionsLoading(true);
         try {
             const response = await fetch(
-                `http://localhost:8000/api/submissions/assignment/${assignment._id}/submissions`,
+                `${process.env.NEXT_PUBLIC_URL}/api/submissions/assignment/${assignment._id}/submissions`,
                 {
                     headers: { Authorization: `Bearer ${session.user.token}` },
                     method: "GET",
@@ -172,7 +172,7 @@ const DashboardPage = () => {
         if (!session) return;
         try {
             const response = await fetch(
-                `http://localhost:8000/api/assgn/${assignmentId}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/assgn/${assignmentId}`,
                 {
                     method: "DELETE",
                     headers: { Authorization: `Bearer ${session.user.token}` },
@@ -206,7 +206,7 @@ const DashboardPage = () => {
         if (!session) return;
         try {
             const response = await fetch(
-                `http://localhost:8000/api/announce/delete/${announcementId}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/announce/delete/${announcementId}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -240,7 +240,7 @@ const DashboardPage = () => {
         if (!session || !currentSubmission || !selectedAssignment) return;
         try {
             const response = await fetch(
-                `http://localhost:8000/api/submissions/submission/${currentSubmission._id}/feedback`,
+                `${process.env.NEXT_PUBLIC_URL}/api/submissions/submission/${currentSubmission._id}/feedback`,
                 {
                     method: "PUT",
                     headers: {
@@ -277,7 +277,7 @@ const DashboardPage = () => {
         if (!session) return;
         try {
             const response = await fetch(
-                `http://localhost:8000/api/submissions/approve/${submissionId}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/submissions/approve/${submissionId}`,
                 {
                     method: "PUT",
                     headers: {
@@ -316,7 +316,7 @@ const DashboardPage = () => {
                 // Fetch assignments
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/assgn/course/${courseID}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/assgn/course/${courseID}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",
@@ -337,7 +337,7 @@ const DashboardPage = () => {
                 // Fetch announcements
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/announce/${courseID}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/announce/${courseID}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",
@@ -358,7 +358,7 @@ const DashboardPage = () => {
                 // Fetch chapters
                 try {
                     const response = await fetch(
-                        `http://localhost:8000/api/chapter/get/${courseID}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/chapter/get/${courseID}`,
                         {
                             headers: { Authorization: `Bearer ${token}` },
                             method: "GET",
@@ -408,7 +408,7 @@ const DashboardPage = () => {
                 if (!courseID) throw new Error("Course ID not found.");
 
                 const response = await fetch(
-                    `http://localhost:8000/api/courses/${courseID}/students`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/courses/${courseID}/students`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -469,7 +469,7 @@ const DashboardPage = () => {
                 attStudents.map(async (student) => {
                     try {
                         const response = await fetch(
-                            `http://localhost:8000/api/adminauth/summary/${student._id}`,
+                            `${process.env.NEXT_PUBLIC_URL}/api/adminauth/summary/${student._id}`,
                             {
                                 headers: {
                                     Authorization: `Bearer ${token}`,
@@ -562,7 +562,7 @@ const DashboardPage = () => {
             await Promise.all(
                 attendanceData.map(async (record) => {
                     const response = await fetch(
-                        "http://localhost:8000/api/adminauth/post/mark",
+                        `${process.env.NEXT_PUBLIC_URL}/api/adminauth/post/mark`,
                         {
                             method: "POST",
                             headers: {

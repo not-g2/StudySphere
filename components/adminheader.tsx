@@ -55,7 +55,7 @@ const Header: React.FC = () => {
 
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/adminauth/profile",
+                    `${process.env.NEXT_PUBLIC_URL}/api/adminauth/profile`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                         method: "GET",
@@ -65,7 +65,7 @@ const Header: React.FC = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setuserImage(data.image?.url || "");
-                } 
+                }
             } catch (error) {
                 console.error("Error fetching profile image:", error);
             }

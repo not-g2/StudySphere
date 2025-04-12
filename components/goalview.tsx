@@ -60,7 +60,7 @@ const GoalTable: React.FC = () => {
             if (session?.user?.token) {
                 try {
                     const response = await fetch(
-                        "http://localhost:8000/api/goals/",
+                        `${process.env.NEXT_PUBLIC_URL}/api/goals/`,
                         {
                             method: "GET",
                             headers: {
@@ -98,7 +98,7 @@ const GoalTable: React.FC = () => {
         if (session?.user?.token) {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/goals/${id}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/goals/${id}`,
                     {
                         method: "DELETE",
                         headers: {
@@ -156,14 +156,17 @@ const GoalTable: React.FC = () => {
                 description: newName,
                 dueDate: newEndDate,
             };
-            const response = await fetch("http://localhost:8000/api/goals/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${session?.user.token}`,
-                },
-                body: JSON.stringify(newGoal),
-            });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_URL}/api/goals/`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${session?.user.token}`,
+                    },
+                    body: JSON.stringify(newGoal),
+                }
+            );
             if (!response.ok) {
                 throw new Error("Failed to add goal");
             }

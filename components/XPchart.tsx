@@ -93,7 +93,7 @@ const LevelProgressContainer: React.FC<LevelProgressProps> = () => {
 
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/users/profile",
+                    `${process.env.NEXT_PUBLIC_URL}/api/users/profile`,
                     {
                         headers: {
                             Authorization: `Bearer ${session.user.token}`,

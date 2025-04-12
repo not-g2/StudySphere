@@ -47,7 +47,7 @@ function DeadlinesList() {
                     return;
                 }
                 const response = await fetch(
-                    `http://localhost:8000/api/users/${userId}/deadlines`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/users/${userId}/deadlines`,
                     {
                         method: "GET",
                         headers: {

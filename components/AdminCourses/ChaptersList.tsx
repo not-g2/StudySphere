@@ -51,7 +51,7 @@ const ChaptersList = ({ chapters, setChapters }: ChaptersListProps) => {
 
             console.log(chapterId);
             const response = await fetch(
-                `http://localhost:8000/api/chapter/delete/${chapterId}`,
+                `${process.env.NEXT_PUBLIC_URL}/api/chapter/delete/${chapterId}`,
                 {
                     method: "DELETE",
                     headers: {

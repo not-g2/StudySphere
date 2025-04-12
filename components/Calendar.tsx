@@ -72,7 +72,7 @@ const MyCalendar = () => {
         const fetchTimetable = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/tt/timetable/${userId}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/tt/timetable/${userId}`,
                     {
                         method: "GET",
                         headers: {
@@ -115,7 +115,7 @@ const MyCalendar = () => {
         const fetchReminders = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/reminder/reminders/${userId}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/reminder/reminders/${userId}`,
                     {
                         method: "GET",
                         headers: {
@@ -157,7 +157,7 @@ const MyCalendar = () => {
         const fetchDeadlines = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/users/${userId}/deadlines`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/users/${userId}/deadlines`,
                     {
                         method: "GET",
                         headers: {
@@ -221,7 +221,7 @@ const MyCalendar = () => {
                 }
 
                 const response = await fetch(
-                    `http://localhost:8000/api/tt/delete-slot/${studentId}`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/tt/delete-slot/${studentId}`,
                     {
                         method: "DELETE",
                         headers: { "Content-Type": "application/json" },

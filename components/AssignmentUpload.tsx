@@ -47,7 +47,7 @@ const AssignmentUpload: React.FC<{ courseId: string }> = ({ courseId }) => {
             }
 
             const response = await fetch(
-                "http://localhost:8000/api/adminauth/post/assgn",
+                `${process.env.NEXT_PUBLIC_URL}/api/adminauth/post/assgn`,
                 {
                     method: "POST",
                     headers: {
