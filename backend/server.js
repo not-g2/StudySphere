@@ -4,7 +4,7 @@ const cors = require("cors"); //we need cors to handle any Cross-Origin Resource
 const connectDB = require("./config/db");
 const passport = require("./config/passport");
 const session = require("express-session");
-const MemoryStore = require('memorystore')(session); // 
+const MemoryStore = require('memorystore')(session); // This is to prevent memory leaks in session storage by providing a more efficient in-memory store than the default MemoryStore, with optional cleanup of expired sessions.
 
 const uploadPicRoutes = require("./routes/picsRoutes");
 const authRoutes = require("./routes/authRoutes");
