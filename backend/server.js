@@ -4,6 +4,7 @@ const cors = require("cors"); //we need cors to handle any Cross-Origin Resource
 const connectDB = require("./config/db");
 const passport = require("./config/passport");
 const session = require("express-session");
+const MemoryStore = require('memorystore')(session); // 
 
 const uploadPicRoutes = require("./routes/picsRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -37,6 +38,9 @@ app.use(
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true,
+        store: new MemoryStore({
+            checkPeriod: 86400000 // prune expired entries every 24h (clean up expired sessions every 24 hours)
+        })
     })
 );
 
