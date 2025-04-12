@@ -9,16 +9,8 @@ import GoalTable from "@/components/goalview";
 import FocusRadarChart from "@/components/Dashboard/pomoradarchart"; // Existing radar chart component
 import SubjectTimeBarChart from "@/components/Dashboard/subjecttimechart"; // New bar chart component
 import { Session } from "@/types/session";
-import { LevelProgressProps } from "@/types/levelProgress";
-
-// Dynamically import components that shouldn’t be server‑side rendered.
-const Leaderboard = dynamic(() => import("@/components/leaderboard"), {
-    ssr: false,
-});
-
-const LevelProgress = dynamic(() => import("@/components/XPchart"), {
-    ssr: false,
-});
+import Leaderboard from "@/components/leaderboard";
+import LevelProgress from "@/components/XPchart";
 
 function DashboardPage() {
     const [session, setSession] = useState<Session | null>(null);
