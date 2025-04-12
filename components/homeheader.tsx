@@ -19,6 +19,8 @@ import { formatTime } from "@/utils/formatTime";
 import { toast } from "react-toastify";
 import Lottie from "lottie-react";
 import Notifications from "./HomeHeader/Notifications";
+import fetchProfile from "@/utils/fetchProfile";
+import { useQuery } from "@tanstack/react-query";
 
 const skeletonBg = "#001125";
 
@@ -28,11 +30,8 @@ const Header: React.FC = () => {
         null
     );
     const router = useRouter();
-    const [userImage, setUserImage] = useState<string | null>(null);
     const [session, setSession] = useState<any | null | undefined>(undefined);
     const [open, setOpen] = useState(false);
-    const [animateBell, setAnimateBell] = useState<boolean>(true);
-    const [streak, setstreak] = useState(0);
     const [flameanim, setflameanim] = useState(null);
 
     useSessionCheck(setSession);
@@ -66,34 +65,14 @@ const Header: React.FC = () => {
         setOpen(true);
     };
 
-    useEffect(() => {
-        if (!session) return;
+    const { data } = useQuery({
+        queryKey: ["userProfile"],
+        queryFn: () => fetchProfile(session?.user?.token),
+        enabled: !!session?.user?.token,
+    });
 
-        const GetProfile = async () => {
-            const token = session.user.token;
-            try {
-                const response = await fetch(
-                    `http://localhost:${PORT}/api/desc/profile`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                        method: "GET",
-                    }
-                );
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserImage(data.user.image?.url || "");
-                    setstreak(data.user.streakCount);
-                } else {
-                    console.error("Failed to fetch profile image");
-                }
-            } catch (error) {
-                console.error("Error fetching profile image:", error);
-            }
-        };
-
-        GetProfile();
-    }, [session]);
+    const userImage = data?.user?.image?.url || "";
+    const streak = data?.user?.streakCount || 0;
 
     useEffect(() => {
         const toastMsg = localStorage.getItem("showToast");

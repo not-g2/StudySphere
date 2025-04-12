@@ -119,7 +119,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
                         tick={{ fill: "#fff" }}
                     />
                     <Tooltip />
-                    <Bar dataKey="level" barSize={20}>
+                    <Bar dataKey="level" barSize={20} isAnimationActive={false}>
                         {displayedData.map((entry, index) => (
                             <Cell
                                 key={`cell-${index}`}

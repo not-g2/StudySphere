@@ -1,9 +1,10 @@
 "use client";
 
 import { Card, CardMedia, CardContent, Typography, Grid } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
+import { useQuery } from "@tanstack/react-query";
 
 interface reward {
     title: string;
@@ -12,44 +13,47 @@ interface reward {
     cost: number;
 }
 
+const getRewards = (token: string) => {
+    if (!token) return Promise.resolve([]);
+
+    const PORT = process.env.NEXT_PUBLIC_PORT || "8000";
+
+    return fetch(`http://localhost:${PORT}/api/rewd/rewards`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then((response) => {
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+            return response.json();
+        })
+        .then((data) => {
+            return data.rewards;
+        })
+        .catch((error) => {
+            console.error("Error fetching rewards:", error);
+            return [];
+        });
+};
+
 const RewardsDisplay = () => {
     const PORT = process.env.NEXT_PUBLIC_PORT;
     const [session, setSession] = useState<any>(null);
     const router = useRouter();
-    const [rewards, setRewards] = useState<reward[] | []>([]);
 
-    useSessionCheck(setSession); // ✅ Use session check hook
+    useSessionCheck(setSession);
 
-    useEffect(() => {
-        const getRewards = async () => {
-            if (!session) return;
-
-            try {
-                const response = await fetch(
-                    `http://localhost:${PORT}/api/rewd/rewards`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log(data);
-                setRewards(data.rewards);
-            } catch (error) {
-                console.error("Error fetching rewards:", error);
-            }
-        };
-
-        getRewards();
-    }, [session]);
+    const {
+        data = [],
+        isLoading,
+        isError,
+    } = useQuery<reward[]>({
+        queryKey: ["userRewards"],
+        queryFn: () => getRewards(session.user.token),
+        enabled: !!session?.user?.token,
+    });
 
     function handleSubmit(reward: any) {
         const redeemReward = async (rewardId: any, userId: any) => {
@@ -84,6 +88,19 @@ const RewardsDisplay = () => {
         redeemReward(reward._id, session.user.id);
     }
 
+    if (isLoading)
+        return (
+            <div className="bg-c2 w-full min-h-screen items-center justify-center text-5xl flex text-white">
+                Loading ...
+            </div>
+        );
+    if (isError)
+        return (
+            <div className="bg-c2 w-full min-h-screen items-center justify-center text-5xl flex text-white">
+                Error Occured
+            </div>
+        );
+
     return (
         <Grid
             container
@@ -94,7 +111,7 @@ const RewardsDisplay = () => {
             className="bg-c2"
             sx={{ width: "100%", height: "100vh" }}
         >
-            {rewards.map((reward, index) => (
+            {data.map((reward, index) => (
                 <Grid
                     item
                     xs={12}
@@ -106,7 +123,7 @@ const RewardsDisplay = () => {
                 >
                     <Card
                         onClick={() => handleSubmit(reward)}
-                        className="bg-c5"
+                        className="!bg-c5"
                         sx={{
                             width: "90%",
                             display: "flex",

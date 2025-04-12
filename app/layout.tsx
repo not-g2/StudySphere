@@ -1,23 +1,22 @@
-"use client";
 import { ReactNode } from "react";
 import "./globals.css";
 import "./(protected)/output.css";
-import { TimerProvider } from "@/context/TimerContext";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import dynamic from "next/dynamic";
+import Providers from "./providers";
+
+export const metadata = {
+    title: "StudySphere",
+    description: "Your all-in-one study companion",
+};
 
 function RootLayout({ children }: { children: ReactNode }) {
     return (
-        <TimerProvider>
-            <html lang="en">
-                <body>
-                    {children}
-                    <ToastContainer position="bottom-left" autoClose={5000} />
-                </body>
-            </html>
-        </TimerProvider>
+        <html lang="en">
+            <body>
+                <Providers>{children}</Providers>
+            </body>
+        </html>
     );
 }
 
-export default dynamic(() => Promise.resolve(RootLayout), { ssr: false });
+export default RootLayout;
