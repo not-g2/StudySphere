@@ -307,7 +307,7 @@ const ClassesPage = () => {
                 setLoading(true);
                 try {
                     const response = await fetch(
-                        `http://localhost:${PORT}/api/courses/student/${session.user.id}`,
+                        `${process.env.NEXT_PUBLIC_URL}/api/courses/student/${session.user.id}`,
                         {
                             headers: {
                                 Authorization: `Bearer ${session.user.token}`,
@@ -346,7 +346,7 @@ const ClassesPage = () => {
 
             try {
                 const response = await fetch(
-                    `http://localhost:${PORT}/api/courses/add-course`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/courses/add-course`,
                     {
                         method: "PUT",
                         headers: {

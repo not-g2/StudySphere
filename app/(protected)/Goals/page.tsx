@@ -28,7 +28,7 @@ function ThirdRowPage() {
         async function createReminder(deadlineData: any) {
             try {
                 const response = await fetch(
-                    `http://localhost:${PORT}/api/reminder/reminders`,
+                    `${process.env.NEXT_PUBLIC_URL}/api/reminder/reminders`,
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },

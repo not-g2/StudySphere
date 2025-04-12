@@ -1,7 +1,7 @@
 const fetchProfile = async (token: string) => {
     if (!token) return;
     const PORT = process.env.NEXT_PUBLIC_PORT || 8000;
-    const res = await fetch(`http://localhost:${PORT}/api/desc/profile`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/desc/profile`, {
         headers: {
             "Content-type": "application/json",
             Authorization: `Bearer ${token}`,
