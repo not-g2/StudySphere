@@ -80,7 +80,7 @@ function DashboardPage() {
                             marginRight: "20px",
                             display: "flex",
                             alignItems: "center",
-                            backgroundColor: "#896EFB", // Specified purple colour
+                            backgroundColor: "#896EFB",
                             padding: "20px",
                             borderRadius: "8px",
                             boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
@@ -97,16 +97,14 @@ function DashboardPage() {
                             style={{
                                 width: "200px",
                                 marginLeft: "20px",
-                                backgroundColor: "#A18BFC", // Lighter shade of #896EFB
+                                backgroundColor: "#A18BFC",
                                 padding: "20px",
                                 borderRadius: "8px",
                                 textAlign: "center",
                                 color: "white",
                             }}
                         >
-                            <h3
-                                style={{ margin: "0 0 10px", fontSize: "16px" }}
-                            >
+                            <h3 style={{ margin: "0 0 10px", fontSize: "16px" }}>
                                 Aura Points
                             </h3>
                             <p style={{ fontSize: "20px", margin: 0 }}>
@@ -126,7 +124,7 @@ function DashboardPage() {
                         display: "flex",
                         justifyContent: "space-between",
                         gap: "20px",
-                        alignItems: "flex-start", // Ensures all child elements start at the same vertical position
+                        alignItems: "flex-start",
                     }}
                 >
                     <div
@@ -161,44 +159,38 @@ function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Third Row: Analytics - Radar Chart and Bar Chart side by side */}
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: "20px",
-                        gap: "20px",
-                    }}
-                >
+                {/* Third Row: Analytics - Render only if focusData exists */}
+                {focusData && focusData.length > 0 && (
                     <div
                         style={{
-                            width: "600px",
-                            backgroundColor: "#FFFFFF",
-                            padding: "20px",
-                            borderRadius: "8px",
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "20px",
+                            gap: "20px",
                         }}
                     >
-                        {focusData.length > 0 ? (
+                        <div
+                            style={{
+                                width: "600px",
+                                backgroundColor: "#FFFFFF",
+                                padding: "20px",
+                                borderRadius: "8px",
+                            }}
+                        >
                             <FocusRadarChart data={focusData} />
-                        ) : (
-                            <p>Loading focus analytics...</p>
-                        )}
-                    </div>
-                    <div
-                        style={{
-                            width: "600px",
-                            backgroundColor: "#F3F3F4",
-                            padding: "20px",
-                            borderRadius: "8px",
-                        }}
-                    >
-                        {focusData.length > 0 ? (
+                        </div>
+                        <div
+                            style={{
+                                width: "600px",
+                                backgroundColor: "#F3F3F4",
+                                padding: "20px",
+                                borderRadius: "8px",
+                            }}
+                        >
                             <SubjectTimeBarChart data={focusData} />
-                        ) : (
-                            <p>Loading focus analytics...</p>
-                        )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
