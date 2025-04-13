@@ -57,7 +57,7 @@ function DashboardPage() {
     }, [session]);
 
     return (
-        <div style={{ backgroundColor: "#FFFFFF", minHeight: "100vh" }}>
+        <div className="bg-c2 min-h-full">
             <div
                 style={{
                     maxWidth: "1600px",
@@ -104,7 +104,9 @@ function DashboardPage() {
                                 color: "white",
                             }}
                         >
-                            <h3 style={{ margin: "0 0 10px", fontSize: "16px" }}>
+                            <h3
+                                style={{ margin: "0 0 10px", fontSize: "16px" }}
+                            >
                                 Aura Points
                             </h3>
                             <p style={{ fontSize: "20px", margin: 0 }}>
@@ -130,7 +132,7 @@ function DashboardPage() {
                     <div
                         style={{
                             flex: 1,
-                            backgroundColor: "#FFFFFF",
+                            backgroundColor: "#001D3D",
                             padding: "20px",
                             borderRadius: "8px",
                         }}
@@ -140,7 +142,7 @@ function DashboardPage() {
                     <div
                         style={{
                             flex: 1,
-                            backgroundColor: "#FFFFFF",
+                            backgroundColor: "#001D3D",
                             padding: "20px",
                             borderRadius: "8px",
                         }}
@@ -150,7 +152,7 @@ function DashboardPage() {
                     <div
                         style={{
                             flex: 1,
-                            backgroundColor: "#FFFFFF",
+                            backgroundColor: "#001D3D",
                             padding: "20px",
                             borderRadius: "8px",
                         }}
@@ -172,7 +174,7 @@ function DashboardPage() {
                         <div
                             style={{
                                 width: "600px",
-                                backgroundColor: "#FFFFFF",
+                                backgroundColor: "#001D3D",
                                 padding: "20px",
                                 borderRadius: "8px",
                             }}
@@ -182,7 +184,7 @@ function DashboardPage() {
                         <div
                             style={{
                                 width: "600px",
-                                backgroundColor: "#F3F3F4",
+                                backgroundColor: "#001D3D",
                                 padding: "20px",
                                 borderRadius: "8px",
                             }}

@@ -16,7 +16,7 @@ function RootLayout({ children }: { children: ReactNode; session: any }) {
         pathname.startsWith("/auth/github");
 
     return (
-        <div>
+        <div className="h-full">
             <TimerProvider>
                 {!isAuthRedirect &&
                     (isAdminRoute ? <AdminHeader /> : <Header />)}
