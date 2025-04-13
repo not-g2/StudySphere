@@ -105,7 +105,7 @@ passport.use(
         {
             clientID: process.env.GITHUB_ID,
             clientSecret: process.env.GITHUB_SECRET,
-            callbackURL: "https://studysphere-hlyh.onrender.com/auth/callback/github",
+            callbackURL: "https://studysphere-hlyh.onrender.com/auth/github/callback",
             scope: ["user:email"], // Make sure this scope is included
         },
         async (accessToken, refreshToken, profile, done) => {
