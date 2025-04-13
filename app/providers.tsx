@@ -11,10 +11,8 @@ const queryClient = new QueryClient();
 function Providers({ children }: { children: ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
-            <TimerProvider>
                 {children}
                 <ToastContainer position="bottom-left" autoClose={5000} />
-            </TimerProvider>
         </QueryClientProvider>
     );
 }

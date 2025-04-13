@@ -11,8 +11,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_ID,
             clientSecret: process.env.GOOGLE_SECRET,
-            callbackURL:
-                "https://studysphere-hlyh.onrender.com/auth/callback/google",
+            callbackURL: `${process.env.SERVER_URL}/auth/callback/google`,
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
@@ -132,7 +131,7 @@ passport.use(
         {
             clientID: process.env.GITHUB_ID,
             clientSecret: process.env.GITHUB_SECRET,
-            callbackURL: "https://studysphere-hlyh.onrender.com/auth/github/callback",
+            callbackURL: `${process.env.SERVER_URL}/auth/github/callback`,
             scope: ["user:email"], // Make sure this scope is included
         },
         async (accessToken, refreshToken, profile, done) => {
