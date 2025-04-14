@@ -32,7 +32,7 @@ router.get(
         ).toString("base64");
 
         res.redirect(
-            `https://study-sphere-ashen.vercel.app/auth/google?session=${encodedSession}`
+            `${process.env.FRONTEND_URL}/auth/google?session=${encodedSession}`
         );
     }
 );
@@ -66,7 +66,7 @@ router.get(
         ).toString("base64");
 
         res.redirect(
-            `https://study-sphere-ashen.vercel.app/auth/github?session=${encodedSession}`
+            `${process.env.FRONTEND_URL}/auth/github?session=${encodedSession}`
         );
     }
 );

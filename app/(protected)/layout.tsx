@@ -6,14 +6,9 @@ import { ReactNode } from "react";
 import "./output.css";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
+import { TimerProvider } from "@/context/TimerContext";
 
-function RootLayout({
-    children,
-    session,
-}: {
-    children: ReactNode;
-    session: any;
-}) {
+function RootLayout({ children }: { children: ReactNode; session: any }) {
     const pathname = usePathname();
     const isAdminRoute = pathname.startsWith("/admin");
     const isAuthRedirect =
@@ -22,8 +17,11 @@ function RootLayout({
 
     return (
         <div>
-            {!isAuthRedirect && (isAdminRoute ? <AdminHeader /> : <Header />)}
-            {children}
+            <TimerProvider>
+                {!isAuthRedirect &&
+                    (isAdminRoute ? <AdminHeader /> : <Header />)}
+                {children}
+            </TimerProvider>
         </div>
     );
 }
