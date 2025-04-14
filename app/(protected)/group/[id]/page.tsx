@@ -398,21 +398,20 @@ const DashboardNoAssignments = () => {
             );
             if (response.ok) {
                 const data = await response.json();
+                console.log(data);
                 const transformedAnnouncements = data.allAnnouncements.map(
                     (item: any, index: number) => {
-                        if (typeof item === "string") {
-                            return {
-                                _id: index,
-                                title:
-                                    item.substring(0, 20) +
-                                    (item.length > 20 ? "..." : ""),
-                                description: item,
-                                createdAt: new Date().toISOString(),
-                            };
-                        }
-                        return item;
+                        return {
+                            _id: item.user._id,
+                            title:
+                                item.content.substring(0, 20) +
+                                (item.content.length > 20 ? "..." : ""),
+                            description: item.content,
+                            createdAt: item.date,
+                        };
                     }
                 );
+                console.log(transformedAnnouncements, "hi");
                 setAnnouncements(transformedAnnouncements);
             } else {
                 console.error("Failed to fetch announcements");

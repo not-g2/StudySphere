@@ -128,13 +128,9 @@ const MyCalendar = () => {
                     const reminders = await response.json();
                     const formattedReminders = reminders.map(
                         (reminder: any) => ({
-                            title: reminder.name,
+                            title: reminder.description,
                             start: reminder.startdate,
-                            end: new Date(
-                                new Date(reminder.enddate).getTime() + 86400000
-                            )
-                                .toISOString()
-                                .split("T")[0], // Ensure full-day stretch
+                            end: reminder.enddate,
                             allDay: true,
                             extendedProps: {
                                 description: reminder.description,

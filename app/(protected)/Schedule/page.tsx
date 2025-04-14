@@ -10,7 +10,6 @@ import useSessionCheck from "../../hooks/auth";
 const TimeTablePage: React.FC = () => {
     const [session, setSession] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const router = useRouter();
 
     useSessionCheck(setSession);
 
