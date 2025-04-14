@@ -273,9 +273,17 @@ router.get("/:courseId/assignments", async (req, res) => {
 });
 
 //add a student to a Course
-router.put("/add-course", async (req, res) => {
+router.put("/add-course/:adminId",authMiddleware, async (req, res) => {
     try {
         const { studentId, courseCode } = req.body;
+        const {adminId} = req.params;
+
+        const admin = await Admin.findById(adminId);
+        if(!admin){
+            return res.status(403).json({
+                msg : "Only admins can add students to a course!"
+            })
+        }
 
         if (!studentId) {
             return res.status(400).json({ message: "Student ID is required" });
@@ -291,6 +299,11 @@ router.put("/add-course", async (req, res) => {
             return res.status(404).json({ message: "Course not found" });
         }
 
+        const student = await User.findById(studentId);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
         if (course.students.includes(studentId)) {
             return res.status(400).json({
                 message: "Student is already enrolled in this course",
@@ -301,10 +314,17 @@ router.put("/add-course", async (req, res) => {
 
         await course.save();
 
-        const student = await User.findById(studentId);
-        if (!student) {
-            return res.status(404).json({ message: "Student not found" });
+        if(student.courses.length===0){
+            student.unlockedBadges = [...new Set([...student.unlockedBadges,'67e4089f02cd398c11be687b'])];
         }
+
+        student.courses.push(course._id);
+        await student.save();
+
+        // const student = await User.findById(studentId);
+        // if (!student) {
+        //     return res.status(404).json({ message: "Student not found" });
+        // }
         
         await Notification.updateOne(
             {user : student._id},
@@ -312,8 +332,12 @@ router.put("/add-course", async (req, res) => {
             {new : true,upsert : true}
         )
 
-        student.courses.push(course._id);
-        await student.save();
+        // if(student.courses.length===0){
+        //     student.unlockedBadges = [...new Set([...student.unlockedBadges,'67e4089f02cd398c11be687b'])];
+        // }
+
+        // student.courses.push(course._id);
+        // await student.save();
 
         res.status(200).json({ message: "Student added to course", course });
     } catch (err) {
