@@ -31,7 +31,7 @@ passport.use(
             password: "nopassword",
             prevLoginDate: new Date(new Date().setUTCHours(0, 0, 0, 0)),
             streakCount: 1,
-            unlockedBadges: ["67e407a602cd398c11be6875"],
+            unlockedBadges: ["67e407a602cd398c11be6875","67e409a102cd398c11be688c"],
           });
         } else {
           // Add googleId to existing user
@@ -126,7 +126,7 @@ passport.use(
             password: "nopassword",
             prevLoginDate: new Date(new Date().setUTCHours(0, 0, 0, 0)),
             streakCount: 1,
-            unlockedBadges: ["67e407a602cd398c11be6875"],
+            unlockedBadges: ["67e407a602cd398c11be6875","67e409a102cd398c11be688c"],
           });
         } else {
           if (!user.githubId) {
