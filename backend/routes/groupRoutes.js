@@ -150,13 +150,15 @@ router.post("/joingroup/:groupcode",authMiddleware,async(req,res)=>{
             { new: true } // Return the updated group
         );
 
-        if(user.studyGroups && user.studyGroups.length === 0){
+        // if(user.studyGroups && user.studyGroups.length === 0){
+        if(user.studyGroups.length === 0){
             let len1 = user.unlockedBadges.length || 0;
             const updatedUser = await User.findByIdAndUpdate(
                 userId,
                 {$push : {studyGroups : updatedGroup._id},
                 $addToSet : {unlockedBadges : '67e408ae02cd398c11be687c'}
-                }
+                },
+                {new : true}
             )
             let len2 = updatedUser.unlockedBadges.length || 0;
             if(len1 !== len2){
