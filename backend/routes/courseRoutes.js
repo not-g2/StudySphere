@@ -273,17 +273,9 @@ router.get("/:courseId/assignments", async (req, res) => {
 });
 
 //add a student to a Course
-router.put("/add-course/:adminId",authMiddleware, async (req, res) => {
+router.put("/add-course", async (req, res) => {
     try {
         const { studentId, courseCode } = req.body;
-        const {adminId} = req.params;
-
-        const admin = await Admin.findById(adminId);
-        if(!admin){
-            return res.status(403).json({
-                msg : "Only admins can add students to a course!"
-            })
-        }
 
         if (!studentId) {
             return res.status(400).json({ message: "Student ID is required" });
