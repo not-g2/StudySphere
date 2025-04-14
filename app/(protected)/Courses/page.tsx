@@ -368,9 +368,9 @@ const ClassesPage = () => {
     };
 
     return (
-        <div className="bg-[#001D3D] h-full">
+        <div className="bg-c2 h-full">
             <Box
-                className="bg-[#F3F3F4] text-black p-4 flex flex-col items-start"
+                className="bg-c2 text-black p-4 flex flex-col items-start"
                 sx={{
                     minHeight: "100vh",
                     width: "100vw",

@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import path from "path";
+import badgeData from "@/data/test.badges.json";
 
 interface BadgeTierProps {
     title: string;
@@ -33,6 +33,13 @@ export default function BadgeTier({
         );
     };
 
+    const badgeLookup = new Map(
+        badgeData.map((badge) => [
+            badge.badgeLink.toLowerCase(),
+            { title: badge.title, content: badge.content },
+        ])
+    );
+
     const getLocalFileName = (filePath: string) => {
         return filePath.split("/").pop()?.toLowerCase() || "";
     };
@@ -51,17 +58,28 @@ export default function BadgeTier({
             <h2 className={`text-xl font-semibold mb-2 ${color}`}>{title}</h2>
             {images.length > 0 && (
                 <div className="flex flex-row gap-x-4">
-                    {images.map((src, index) => (
-                        <img
-                            key={index}
-                            className={clsx("w-20 h-20", {
-                                "grayscale opacity-15":
-                                    missingBadges.includes(src),
-                            })}
-                            src={src}
-                            alt={`${title} badge`}
-                        />
-                    ))}
+                    {images.map((src, index) => {
+                        const info = badgeLookup.get(
+                            src.replace("./Badges/", "").toLowerCase()
+                        );
+                        console.log(src, info);
+                        return (
+                            <div key={index} className="relative group w-max">
+                                <img
+                                    className={clsx("w-20 h-20", {
+                                        "grayscale opacity-15":
+                                            missingBadges.includes(src),
+                                    })}
+                                    src={src}
+                                    alt={`${title} badge`}
+                                />
+                                <div className="absolute bottom-[-60px] left-1/2 -translate-x-1/2 bg-gray-600 text-white opacity-0 bg-opacity-70 group-hover:opacity-100 text-center p-2 transition-opacity duration-300 rounded whitespace-nowrap text-sm text-ellipsis">
+                                    {info?.title}
+                                    <div>{info?.content}</div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>

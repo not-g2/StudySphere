@@ -8,7 +8,7 @@ const Loading: React.FC = () => {
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
-            className="bg-c1" // Apply custom background color c1
+            className="bg-c2" // Apply custom background color c1
             sx={{ height: "100vh" }}
         >
             <CircularProgress />

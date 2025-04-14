@@ -67,7 +67,6 @@ export default function Modal({ isOpen, onClose, ownedBadges }: ModalProps) {
                             "./Badges/Sign_up.png",
                             "./Badges/1_Level.png",
                             "./Badges/1_Assm.png",
-                            "./Badges/1_Level.png",
                             "./Badges/Create_Group.png",
                             "./Badges/Join_Course.png",
                             "./Badges/10_Days.png",

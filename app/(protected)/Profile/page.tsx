@@ -27,6 +27,7 @@ const ProfilePage = () => {
     useEffect(() => {
         if (data?.user) {
             setUser(data.user);
+            console.log(data.user);
         }
     }, [data]);
 
@@ -112,14 +113,14 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="flex flex-row md:flex-row h-auto bg-[#F5F5F5] p-6">
+        <div className="flex flex-row md:flex-row bg-c2 p-6 h-full items-start">
             {/* Left Section */}
             <div className="md:w-1/4 flex flex-col items-center gap-6 p-6 bg-white rounded-lg shadow-lg">
                 <Avatar
                     src={user?.image?.url || "default-profile.png"}
                     alt="Profile Picture"
                     sx={{ width: 180, height: 180 }}
-                    className="shadow-md border-4 border-gray-300"
+                    className="shadow-md border-4 border-gray-300 hover:cursor-pointer"
                     onClick={() => {
                         inputRef.current?.click();
                     }}
@@ -154,7 +155,7 @@ const ProfilePage = () => {
                 <div className="shadow-md rounded-lg bg-white w-full p-6 flex flex-col items-center mb-6">
                     <Typography
                         variant="h4"
-                        className="mb-6 font-semibold text-gray-800 capitalize"
+                        className="mb-6 font-semibold text-gray-800 capitalize pb-2"
                     >
                         Welcome Back, {user?.name} 👋
                     </Typography>
