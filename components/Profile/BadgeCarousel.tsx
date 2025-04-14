@@ -14,17 +14,15 @@ export default function InfiniteScroll({ images }: InfiniteScrollProps) {
     const [shouldAnimate, setShouldAnimate] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
-    useEffect(() => {
-        if (marqueeRef.current && trackRef.current) {
-            const marqueeWidth = marqueeRef.current.offsetWidth;
-            const trackWidth = trackRef.current.scrollWidth;
-            setShouldAnimate(trackWidth > marqueeWidth);
-        }
-    }, [images]);
-
     const onClose = () => {
         setIsOpen(false);
     };
+
+    useEffect(() => {
+        const noOfImages = images.length;
+        const marqueeLength = marqueeRef.current?.offsetWidth || 0;
+        setShouldAnimate(noOfImages * 160 > marqueeLength);
+    }, [images]);
 
     return (
         <div
@@ -46,17 +44,35 @@ export default function InfiniteScroll({ images }: InfiniteScrollProps) {
                 <Modal isOpen={isOpen} onClose={onClose} ownedBadges={images} />
             </div>
 
-            {images.length > 0 && shouldAnimate ? (
-                <div className={styles.marquee} ref={marqueeRef}>
-                    <div className={styles.marquee_track} ref={trackRef}>
+            {images.length > 0 ? (
+                <div
+                    className={
+                        shouldAnimate ? `${styles.marquee}` : "flex flex-row"
+                    }
+                    ref={marqueeRef}
+                >
+                    <div
+                        className={
+                            shouldAnimate
+                                ? `${styles.marquee_track}`
+                                : "flex-row flex"
+                        }
+                        ref={trackRef}
+                    >
                         {images.map((image, index) => (
                             <div
                                 key={image._id}
-                                className={styles.marquee_item}
+                                className={
+                                    shouldAnimate
+                                        ? `${styles.marquee_item}`
+                                        : ""
+                                }
                                 style={
-                                    {
-                                        "--item-position": `${index - 1}`,
-                                    } as React.CSSProperties
+                                    shouldAnimate
+                                        ? ({
+                                              "--item-position": `${index - 1}`,
+                                          } as React.CSSProperties)
+                                        : {}
                                 }
                             >
                                 <img
@@ -67,18 +83,6 @@ export default function InfiniteScroll({ images }: InfiniteScrollProps) {
                             </div>
                         ))}
                     </div>
-                </div>
-            ) : images.length > 0 ? (
-                <div className="flex flex-row">
-                    {images.map((image, index) => (
-                        <div key={image._id}>
-                            <img
-                                src={image.badgeLink}
-                                alt="Badge"
-                                className="w-40 h-40 rounded-lg shadow-md border-4 border-gray-300"
-                            />
-                        </div>
-                    ))}
                 </div>
             ) : (
                 <p className="text-lg text-gray-500">No Achievements Found</p>
