@@ -70,6 +70,7 @@ export default function Modal({ isOpen, onClose, ownedBadges }: ModalProps) {
                             "./Badges/Create_Group.png",
                             "./Badges/Join_Course.png",
                             "./Badges/10_Days.png",
+                            "./Badges/Join_Group.png",
                         ]}
                         ownedBadges={ownedBadges}
                     />

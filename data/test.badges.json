@@ -1,82 +1,82 @@
 [
     {
         "badgeLink": "Sign_up.png",
-        "content": "Sign Up",
+        "content": "Sign Up to the Website",
         "title": "Welcome Aboard"
     },
     {
         "badgeLink": "10_Days.png",
-        "content": "10 Days log in",
+        "content": "Log in for 10 Days",
         "title": "10-Day Streaker"
     },
     {
         "badgeLink": "30_Days.png",
-        "content": "30 Days log in",
+        "content": "Log in for 30 Days",
         "title": "One-Month Login Champ"
     },
     {
         "badgeLink": "100_Days.png",
-        "content": "100 Days log in",
+        "content": "Log in for 100 Days",
         "title": "Century Streak"
     },
     {
         "badgeLink": "365_Days.png",
-        "content": "365 Days log in",
+        "content": "Log in for 365 Days",
         "title": "Year-Long Legend"
     },
     {
         "badgeLink": "1000_Days.png",
-        "content": "1000 Days log in",
+        "content": "Log in for 1000 Days",
         "title": "The Millennium Loyalist"
     },
     {
         "badgeLink": "Join_Course.png",
-        "content": "Joining a Course for the first time",
+        "content": "Join a Course",
         "title": "Course Explorer"
     },
     {
-        "badgeLink": "Join_Course.png",
-        "content": "Joining a Group for the first time",
+        "badgeLink": "Join_Group.png",
+        "content": "Join a Group",
         "title": "Group Explorer"
     },
     {
         "badgeLink": "Create_Group.png",
-        "content": "Creating a Group for the first time",
+        "content": "Create a Group",
         "title": "Founder"
     },
     {
         "badgeLink": "10_Group.png",
-        "content": "Be Creator of Group of 10 ppl",
+        "content": "Be the Creator of a Group of 10 people",
         "title": "Small Group Leader"
     },
     {
         "badgeLink": "50_Group.png",
-        "content": "Be Creator of Group of 50 ppl",
+        "content": "Be the Creator of a Group of 50 people",
         "title": "Mid-Sized Group Leader"
     },
     {
         "badgeLink": "100_Group.png",
-        "content": "Be Creator of Group of 100 ppl",
+        "content": "Be the Creator of a Group of 100 people",
         "title": "Large Group Leader"
     },
     {
         "badgeLink": "1_Assm.png",
-        "content": "Submit 1 Assm",
+        "content": "Submit 1 Asssignment",
         "title": "First Submission"
     },
     {
         "badgeLink": "5_Assm.png",
-        "content": "Submit 5 Assm",
+        "content": "Submit 5 Asssignments",
         "title": "Assignment Novice"
     },
     {
         "badgeLink": "50_Assm.png",
-        "content": "Submit 50 Assm",
+        "content": "Submit 50 Asssignments",
         "title": "Assignment Pro"
     },
     {
         "badgeLink": "100_Assm.png",
-        "content": "Submit 100 Assm",
+        "content": "Submit 100 Asssignments",
         "title": "Assignment Master"
     },
     {
@@ -86,32 +86,32 @@
     },
     {
         "badgeLink": "7_Attend.png",
-        "content": "Have 100% attendance for 7 days (continuous)",
+        "content": "Have 100% attendance for 7 days",
         "title": "Perfect Attendance (1 Week)"
     },
     {
         "badgeLink": "30_Attend.png",
-        "content": "Have 100% attendance for 30 days (continuous)",
+        "content": "Have 100% attendance for 30 days",
         "title": "Perfect Attendance (1 Month)"
     },
     {
         "badgeLink": "25_Min_Focus.png",
-        "content": "25 min focus Session",
+        "content": "Spend a total of 25 minutes on the Pomodoro Timer",
         "title": "Focus Starter"
     },
     {
         "badgeLink": "3_Hrs_Focus.png",
-        "content": "3 hrs focus Session (Total)",
+        "content": "Spend a total of 3 Hours on the Pomodoro Timer",
         "title": "Focus Veteran"
     },
     {
         "badgeLink": "24_Hrs_Focus.png",
-        "content": "24 hrs focus Session (Total)",
+        "content": "Spend a total of 24 Hours on the Pomodoro Timer",
         "title": "Focus Champion"
     },
     {
         "badgeLink": "7_Days_Focus.png",
-        "content": "7 Days focus Session (Total)",
+        "content": "Spend a total of 7 Days on the Pomodoro Timer",
         "title": "Focus Master"
     },
     {
@@ -151,12 +151,12 @@
     },
     {
         "badgeLink": "0_Attend.png",
-        "content": "Have 0% Attendance",
+        "content": "????",
         "title": "Sussssssy Bakaaaaaa!!!!"
     },
     {
         "badgeLink": "10_Assm.png",
-        "content": "Submit 10 Assm",
+        "content": "Submit 10 Asssignments",
         "title": "Assignment Master"
     }
 ]
