@@ -1,22 +1,19 @@
 "use client";
-
-import { Card, CardMedia, CardContent, Typography, Grid } from "@mui/material";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import CardComp from "@/components/Rewards/CardComp";
+import { toast } from "react-toastify";
 
 interface reward {
-    title: string;
+    _id: string;
+    name: string;
     picture: string;
-    desc: string;
-    cost: number;
+    reqPoints: number;
 }
 
-const getRewards = (token: string) => {
+const getRewards = async (token: string) => {
     if (!token) return Promise.resolve([]);
-
-    const PORT = process.env.NEXT_PUBLIC_PORT || "8000";
 
     return fetch(`${process.env.NEXT_PUBLIC_URL}/api/rewd/rewards`, {
         method: "GET",
@@ -39,14 +36,41 @@ const getRewards = (token: string) => {
 };
 
 const RewardsDisplay = () => {
-    const PORT = process.env.NEXT_PUBLIC_PORT;
+    const redeemReward = async (token: string, reward_id: string) => {
+        return fetch(
+            `${process.env.NEXT_PUBLIC_URL}/api/rewd/rewards/redeem/${reward_id}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    userId: session.user.id,
+                }),
+            }
+        )
+            .then((res) => {
+                if (!res.ok) {
+                    return res.json().then((data) => {
+                        toast.error(`${data.error}`);
+                    });
+                }
+
+                return res.json();
+            })
+            .then((data) => {
+                toast.success(`Congratulations, ${data.message}`);
+                queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+            });
+    };
     const [session, setSession] = useState<any>(null);
-    const router = useRouter();
+    const queryClient = useQueryClient();
 
     useSessionCheck(setSession);
 
     const {
-        data = [],
+        data: Rewards = [],
         isLoading,
         isError,
     } = useQuery<reward[]>({
@@ -55,43 +79,10 @@ const RewardsDisplay = () => {
         enabled: !!session?.user?.token,
     });
 
-    function handleSubmit(reward: any) {
-        const redeemReward = async (rewardId: any, userId: any) => {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/rewd/rewards/redeem/${rewardId}`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                        body: JSON.stringify({ userId }),
-                    }
-                );
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(
-                        errorData.error || "Error redeeming reward"
-                    );
-                }
-
-                const data = await response.json();
-                alert(`${data.message}, Coupon Code ${data.coupon_id}`);
-            } catch (error: unknown) {
-                const e = error as Error;
-                alert(`Error: ${e.message}`);
-            }
-        };
-
-        redeemReward(reward._id, session.user.id);
-    }
-
     if (isLoading)
         return (
-            <div className="bg-c2 w-full min-h-screen items-center justify-center text-5xl flex text-white">
-                Loading ...
+            <div className="bg-c2 w-full min-h-screen items-center justify-center text-2xl flex text-white">
+                Loading Rewards ....
             </div>
         );
     if (isError)
@@ -102,76 +93,24 @@ const RewardsDisplay = () => {
         );
 
     return (
-        <Grid
-            container
-            spacing={1}
-            paddingLeft={1}
-            paddingTop={1}
-            margin={0}
-            className="bg-c2"
-            sx={{ width: "100%", height: "100vh" }}
-        >
-            {data.map((reward, index) => (
-                <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={3}
-                    lg={2}
-                    key={index}
-                    sx={{ marginBottom: 1 }}
-                >
-                    <Card
-                        onClick={() => handleSubmit(reward)}
-                        className="!bg-c5"
-                        sx={{
-                            width: "90%",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            paddingTop: 1,
-                            borderRadius: 3,
-                            borderImage:
-                                "linear-gradient(45deg, #1b1a55, #070f2b) 1",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                            transition:
-                                "transform 0.3s ease, box-shadow 0.3s ease",
-                            "&:hover": {
-                                transform: "scale(1.02)",
-                                boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.3)",
-                            },
-                            cursor: "pointer",
-                        }}
-                    >
-                        <CardMedia
-                            component="img"
-                            height="140"
-                            image={reward.picture}
-                            alt={reward.title}
-                            sx={{
-                                width: 200,
-                                height: 200,
-                                borderRadius: 3,
-                                border: "1px solid",
-                            }}
-                        />
-                        <CardContent>
-                            <Typography
-                                gutterBottom
-                                variant="h5"
-                                component="div"
-                                color="#FFFFFF"
-                            >
-                                {reward.title}
-                            </Typography>
-                            <Typography color="#FFFFFF">
-                                Redeem for {reward.cost} points
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-            ))}
-        </Grid>
+        <div className="w-full min-h-screen bg-c2 p-4">
+            <h2 className="text-4xl text-center text-white font-semibold pb-5">
+                Welcome to the Shop
+            </h2>
+            <div className="mx-auto max-w-screen-lg grid gap-6 grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] justify-items-center">
+                {Rewards.map((reward, index) => (
+                    <CardComp
+                        key={reward._id}
+                        name={reward.name}
+                        picture={reward.picture}
+                        reqPoints={reward.reqPoints}
+                        onRedeem={() =>
+                            redeemReward(session.user.token, reward._id)
+                        }
+                    />
+                ))}
+            </div>
+        </div>
     );
 };
 

@@ -6,6 +6,11 @@ body::-webkit-scrollbar {
     display: none; /* Chrome, Safari */
 }
 
+html,
+body {
+    @apply h-full;
+}
+
 /* :root {
   --background: #ffffff;
   --foreground: #171717;
