@@ -69,7 +69,7 @@ router.post(
                 return res.status(404).json({ msg: "User not found" });
             }
 
-            user.profilePic = req.file.path;
+            //user.profilePic = req.file.path;
             user.image.url = req.file.path;
             await user.save();
 

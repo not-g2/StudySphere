@@ -33,7 +33,7 @@ CourseSchema.pre("save", function (next) {
             .digest("hex");
         this.courseCode = hash.slice(0, 8); // Take the first 8 characters of the hash
     }
-    next(); // Don't call this.save() here!
+    next(); 
 });
 
 module.exports = mongoose.model("Course", CourseSchema);

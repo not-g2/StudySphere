@@ -30,7 +30,11 @@ const UserSchema = new mongoose.Schema({
     auraPoints: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
     unlockedBadges : [{type : mongoose.Schema.Types.ObjectId,ref : 'Badge'}],
-    rewards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reward" }],
+    //rewards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reward" }],
+    rewards : [{
+        rewardId : {type : mongoose.Schema.Types.ObjectId,ref : 'Reward'},
+        redeemCode : {type : String}
+    }],
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: "Group" }],
     groupCreated: {
         // this denotes the number of groups created by a particular user , so that any user doesnt really make too  any un necessary groups
