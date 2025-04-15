@@ -107,7 +107,7 @@ router.post("/rewards/redeem/:id", async (req, res) => {
         // Deduct aura points and update user rewards
         user.auraPoints -= reward.reqPoints;
         //user.rewards.push(reward._id);
-        user.rewards.rewardId = reward._id;
+        //user.rewards.rewardId = reward._id;
         
         // calculating the user specific redeem code
         const hashInput = `${user._id}${reward._id}${Date.now()}`;
@@ -115,7 +115,11 @@ router.post("/rewards/redeem/:id", async (req, res) => {
                     .createHash("sha256")
                     .update(hashInput)
                     .digest("hex");
-        user.rewards.redeemCode = hash.slice(0,8);
+        //user.rewards.redeemCode = hash.slice(0,8);
+        user.rewards.push({
+            rewardId : reward._id,
+            redeemCode : hash.slice(0,8)
+        })
         await user.save();
 
         res.status(200).json({
