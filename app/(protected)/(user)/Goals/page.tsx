@@ -12,8 +12,33 @@ interface Goal {
     endDate: string;
 }
 
+const fetchGoals = async (token: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_URL}/api/goals/`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then((res) => {
+            if (!res.ok) return null;
+            return res.json();
+        })
+        .then((data) => {
+            const formattedGoals = data.map((goal: any) => ({
+                _id: goal._id,
+                name: goal.title,
+                endDate: goal.dueDate,
+            }));
+            formattedGoals.sort(
+                (a: Goal, b: Goal) =>
+                    new Date(b.endDate).getTime() -
+                    new Date(a.endDate).getTime()
+            );
+            return formattedGoals;
+        });
+};
+
 function ThirdRowPage() {
-    const PORT = process.env.NEXT_PUBLIC_PORT;
     const [session, setSession] = useState<any>(null);
     const [goalRefresh, setGoalRefresh] = useState(0);
     useSessionCheck(setSession);
@@ -64,7 +89,6 @@ function ThirdRowPage() {
                     <DeadlineForm onAddDeadline={addDeadline} />
                 </div>
                 <div style={{ flex: 1 }}>
-                    <GoalTable />
                 </div>
                 <div style={{ flex: 1 }}>
                     <Challengetable />

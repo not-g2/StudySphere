@@ -26,7 +26,7 @@ const GoalTable: React.FC<{ goalsData: Goal[]; token: string }> = ({
     goalsData,
     token,
 }) => {
-    const [goals, setGoals] = useState(goalsData);
+    const [goals, setGoals] = useState(goalsData || []);
     const [completedGoals, setCompletedGoals] = useState<string[]>([]);
     const [fadedGoals, setFadedGoals] = useState<string[]>([]);
 
