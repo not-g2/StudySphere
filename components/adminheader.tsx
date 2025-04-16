@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Avatar, Button } from "@mui/material";
-import Dropdown from "../components/dropdown";
+import Dropdown from "./dropdown";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LogoutPage from "./signout";

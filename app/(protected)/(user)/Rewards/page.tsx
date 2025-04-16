@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import useSessionCheck from "../../hooks/auth"; // ✅ Added session hook
+import useSessionCheck from "../../../hooks/auth"; // ✅ Added session hook
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CardComp from "@/components/Rewards/CardComp";
 import { toast } from "react-toastify";

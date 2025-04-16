@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import MyCalendar from "../../../components/Calendar";
+import MyCalendar from "../../../../components/Calendar";
 import DeadlineForm from "@/components/Deadlineform";
 import SubjectSchedulerModal from "@/components/timetable";
-import useSessionCheck from "../../hooks/auth";
+import useSessionCheck from "../../../hooks/auth";
 
 const TimeTablePage: React.FC = () => {
     const [session, setSession] = useState<any>(null);

@@ -12,8 +12,8 @@ import {
 import { keyframes } from "@mui/system";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import ClassCodePopup from "../../../components/classAdd";
-import useSessionCheck from "../../hooks/auth";
+import ClassCodePopup from "../../../../components/classAdd";
+import useSessionCheck from "../../../hooks/auth";
 import { Session } from "@/types/session";
 import dynamic from "next/dynamic";
 interface classItem {

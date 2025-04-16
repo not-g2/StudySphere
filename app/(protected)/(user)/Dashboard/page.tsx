@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import useSessionCheck from "../../hooks/auth";
+import useSessionCheck from "../../../hooks/auth";
 import DeadlinesList from "@/components/deadlines";
 import AttendancePieChart from "@/components/AttendancePieChart";
 import GoalTable from "@/components/goalview";

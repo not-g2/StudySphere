@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import useSessionCheck from "../../hooks/auth";
+import useSessionCheck from "../../../hooks/auth";
 import GroupCodePopup from "@/components/Group/GroupCodePopup";
 import CreateGroupPopup from "@/components/Group/CreateGroupPopup";
 

@@ -5,7 +5,7 @@ import AddGoalForm from "@/components/addgoal";
 import DeadlineForm from "@/components/Deadlineform";
 import GoalTable from "@/components/goalview";
 import Challengetable from "@/components/challenge";
-import useSessionCheck from "../../hooks/auth";
+import useSessionCheck from "../../../hooks/auth";
 
 interface Goal {
     name: string;
