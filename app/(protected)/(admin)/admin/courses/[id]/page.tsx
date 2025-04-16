@@ -27,6 +27,7 @@ import AddAnnouncementDialog from "@/components/AdminCourses/AddAnnouncementDial
 import AddAssignmentDialog from "@/components/AdminCourses/AddAssignmentDialog";
 import AddChapterDialog from "@/components/AdminCourses/AddChapterDialog";
 import SubmissionsDialog from "@/components/AdminCourses/SubmissionsDialog";
+import { Session } from "@/types/session";
 
 interface Announcement {
     _id: number;
@@ -56,15 +57,6 @@ interface Student {
     _id: string;
     name: string;
 }
-
-type Session = {
-    user: {
-        id: string;
-        token: string;
-    };
-    email: string;
-    isAdmin: boolean;
-};
 
 const DashboardPage = () => {
     // State declarations

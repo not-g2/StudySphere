@@ -1,60 +1,171 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import useSessionCheck from "../../../hooks/auth";
+import React, { Suspense } from "react";
 import DeadlinesList from "@/components/deadlines";
 import AttendancePieChart from "@/components/AttendancePieChart";
 import GoalTable from "@/components/goalview";
-import FocusRadarChart from "@/components/Dashboard/pomoradarchart"; // Existing radar chart component
-import SubjectTimeBarChart from "@/components/Dashboard/subjecttimechart"; // New bar chart component
-import { Session } from "@/types/session";
+import FocusRadarChart from "@/components/Dashboard/pomoradarchart";
+import SubjectTimeBarChart from "@/components/Dashboard/subjecttimechart";
 import Leaderboard from "@/components/leaderboard";
-import LevelProgress from "@/components/XPchart";
+import LevelProgressContainer from "@/components/Dashboard/LevelProgressContainer";
+import { cookies } from "next/headers";
 
-function DashboardPage() {
-    const [session, setSession] = useState<Session | null>(null);
-    const [profile, setProfile] = useState({ xp: 0, level: 0, auraPoints: 0 });
-    const [focusData, setFocusData] = useState([]);
-    const router = useRouter();
+const getProfile = async (token: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_URL}/api/users/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+    })
+        .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch profile");
+            return res.json();
+        })
+        .catch((err) => {
+            console.error("Error fetching Profile Data:", err);
+            return null;
+        });
+};
 
-    // Use custom hook for session checking.
-    useSessionCheck(setSession);
-
-    // Fetch profile details (including auraPoints) and focus analytics once session is available.
-    useEffect(() => {
-        if (session) {
-            console.log(session);
-            fetch(`${process.env.NEXT_PUBLIC_URL}/api/users/profile`, {
-                headers: { Authorization: `Bearer ${session.user.token}` },
-            })
-                .then((res) => res.json())
-                .then((data) =>
-                    setProfile({
-                        xp: data.xp,
-                        level: data.level,
-                        auraPoints: data.auraPoints,
-                    })
-                )
-                .catch((err) => console.error("Error fetching profile:", err));
-
-            fetch(
-                `${process.env.NEXT_PUBLIC_URL}/api/pomodoro/fetchuseranalytics/${session.user.id}`,
-                {
-                    headers: { Authorization: `Bearer ${session.user.token}` },
-                }
-            )
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.focusdata && data.focusdata.focusSessionData) {
-                        setFocusData(data.focusdata.focusSessionData);
-                    }
-                })
-                .catch((err) =>
-                    console.error("Error fetching focus analytics:", err)
-                );
+const getFocusData = async (token: string, userid: string) => {
+    return fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/pomodoro/fetchuseranalytics/${userid}`,
+        {
+            headers: { Authorization: `Bearer ${token}` },
         }
-    }, [session]);
+    )
+        .then((res) => {
+            if (!res.ok) {
+                return null;
+            }
+            return res.json();
+        })
+        .then((data) => {
+            return data?.focusdata?.focusSessionData ?? [];
+        })
+        .catch((err) => {
+            console.error("Error fetching focus analytics:", err);
+            return null;
+        });
+};
+
+const fetchAttendanceData = async (token: string, userID: string) => {
+    return fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/attendance/breakdown/${userID}`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        }
+    )
+        .then((res) => {
+            if (!res.ok) return null;
+            return res.json();
+        })
+        .then((data) => {
+            return data?.attendanceByCourse || [];
+        })
+        .catch((err) => {
+            console.error(err);
+            return null;
+        });
+};
+
+const getLeaderboard = async (token: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_URL}/api/data/top-10-aura`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        method: "GET",
+    })
+        .then((res) => {
+            if (!res.ok) return null;
+            return res.json();
+        })
+        .then((data) => {
+            const updatedUsers =
+                data?.users.map((user: any) => ({
+                    ...user,
+                    name: user.name || `User(${user._id})`,
+                    level: user.level || 0,
+                })) || [];
+            return updatedUsers;
+        })
+        .catch((err) => {
+            console.error(err);
+            return null;
+        });
+};
+
+const fetchDeadlines = async (token: string, userID: string) => {
+    return fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/users/${userID}/deadlines`,
+        {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    )
+        .then((res) => {
+            if (!res.ok) return null;
+            return res.json();
+        })
+        .then((data) => {
+            const formattedDeadlines = data.deadlines.map((deadline: any) => ({
+                id:
+                    deadline.id ||
+                    `${deadline.assignmentTitle}-${deadline.dueDate}`,
+                name: deadline.assignmentTitle,
+                date: deadline.dueDate,
+                course: deadline.courseName,
+            }));
+            formattedDeadlines.sort((a: Deadline, b: Deadline) => {
+                return new Date(a.date).getTime() - new Date(b.date).getTime();
+            });
+            return formattedDeadlines;
+        })
+        .catch((err) => {
+            console.error("Error getting Leaderboard Details");
+        });
+};
+
+const fetchGoals = async (token: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_URL}/api/goals/`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then((res) => {
+            if (!res.ok) return null;
+            return res.json();
+        })
+        .then((data) => {
+            const formattedGoals = data.map((goal: any) => ({
+                _id: goal._id,
+                name: goal.title,
+                endDate: goal.dueDate,
+            }));
+            formattedGoals.sort(
+                (a: Goal, b: Goal) =>
+                    new Date(b.endDate).getTime() -
+                    new Date(a.endDate).getTime()
+            );
+            return formattedGoals;
+        });
+};
+
+export default async function DashboardPage() {
+    const cookieStore = await cookies();
+    const session = JSON.parse(cookieStore.get("session")?.value || "");
+    const profile = await getProfile(session.user.token);
+    const focusData = await getFocusData(session.user.token, session.user.id);
+    const attendanceData = await fetchAttendanceData(
+        session.user.token,
+        session.user.id
+    );
+    const leaderboardData = await getLeaderboard(session.user.token);
+    const deadlines = await fetchDeadlines(session.user.token, session.user.id);
+    const goalsData = await fetchGoals(session.user.token);
 
     return (
         <div className="bg-c2 min-h-full">
@@ -74,49 +185,58 @@ function DashboardPage() {
                     }}
                 >
                     {/* Left container with LevelProgress and Aura Points */}
-                    <div
-                        style={{
-                            flex: 1,
-                            marginRight: "20px",
-                            display: "flex",
-                            alignItems: "center",
-                            backgroundColor: "#896EFB",
-                            padding: "20px",
-                            borderRadius: "8px",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                            color: "white",
-                        }}
-                    >
-                        <div style={{ flex: 1 }}>
-                            <LevelProgress
-                                level={profile.level}
-                                xp={profile.xp}
-                            />
-                        </div>
+                    <Suspense>
                         <div
                             style={{
-                                width: "200px",
-                                marginLeft: "20px",
-                                backgroundColor: "#A18BFC",
+                                flex: 1,
+                                marginRight: "20px",
+                                display: "flex",
+                                alignItems: "center",
+                                backgroundColor: "#896EFB",
                                 padding: "20px",
                                 borderRadius: "8px",
-                                textAlign: "center",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                 color: "white",
                             }}
                         >
-                            <h3
-                                style={{ margin: "0 0 10px", fontSize: "16px" }}
+                            <div style={{ flex: 1 }}>
+                                <LevelProgressContainer
+                                    level={profile.level}
+                                    xp={profile.xp}
+                                />
+                            </div>
+                            <div
+                                style={{
+                                    width: "200px",
+                                    marginLeft: "20px",
+                                    backgroundColor: "#A18BFC",
+                                    padding: "20px",
+                                    borderRadius: "8px",
+                                    textAlign: "center",
+                                    color: "white",
+                                }}
                             >
-                                Aura Points
-                            </h3>
-                            <p style={{ fontSize: "20px", margin: 0 }}>
-                                {profile.auraPoints}
-                            </p>
+                                <h3
+                                    style={{
+                                        margin: "0 0 10px",
+                                        fontSize: "16px",
+                                    }}
+                                >
+                                    Aura Points
+                                </h3>
+                                <p style={{ fontSize: "20px", margin: 0 }}>
+                                    {profile.auraPoints}
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    </Suspense>
                     {/* Right container with AttendancePieChart */}
                     <div style={{ flex: 1, marginLeft: "20px" }}>
-                        <AttendancePieChart />
+                        <Suspense>
+                            <AttendancePieChart
+                                attendanceData={attendanceData}
+                            />
+                        </Suspense>
                     </div>
                 </div>
 
@@ -137,7 +257,12 @@ function DashboardPage() {
                             borderRadius: "8px",
                         }}
                     >
-                        <Leaderboard session={session} />
+                        <Suspense>
+                            <Leaderboard
+                                leaderboardEntries={leaderboardData}
+                                userId={session.user.id}
+                            />
+                        </Suspense>
                     </div>
                     <div
                         style={{
@@ -147,7 +272,9 @@ function DashboardPage() {
                             borderRadius: "8px",
                         }}
                     >
-                        <DeadlinesList />
+                        <Suspense>
+                            <DeadlinesList deadlines={deadlines} />
+                        </Suspense>
                     </div>
                     <div
                         style={{
@@ -157,45 +284,50 @@ function DashboardPage() {
                             borderRadius: "8px",
                         }}
                     >
-                        <GoalTable />
+                        <Suspense>
+                            <GoalTable
+                                goalsData={goalsData}
+                                token={session.user.token}
+                            />
+                        </Suspense>
                     </div>
                 </div>
 
                 {/* Third Row: Analytics - Render only if focusData exists */}
-                {focusData && focusData.length > 0 && (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: "20px",
+                        gap: "20px",
+                    }}
+                >
                     <div
                         style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            marginTop: "20px",
-                            gap: "20px",
+                            width: "600px",
+                            backgroundColor: "#001D3D",
+                            padding: "20px",
+                            borderRadius: "8px",
                         }}
                     >
-                        <div
-                            style={{
-                                width: "600px",
-                                backgroundColor: "#001D3D",
-                                padding: "20px",
-                                borderRadius: "8px",
-                            }}
-                        >
+                        <Suspense>
                             <FocusRadarChart data={focusData} />
-                        </div>
-                        <div
-                            style={{
-                                width: "600px",
-                                backgroundColor: "#001D3D",
-                                padding: "20px",
-                                borderRadius: "8px",
-                            }}
-                        >
-                            <SubjectTimeBarChart data={focusData} />
-                        </div>
+                        </Suspense>
                     </div>
-                )}
+                    <div
+                        style={{
+                            width: "600px",
+                            backgroundColor: "#001D3D",
+                            padding: "20px",
+                            borderRadius: "8px",
+                        }}
+                    >
+                        <Suspense>
+                            <SubjectTimeBarChart data={focusData} />
+                        </Suspense>
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
-
-export default DashboardPage;

@@ -102,38 +102,47 @@ const SubjectTimeBarChart: React.FC<SubjectTimeBarChartProps> = ({ data }) => {
                     padding: "10px",
                 }}
             >
-                <ResponsiveContainer width="100%" height={400}>
-                    <BarChart
-                        data={chartData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#666666" />
-                        <XAxis dataKey="day" tick={{ fill: "white" }} />
-                        <YAxis tick={{ fill: "white" }} />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: "#333333",
-                                border: "none",
-                                color: "white",
-                            }}
-                            labelStyle={{ color: "white" }}
-                            // Convert seconds to minutes by dividing by 60.
-                            formatter={(value) =>
-                                `${(Number(value) / 60).toFixed(2)} minutes`
-                            }
-                            labelFormatter={(label) => `Day: ${label}`}
-                        />
-                        <Legend wrapperStyle={{ color: "white" }} />
-                        {Array.from(uniqueSubjects).map((subject) => (
-                            <Bar
-                                key={subject}
-                                dataKey={subject}
-                                stackId="a"
-                                fill={subjectColorMap[subject]}
+                {data.length !== 0 ? (
+                    <ResponsiveContainer width="100%" height={400}>
+                        <BarChart
+                            data={chartData}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#666666"
                             />
-                        ))}
-                    </BarChart>
-                </ResponsiveContainer>
+                            <XAxis dataKey="day" tick={{ fill: "white" }} />
+                            <YAxis tick={{ fill: "white" }} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "#333333",
+                                    border: "none",
+                                    color: "white",
+                                }}
+                                labelStyle={{ color: "white" }}
+                                // Convert seconds to minutes by dividing by 60.
+                                formatter={(value) =>
+                                    `${(Number(value) / 60).toFixed(2)} minutes`
+                                }
+                                labelFormatter={(label) => `Day: ${label}`}
+                            />
+                            <Legend wrapperStyle={{ color: "white" }} />
+                            {Array.from(uniqueSubjects).map((subject) => (
+                                <Bar
+                                    key={subject}
+                                    dataKey={subject}
+                                    stackId="a"
+                                    fill={subjectColorMap[subject]}
+                                />
+                            ))}
+                        </BarChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="h-[400px] flex items-center justify-center text-3xl text-white">
+                        No Focus Data to Display
+                    </div>
+                )}
             </div>
         </div>
     );

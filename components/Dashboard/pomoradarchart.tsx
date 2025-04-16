@@ -46,28 +46,34 @@ const FocusRadarChart: React.FC<FocusRadarChartProps> = ({ data }) => {
             }}
         >
             <h2 style={{ textAlign: "center" }}>Focus Time per Subject</h2>
-            <ResponsiveContainer width="100%" height={400}>
-                <RadarChart data={chartData}>
-                    <PolarGrid stroke="rgba(255,255,255,0.5)" />
-                    <PolarAngleAxis dataKey="subject" stroke="white" />
-                    <PolarRadiusAxis stroke="white" />
-                    <Radar
-                        name="Time Spent"
-                        dataKey="timeSpent"
-                        stroke="white"
-                        fill="#E67E22" // Darker shade of orange for the radar fill
-                        fillOpacity={0.6}
-                    />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: "#333",
-                            border: "none",
-                        }}
-                        labelStyle={{ color: "#fff" }}
-                        itemStyle={{ color: "#fff" }}
-                    />
-                </RadarChart>
-            </ResponsiveContainer>
+            {data.length !== 0 ? (
+                <ResponsiveContainer width="100%" height={400}>
+                    <RadarChart data={chartData}>
+                        <PolarGrid stroke="rgba(255,255,255,0.5)" />
+                        <PolarAngleAxis dataKey="subject" stroke="white" />
+                        <PolarRadiusAxis stroke="white" />
+                        <Radar
+                            name="Time Spent"
+                            dataKey="timeSpent"
+                            stroke="white"
+                            fill="#E67E22" // Darker shade of orange for the radar fill
+                            fillOpacity={0.6}
+                        />
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: "#333",
+                                border: "none",
+                            }}
+                            labelStyle={{ color: "#fff" }}
+                            itemStyle={{ color: "#fff" }}
+                        />
+                    </RadarChart>
+                </ResponsiveContainer>
+            ) : (
+                <div className="h-[400px] flex items-center justify-center text-3xl">
+                    No Focus Data to Display
+                </div>
+            )}
         </div>
     );
 };

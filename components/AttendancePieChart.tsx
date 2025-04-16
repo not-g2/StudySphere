@@ -1,6 +1,6 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import {
     PieChart,
     Pie,
@@ -17,53 +17,9 @@ interface AttendanceData {
     attendedClasses: number;
 }
 
-const AttendancePieChart: React.FC = () => {
-    const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([]);
-    const [session, setSession] = useState<any>(null);
-
-    useEffect(() => {
-        const sessionData = Cookies.get("session");
-        if (sessionData) {
-            setSession(JSON.parse(sessionData));
-        } else {
-            console.error("No session data found in cookies");
-        }
-    }, []);
-
-    useEffect(() => {
-        const fetchAttendanceData = async () => {
-            if (!session?.user?.token || !session?.user?.id) {
-                console.error("Session data or user token missing");
-                return;
-            }
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/attendance/breakdown/${session.user.id}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${session.user.token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    setAttendanceData(data.attendanceByCourse);
-                } else {
-                    console.error(
-                        "Failed to fetch attendance data, response status:",
-                        response.status
-                    );
-                }
-            } catch (error) {
-                console.error("Error fetching attendance data:", error);
-            }
-        };
-        if (session) {
-            fetchAttendanceData();
-        }
-    }, [session]);
-
+const AttendancePieChart: React.FC<{ attendanceData: AttendanceData[] }> = ({
+    attendanceData,
+}) => {
     return (
         <div
             className="w-full px-4"

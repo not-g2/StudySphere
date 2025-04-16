@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import "./globals.css";
 import "./(protected)/output.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,7 +13,7 @@ function RootLayout({ children }: { children: ReactNode }) {
     return (
         <html lang="en" className="h-full">
             <body className="h-full">
-                <Providers>{children}</Providers>
+                    <Providers>{children}</Providers>
             </body>
         </html>
     );

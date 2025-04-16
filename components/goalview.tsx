@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -21,22 +19,16 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 
-interface Goal {
-    _id: string;
-    name: string;
-    endDate: string;
-}
-
 const headerBgColor = "#3f51b5";
 const headerTextColor = "#fff";
 
-const GoalTable: React.FC = () => {
-    const [goals, setGoals] = useState<Goal[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [session, setSession] = useState<any>(null);
+const GoalTable: React.FC<{ goalsData: Goal[]; token: string }> = ({
+    goalsData,
+    token,
+}) => {
+    const [goals, setGoals] = useState(goalsData);
     const [completedGoals, setCompletedGoals] = useState<string[]>([]);
     const [fadedGoals, setFadedGoals] = useState<string[]>([]);
-    const router = useRouter();
 
     // For new goal dialog
     const [open, setOpen] = useState(false);
@@ -44,75 +36,23 @@ const GoalTable: React.FC = () => {
     const [newEndDate, setNewEndDate] = useState("");
     const [addingError, setAddingError] = useState<string | null>(null);
 
-    // Retrieve session from cookies and handle redirection
-    useEffect(() => {
-        const sessionData = Cookies.get("session");
-        if (sessionData) {
-            setSession(JSON.parse(sessionData));
-        } else {
-            router.push("/auth/signin");
-        }
-    }, [router]);
-
-    // Fetch goals when session changes
-    useEffect(() => {
-        const fetchGoals = async () => {
-            if (session?.user?.token) {
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/goals/`,
-                        {
-                            method: "GET",
-                            headers: {
-                                Authorization: `Bearer ${session.user.token}`,
-                            },
-                        }
-                    );
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch goals");
-                    }
-                    const data = await response.json();
-                    const formattedGoals = data.map((goal: any) => ({
-                        _id: goal._id,
-                        name: goal.title,
-                        endDate: goal.dueDate,
-                    }));
-                    // Sort goals by endDate descending (most recent first)
-                    formattedGoals.sort(
-                        (a: Goal, b: Goal) =>
-                            new Date(b.endDate).getTime() -
-                            new Date(a.endDate).getTime()
-                    );
-                    setGoals(formattedGoals);
-                } catch (err) {
-                    console.error(err);
-                    setError("Failed to fetch goals. Please try again.");
-                }
-            }
-        };
-        fetchGoals();
-    }, [session]);
-
     // Delete goal by ID (calls API)
     const deleteGoal = async (id: string) => {
-        if (session?.user?.token) {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/goals/${id}`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    throw new Error("Failed to delete goal");
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_URL}/api/goals/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            } catch (err) {
-                console.error(err);
-                setError("Failed to delete goal. Please try again.");
+            );
+            if (!response.ok) {
+                throw new Error("Failed to delete goal");
             }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -162,7 +102,7 @@ const GoalTable: React.FC = () => {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${session?.user.token}`,
+                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify(newGoal),
                 }

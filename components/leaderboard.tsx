@@ -18,7 +18,8 @@ interface LeaderboardEntry {
 }
 
 interface LeaderboardProps {
-    session: any;
+    leaderboardEntries: LeaderboardEntry[];
+    userId: string;
 }
 
 // Helper function to truncate names longer than 10 characters
@@ -26,48 +27,12 @@ const truncateName = (name: string): string => {
     return name.length > 10 ? name.slice(0, 10) + "..." : name;
 };
 
-const Leaderboard: React.FC<LeaderboardProps> = ({ session }) => {
-    const [leaderboardEntries, setLeaderboardEntries] = useState<
-        LeaderboardEntry[]
-    >([]);
-
-    useEffect(() => {
-        const getLeaderboard = async () => {
-            if (!session) return;
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/data/top-10-aura`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${session.user.token}`,
-                            "Content-Type": "application/json",
-                        },
-                        method: "GET",
-                    }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    // Ensure each user has a name and level (using defaults if missing)
-                    const updatedUsers = data.users.map(
-                        (user: LeaderboardEntry) => ({
-                            ...user,
-                            name: user.name || `User(${user._id})`,
-                            level: user.level || 0,
-                        })
-                    );
-                    setLeaderboardEntries(updatedUsers);
-                } else {
-                    console.error("Failed to get leaderboard details");
-                }
-            } catch (error) {
-                console.error("Error getting leaderboard:", error);
-            }
-        };
-        getLeaderboard();
-    }, [session]);
-
+const Leaderboard: React.FC<LeaderboardProps> = ({
+    leaderboardEntries,
+    userId,
+}) => {
     // Determine if current user is in the top 4
-    const currentUserId = session?.user?.id;
+    const currentUserId = userId;
     const topFour = leaderboardEntries.slice(0, 4);
     const isCurrentUserInTopFour = topFour.some(
         (entry) => entry._id === currentUserId
