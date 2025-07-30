@@ -29,6 +29,7 @@ const Dropdown: React.FC<DropdownProps> = ({ anchorEl, handleClose, handleSignOu
         },
       }}
     >
+      <MenuItem onClick={handleProfileRedirect}>Profile</MenuItem>
       <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
     </Menu>
   );
