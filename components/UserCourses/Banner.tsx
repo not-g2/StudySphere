@@ -1,45 +1,43 @@
-"use client";
-import { Typography, Box, Avatar } from "@mui/material";
+// components/UserCourses/Banner.tsx
+import { Box, Typography, Avatar } from "@mui/material";
 
 interface BannerProps {
   courseTitle: string;
-  bannerImage: string;
+  gradient: string;
   professorImage: string;
 }
 
-const Banner: React.FC<BannerProps> = ({ courseTitle, bannerImage, professorImage }) => {
+export default function Banner({
+  courseTitle,
+  gradient,
+  professorImage,
+}: BannerProps) {
   return (
     <Box
       sx={{
-        position: "relative",
         height: 200,
-        backgroundImage: `url(${bannerImage})`,
+        width: "100%",
+        background: gradient,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        borderRadius: 2,
         display: "flex",
         alignItems: "center",
-        padding: 3,
-        color: "#ffffff",
+        px: 4,
+        color: "#fff",
+        position: "relative",
       }}
     >
-      <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-        Course: {courseTitle}
+      <Typography variant="h4" sx={{ flex: 1 }}>
+        {courseTitle}
       </Typography>
       <Avatar
-        alt="Professor Name"
         src={professorImage}
         sx={{
-          position: "absolute",
-          right: 20,
-          width: 120,
-          height: 120,
-          border: "3px solid white",
-          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+          width: 56,
+          height: 56,
+          border: "2px solid rgba(255,255,255,0.8)",
         }}
       />
     </Box>
   );
-};
-
-export default Banner;
+}

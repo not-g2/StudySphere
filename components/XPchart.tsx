@@ -1,129 +1,120 @@
+// components/XPchart.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { PieChart, Pie, Cell } from "recharts";
 import { LevelProgressProps } from "@/types/levelProgress";
 
-const LevelProgress: React.FC<LevelProgressProps> = ({ level, xp }) => {
-    const data = [
-        { name: "XP", value: xp },
-        { name: "Remaining", value: 100 - xp },
-    ];
-
-    // Use these colours: progress is a lighter blue, remaining is light gray.
-    const COLORS = ["#AC9AFC", "#d6d6d6"];
-
-    const circleSize = 400;
-    const innerRadius = 160;
-    const outerRadius = 180;
-
-    return (
+////////////////////////////////////////////////////////////////////////
+// PRESENTATIONAL: wider bar, bigger text, XP & Aura at ends        //
+////////////////////////////////////////////////////////////////////////
+const LevelProgress: React.FC<LevelProgressProps> = ({
+  level,
+  xp,
+  auraPoints,
+}) => {
+  // match DashboardPage left‑column
+  const containerWidth = 480;
+  return (
+    <div
+      style={{
+        width: containerWidth,
+        backgroundColor: "#896EFB",
+        borderRadius: 16,
+        padding: 16,
+        color: "#fff",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* bar track */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: 24,
+          backgroundColor: "#d6d6d6",
+          borderRadius: 12,
+          overflow: "hidden",
+        }}
+      >
+        {/* filled portion */}
         <div
-            tabIndex={-1}
-            style={{
-                position: "relative",
-                width: circleSize,
-                height: circleSize,
-                backgroundColor: "#896EFB", // re-added background color
-                borderRadius: "50%", // make it circular
-                outline: "none", // remove focus outline
-            }}
+          style={{
+            width: `${xp}%`,
+            height: "100%",
+            backgroundColor: "#AC9AFC",
+          }}
+        />
+
+        {/* level number, centered */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: "bold",
+            fontSize: 20,
+          }}
         >
-            <PieChart width={circleSize} height={circleSize}>
-                <Pie
-                    data={data}
-                    dataKey="value"
-                    cx="50%"
-                    cy="50%"
-                    startAngle={90}
-                    endAngle={-270}
-                    innerRadius={innerRadius}
-                    outerRadius={outerRadius}
-                    paddingAngle={0}
-                    stroke="none"
-                >
-                    {data.map((entry, index) => (
-                        <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                        />
-                    ))}
-                </Pie>
-            </PieChart>
-            <div
-                style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    textAlign: "center",
-                    color: "#fff",
-                }}
-            >
-                <div style={{ fontSize: "36px", fontWeight: "bold" }}>
-                    Level {level}
-                </div>
-                <div style={{ fontSize: "22px" }}>{xp}% XP</div>
-            </div>
+          Level {level}
         </div>
-    );
+      </div>
+
+      {/* XP% on left, Aura on right */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: 12,
+          fontSize: 16,
+        }}
+      >
+        <span>{xp}% XP</span>
+        <span>Aura: {auraPoints}</span>
+      </div>
+    </div>
+  );
 };
 
-const LevelProgressContainer: React.FC<LevelProgressProps> = () => {
-    const [level, setLevel] = useState<number>(0);
-    const [xp, setXp] = useState<number>(0);
-    const [session, setSession] = useState<any>(null);
+////////////////////////////////////////////////////////////////////////
+// CONTAINER: fetches profile and passes props into LevelProgress   //
+////////////////////////////////////////////////////////////////////////
+const LevelProgressContainer: React.FC = () => {
+  const [level, setLevel] = useState<number>(0);
+  const [xp, setXp] = useState<number>(0);
+  const [auraPoints, setAuraPoints] = useState<number>(0);
+  const [session, setSession] = useState<any>(null);
 
-    useEffect(() => {
-        // Retrieve session data from cookies on component mount
-        const sessionData = Cookies.get("session");
-        if (sessionData) {
-            setSession(JSON.parse(sessionData));
-        } else {
-            console.error("No session data found in cookies");
-        }
-    }, []);
+  useEffect(() => {
+    const raw = Cookies.get("session");
+    if (raw) setSession(JSON.parse(raw));
+    else console.error("No session data found in cookies");
+  }, []);
 
-    useEffect(() => {
-        const getProfile = async () => {
-            if (!session?.user?.token) {
-                console.error("Session token is missing");
-                return;
-            }
+  useEffect(() => {
+    if (!session?.user?.token) return;
 
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/users/profile`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
+    fetch(`${process.env.NEXT_PUBLIC_URL}/api/users/profile`, {
+      headers: { Authorization: `Bearer ${session.user.token}` },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(r.statusText);
+        return r.json();
+      })
+      .then((data) => {
+        const adjustedXp = data.xp > 100 ? data.xp / 10 : data.xp;
+        setLevel(data.level);
+        setXp(adjustedXp);
+        setAuraPoints(data.auraPoints);
+      })
+      .catch((err) => console.error("Failed to fetch profile data:", err));
+  }, [session]);
 
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                console.log("Fetched profile data:", data);
-
-                // Ensure xp is between 0 and 100 by dividing by 10 if it's above 100
-                const adjustedXp = data.xp > 100 ? data.xp / 10 : data.xp;
-
-                setLevel(data.level);
-                setXp(adjustedXp);
-            } catch (error) {
-                console.error("Failed to fetch profile data:", error);
-            }
-        };
-
-        if (session) {
-            getProfile();
-        }
-    }, [session]);
-
-    return <LevelProgress level={level} xp={xp} />;
+  return <LevelProgress level={level} xp={xp} auraPoints={auraPoints} />;
 };
 
 export default LevelProgressContainer;

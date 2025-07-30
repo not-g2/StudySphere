@@ -1,210 +1,264 @@
+// app/(protected)/groups/page.tsx (or wherever your dashboard lives)
 "use client";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-    Box,
-    Grid,
-    Card,
-    CardContent,
-    Typography,
-    Button,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  IconButton,
+  Skeleton,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { keyframes } from "@mui/system";
 import { useRouter } from "next/navigation";
+import AddIcon from "@mui/icons-material/Add";
 import useSessionCheck from "../../hooks/auth";
 import GroupCodePopup from "@/components/Group/GroupCodePopup";
 import CreateGroupPopup from "@/components/Group/CreateGroupPopup";
 
 type Session = {
-    user: {
-        id: string;
-        token: string;
-    };
-    email: string;
-    isAdmin: boolean;
+  user: { id: string; token: string };
+  email: string;
+  isAdmin: boolean;
 };
 
 interface Group {
-    _id: string;
-    name: string;
+  _id: string;
+  name: string;
 }
 
-const GroupsDashboard = () => {
-    const PORT = process.env.NEXT_PUBLIC_PORT;
-    const router = useRouter();
-    const [session, setSession] = useState<Session | null>(null);
-    const [groups, setGroups] = useState<Group[]>([]);
-    const [openJoinPopup, setOpenJoinPopup] = useState(false);
-    const [openCreatePopup, setOpenCreatePopup] = useState(false);
+// Fade-in-up animation
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
 
-    useSessionCheck(setSession);
+// Same gradients array as Courses page
+const gradients = [
+  "linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%)",
+  "linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%)",
+  "linear-gradient(135deg, #c0c0aa 0%, #1cefff 100%)",
+  "linear-gradient(135deg, #7f7fd5 0%, #86a8e7 50%, #91eae4 100%)",
+  "linear-gradient(135deg, #1c92d2 0%, #f2fcfe 100%)",
+];
 
-    const fetchGroups = async () => {
-        if (session) {
-            try {
-                console.log(session.user.token);
-                console.log(PORT);
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/groups/allusergrps`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                        method: "GET",
-                    }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(data);
-                    // data.usergrp is expected to be an array of objects, each with _id and name
-                    setGroups(data.usergrp);
-                } else {
-                    console.error("Failed to fetch groups");
-                }
-            } catch (error) {
-                console.error("Error fetching groups:", error);
-            }
+interface GroupCardProps {
+  group: Group;
+  index: number;
+  onClick: (id: string) => void;
+}
+
+const GroupCard: React.FC<GroupCardProps> = ({ group, index, onClick }) => {
+  const bg = gradients[index % gradients.length];
+  return (
+    <Grid
+      item
+      xs={12}
+      sm={6}
+      md={4}
+      lg={3}
+      display="flex"
+      justifyContent="center"
+    >
+      <Card
+        onClick={() => onClick(group._id)}
+        sx={{
+          width: "100%",
+          height: 200,
+          cursor: "pointer",
+          background: bg,
+          opacity: 0,
+          animation: `${fadeInUp} 0.5s ease forwards`,
+          animationDelay: `${index * 0.2}s`,
+        }}
+      >
+        <CardContent
+          sx={{
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: "bold", color: "black", textAlign: "center" }}
+          >
+            {group.name}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+};
+
+const GroupsDashboard: React.FC = () => {
+  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openJoin, setOpenJoin] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
+
+  useSessionCheck(setSession);
+
+  // fetchGroups pulled out so we can call it whenever we actually join/create
+  const fetchGroups = useCallback(async () => {
+    if (!session) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/groups/allusergrps`,
+        {
+          headers: { Authorization: `Bearer ${session.user.token}` },
         }
-    };
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setGroups(data.usergrp);
+      }
+    } catch (err) {
+      console.error("Error fetching groups:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [session]);
 
-    useEffect(() => {
-        fetchGroups();
-    }, [session, openJoinPopup, openCreatePopup]);
+  // only run on mount / when session becomes available
+  useEffect(() => {
+    fetchGroups();
+  }, [fetchGroups]);
 
-    const handleGroupClick = (groupId: string) => {
-        // Navigate to the group details page using the group's _id
-        router.push(`/group/${groupId}`);
-    };
+  const handleGroupClick = (id: string) => {
+    router.push(`/group/${id}`);
+  };
 
-    const handleJoinGroup = async (groupCode: string) => {
-        if (session) {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/groups/joingroup/${groupCode}`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("Error joining group:", errorData);
-                }
-            } catch (error) {
-                console.error("Network error joining group:", error);
-            }
+  const handleJoin = async (code: string) => {
+    if (!session) return;
+    setOpenJoin(false);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/groups/joingroup/${code}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.user.token}`,
+          },
         }
-    };
+      );
+      if (res.ok) {
+        await fetchGroups(); // refresh after join
+      }
+    } catch (err) {
+      console.error("Error joining group:", err);
+    }
+  };
 
-    const handleCreateGroup = async (groupName: string) => {
-        if (session) {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/groups/create`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                        body: JSON.stringify({ name: groupName }),
-                    }
-                );
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("Error creating group:", errorData);
-                }
-            } catch (error) {
-                console.error("Network error creating group:", error);
-            }
+  const handleCreate = async (name: string) => {
+    if (!session) return;
+    setOpenCreate(false);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/groups/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.user.token}`,
+          },
+          body: JSON.stringify({ name }),
         }
-    };
+      );
+      if (res.ok) {
+        await fetchGroups(); // refresh after create
+      }
+    } catch (err) {
+      console.error("Error creating group:", err);
+    }
+  };
 
-    return (
-        <div className="bg-[#001D3D] h-full">
-            <Box
-                className="bg-c2 text-white p-4 flex flex-col items-center"
-                sx={{ minHeight: "100vh", width: "100vw" }}
+  return (
+    <div className="bg-gray-200 min-h-screen">
+      <Box
+        className="bg-gray-200 text-black p-4 flex flex-col items-start"
+        sx={{ width: "100vw" }}
+      >
+        {/* Header */}
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ width: "100%", px: 4, mb: 4 }}
+        >
+          <Typography variant="h4" sx={{ m: 0, lineHeight: 1.2 }}>
+            Your Groups
+          </Typography>
+          <Box>
+            <Button variant="contained" sx={{ mr: 2 }} onClick={() => setOpenJoin(true)}>
+              Join Group
+            </Button>
+            <IconButton
+              onClick={() => setOpenCreate(true)}
+              sx={{
+                bgcolor: "secondary.main",
+                color: "white",
+                "&:hover": { bgcolor: "secondary.dark" },
+              }}
             >
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{ width: "100vw", mb: 4 }}
-                >
-                    <Typography variant="h4" className="mt-2 mb-4">
-                        Your Groups
-                    </Typography>
-                    <Box>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => setOpenJoinPopup(true)}
-                            sx={{ mr: 2 }}
-                        >
-                            Join Group
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={() => setOpenCreatePopup(true)}
-                        >
-                            Create Group
-                        </Button>
-                    </Box>
-                </Box>
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* Cards / Skeletons */}
+        <Grid container spacing={4} sx={{ flexGrow: 1, px: 4 }}>
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => (
                 <Grid
-                    container
-                    spacing={4}
-                    justifyContent="flex-start"
-                    sx={{ flexGrow: 1 }}
+                  key={i}
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  display="flex"
+                  justifyContent="center"
                 >
-                    {groups.map((group) => (
-                        <Grid
-                            item
-                            key={group._id}
-                            xs={12}
-                            sm={6}
-                            md={4}
-                            lg={3}
-                            display="flex"
-                            justifyContent="center"
-                        >
-                            <Card
-                                className="bg-c5 text-white"
-                                sx={{
-                                    width: "100%",
-                                    height: "200px",
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => handleGroupClick(group._id)}
-                            >
-                                <CardContent>
-                                    <Typography
-                                        variant="h5"
-                                        sx={{ fontWeight: "bold" }}
-                                    >
-                                        {group.name}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
+                  <Skeleton
+                    variant="rectangular"
+                    width="100%"
+                    height={200}
+                    animation="wave"
+                  />
                 </Grid>
-                <GroupCodePopup
-                    open={openJoinPopup}
-                    handleClose={() => setOpenJoinPopup(false)}
-                    onJoinGroup={handleJoinGroup}
+              ))
+            : groups.map((g, idx) => (
+                <GroupCard
+                  key={g._id}
+                  group={g}
+                  index={idx}
+                  onClick={handleGroupClick}
                 />
-                <CreateGroupPopup
-                    open={openCreatePopup}
-                    handleClose={() => setOpenCreatePopup(false)}
-                    onCreateGroup={handleCreateGroup}
-                />
-            </Box>
-        </div>
-    );
+              ))}
+        </Grid>
+
+        {/* Popups */}
+        <GroupCodePopup
+          open={openJoin}
+          handleClose={() => setOpenJoin(false)}
+          onJoinGroup={handleJoin}
+        />
+        <CreateGroupPopup
+          open={openCreate}
+          handleClose={() => setOpenCreate(false)}
+          onCreateGroup={handleCreate}
+        />
+      </Box>
+    </div>
+  );
 };
 
 export default GroupsDashboard;

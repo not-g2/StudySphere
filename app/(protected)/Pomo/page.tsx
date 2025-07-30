@@ -32,7 +32,7 @@ export default function PomodoroTimer() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-top bg-gray-900 text-white h-screen w-full">
+        <div className="flex flex-col items-center justify-top bg-white text-black h-screen w-full">
             <div className="flex flex-col items-center">
                 {tag === "Default" && !isRunning ? (
                     <TagInput
@@ -44,7 +44,7 @@ export default function PomodoroTimer() {
                     />
                 ) : (
                     <p
-                        className="mt-10 mb-10 rounded-lg text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] w-60 h-10 text-lg text-center flex items-center justify-center border-4 border-[#202E4B]"
+                        className="mt-10 mb-10 rounded-lg text-black drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] w-60 h-10 text-lg text-center flex items-center justify-center border-4 border-[#202E4B]"
                         onClick={() => {
                             if (!isRunning) setTag("Default");
                         }}
@@ -95,7 +95,7 @@ export default function PomodoroTimer() {
                         )}
                 </div>
                 <span
-                    className={`text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-500 ease-out ${
+                    className={`text-black drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all duration-500 ease-out ${
                         isRunning ? "translate-y-8" : ""
                     }`}
                 >
@@ -110,8 +110,8 @@ export default function PomodoroTimer() {
                     }}
                     className={
                         !isRunning
-                            ? `bg-green-500 px-4 py-2 rounded text-white`
-                            : "bg-gray-600 px-4 py-2 rounded text-gray-400 cursor-not-allowed"
+                            ? `bg-green-500 px-4 py-2 rounded text-black`
+                            : "bg-gray-900 px-4 py-2 rounded text-gray-400 cursor-not-allowed"
                     }
                 >
                     Start
@@ -122,7 +122,7 @@ export default function PomodoroTimer() {
                     }}
                     className={
                         isRunning
-                            ? "bg-yellow-500 px-4 py-2 rounded text-white"
+                            ? "bg-yellow-500 px-4 py-2 rounded text-black"
                             : "bg-gray-600 px-4 py-2 rounded text-gray-400 cursor-not-allowed"
                     }
                 >
@@ -133,7 +133,7 @@ export default function PomodoroTimer() {
                         Reset();
                         setTaginput("");
                     }}
-                    className="bg-red-500 px-4 py-2 rounded text-white"
+                    className="bg-red-500 px-4 py-2 rounded text-black"
                 >
                     Reset
                 </button>

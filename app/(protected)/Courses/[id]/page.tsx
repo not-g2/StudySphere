@@ -1,6 +1,8 @@
+// app/(protected)/Courses/[id]/page.tsx (DashboardPage.tsx)
 "use client";
+
 import { Typography, Grid, Box } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Cookies from "js-cookie";
 import { useRouter, useParams } from "next/navigation";
 
@@ -12,227 +14,209 @@ import AnnouncementPopup from "@/components/announcmentpopup";
 import AssignmentPopup from "@/components/assignmentpopup";
 import { Announcement } from "@/types/announcements";
 import { Assignment } from "@/types/assignment";
+
 interface Chapter {
-    _id: number;
-    title: string;
-    createdAt: string;
-    chapterPdf: string;
+  _id: number;
+  title: string;
+  createdAt: string;
+  chapterPdf: string;
 }
 
 type Session = {
-    user: {
-        id: string;
-        token: string;
-    };
-    email: string;
-    isAdmin: boolean;
+  user: {
+    id: string;
+    token: string;
+  };
+  email: string;
+  isAdmin: boolean;
 };
 
 const DashboardPage = () => {
-    const [open, setOpen] = useState(false);
-    const [openAssm, setOpenAssm] = useState(false);
-    const [currentAnnouncement, setCurrentAnnouncement] =
-        useState<Announcement | null>(null);
-    const [currentAssignment, setCurrentAssignment] =
-        useState<Assignment | null>(null);
-    const [assignments, setassignments] = useState<Assignment[]>([]);
-    const [announcements, setannouncements] = useState<Announcement[]>([]);
-    const [chapters, setchapters] = useState<Chapter[]>([]);
-    const [submissions, setSubmissions] = useState<any[]>([]);
-    const [assignmentsLoading, setAssignmentsLoading] = useState(true);
-    const [submissionsLoading, setSubmissionsLoading] = useState(true);
-    const [session, setSession] = useState<Session | null>(null);
-    const router = useRouter();
-    const params = useParams();
-    const courseID = params.id;
+  // 1) Define the palette of dark gradients
+  const gradientOptions = [
+    "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
+    "linear-gradient(120deg, #232526 0%, #414345 100%)",
+    "radial-gradient(circle at top left, #0f0c29, #302b63, #24243e)",
+    "linear-gradient(200deg, #1f1c2c 0%, #928dab 100%)",
+  ];
 
-    const handleAnnouncementClick = (announcement: Announcement) => {
-        setCurrentAnnouncement(announcement);
-        setOpen(true);
-    };
+  // 2) Pick one gradient once on component mount:
+  const bannerGradient = useMemo(
+    () =>
+      gradientOptions[
+        Math.floor(Math.random() * gradientOptions.length)
+      ],
+    []
+  );
 
-    const handleAssignmentClick = (assignment: Assignment) => {
-        setCurrentAssignment(assignment);
-        setOpenAssm(true);
-    };
+  const [open, setOpen] = useState(false);
+  const [openAssm, setOpenAssm] = useState(false);
+  const [currentAnnouncement, setCurrentAnnouncement] = useState<Announcement | null>(null);
+  const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
+  const [submissionsLoading, setSubmissionsLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
 
-    const handleCloseAnnouncement = () => {
-        setOpen(false);
-        setCurrentAnnouncement(null);
-    };
+  const router = useRouter();
+  const params = useParams();
+  const courseID = params.id as string;
 
-    const handleCloseAssignment = () => {
-        setOpenAssm(false);
-        setCurrentAssignment(null);
-    };
+  const handleAnnouncementClick = (announcement: Announcement) => {
+    setCurrentAnnouncement(announcement);
+    setOpen(true);
+  };
 
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            const sessionData: string | undefined = Cookies.get("session");
+  const handleAssignmentClick = (assignment: Assignment) => {
+    setCurrentAssignment(assignment);
+    setOpenAssm(true);
+  };
 
-            if (sessionData && !session) {
-                setSession(JSON.parse(sessionData));
-            } else if (!sessionData) {
-                router.push("/auth/signin");
-            }
+  const handleCloseAnnouncement = () => {
+    setOpen(false);
+    setCurrentAnnouncement(null);
+  };
 
-            if (session) {
-                const token = session.user.token;
+  const handleCloseAssignment = () => {
+    setOpenAssm(false);
+    setCurrentAssignment(null);
+  };
 
-                // Fetch assignments
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/assgn/course/${courseID}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            method: "GET",
-                        }
-                    );
-                    if (response.ok) {
-                        const data = await response.json();
-                        setassignments(data);
-                    } else {
-                        console.error("Failed to get Assignment details");
-                    }
-                } catch (error) {
-                    console.error("Error getting Assignment Details:", error);
-                } finally {
-                    setAssignmentsLoading(false);
-                }
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const sessionData = Cookies.get("session");
+      if (sessionData && !session) {
+        setSession(JSON.parse(sessionData));
+      } else if (!sessionData) {
+        router.push("/auth/signin");
+        return;
+      }
 
-                // Fetch announcements
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/announce/${courseID}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            method: "GET",
-                        }
-                    );
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log(data);
-                        setannouncements(data);
-                    } else {
-                        console.error("Failed to get Announcement details");
-                    }
-                } catch (error) {
-                    console.error("Error getting Announcement Details:", error);
-                }
+      if (!session) return;
+      const token = session.user.token;
 
-                // Fetch chapters
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/chapter/get/${courseID}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            method: "GET",
-                        }
-                    );
-                    if (response.ok) {
-                        const data = await response.json();
-                        setchapters(data);
-                    } else {
-                        console.error("Failed to get Chapter details");
-                    }
-                } catch (error) {
-                    console.error("Error getting Chapter Details:", error);
-                }
-
-                // Fetch submissions
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/submissions/submissions/${session.user.id}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            method: "GET",
-                        }
-                    );
-                    if (response.ok) {
-                        const data = await response.json();
-                        setSubmissions(data);
-                        console.log(data, response);
-                    } else {
-                        console.error("Failed to get Submission details");
-                    }
-                } catch (error) {
-                    console.error("Error getting Submission Details:", error);
-                } finally {
-                    setSubmissionsLoading(false);
-                }
-            }
-        };
-
-        fetchDashboardData();
-    }, [session]);
-
-    const isSubmitted = (assignmentId: number) => {
-        console.log(submissions);
-        return submissions.some(
-            (submission) =>
-                submission.assignmentId._id === assignmentId &&
-                submission.status === "submitted"
+      // assignments
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/assgn/course/${courseID}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+        if (res.ok) setAssignments(await res.json());
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setAssignmentsLoading(false);
+      }
+
+      // announcements
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/announce/${courseID}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) setAnnouncements(await res.json());
+      } catch (err) {
+        console.error(err);
+      }
+
+      // chapters
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/chapter/get/${courseID}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) setChapters(await res.json());
+      } catch (err) {
+        console.error(err);
+      }
+
+      // submissions
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/submissions/submissions/${session.user.id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) setSubmissions(await res.json());
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setSubmissionsLoading(false);
+      }
     };
 
-    return (
-        <Box
-            className="bg-c2"
-            sx={{
-                minHeight: "100vh",
-                display: "flex",
-                flexDirection: "column",
-                padding: 4,
-            }}
-        >
-            <Banner
-                courseTitle="Mathematics"
-                bannerImage="/mbanner.png"
-                professorImage="/teach1.jpg"
-            />
-            <Grid container spacing={4} mt={2} sx={{ flex: 1 }}>
-                <Grid item xs={12} md={8}>
-                    {assignmentsLoading ? (
-                        <Typography style={{ color: "#fff" }}>
-                            Loading assignments...
-                        </Typography>
-                    ) : assignments.length > 0 ? (
-                        <AssignmentsList
-                            assignments={assignments}
-                            submissionsLoading={submissionsLoading}
-                            isSubmitted={isSubmitted}
-                            onAssignmentClick={handleAssignmentClick}
-                        />
-                    ) : (
-                        <Typography style={{ color: "#fff" }}>
-                            No assignments available
-                        </Typography>
-                    )}
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <AnnouncementsList
-                        announcements={announcements}
-                        onAnnouncementClick={handleAnnouncementClick}
-                    />
-                    <Box sx={{ marginTop: 10 }}>
-                        <ChaptersList chapters={chapters} />
-                    </Box>
-                </Grid>
-            </Grid>
+    fetchDashboardData();
+  }, [session, courseID, router]);
 
-            <AnnouncementPopup
-                open={open}
-                handleClose={handleCloseAnnouncement}
-                announcement={currentAnnouncement}
-            />
-            <AssignmentPopup
-                open={openAssm}
-                handleClose={handleCloseAssignment}
-                assignment={currentAssignment}
-                studentId={session?.user.id}
-            />
-        </Box>
+  const isSubmitted = (assignmentId: number) =>
+    submissions.some(
+      (sub) =>
+        sub.assignmentId._id === assignmentId && sub.status === "submitted"
     );
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: "#f7f7f7",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        padding: 4,
+      }}
+    >
+      {/* pass the one‑time random gradient */}
+      <Banner
+        courseTitle={courseID}
+        gradient={bannerGradient}
+        professorImage="/teach1.jpg"
+      />
+
+      <Grid container spacing={4} mt={2} sx={{ flex: 1 }}>
+        <Grid item xs={12} md={8}>
+          {assignmentsLoading ? (
+            <Typography style={{ color: "#000" }}>
+              Loading assignments...
+            </Typography>
+          ) : assignments.length > 0 ? (
+            <AssignmentsList
+              assignments={assignments}
+              submissionsLoading={submissionsLoading}
+              isSubmitted={isSubmitted}
+              onAssignmentClick={handleAssignmentClick}
+            />
+          ) : (
+            <Typography style={{ color: "#000" }}>
+              No assignments available
+            </Typography>
+          )}
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <AnnouncementsList
+            announcements={announcements}
+            onAnnouncementClick={handleAnnouncementClick}
+          />
+          <Box sx={{ marginTop: 10 }}>
+            <ChaptersList chapters={chapters} />
+          </Box>
+        </Grid>
+      </Grid>
+
+      <AnnouncementPopup
+        open={open}
+        handleClose={handleCloseAnnouncement}
+        announcement={currentAnnouncement}
+      />
+      <AssignmentPopup
+        open={openAssm}
+        handleClose={handleCloseAssignment}
+        assignment={currentAssignment}
+        studentId={session?.user.id}
+      />
+    </Box>
+  );
 };
 
 export default DashboardPage;

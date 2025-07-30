@@ -1,361 +1,307 @@
+// components/TodoList.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
+import {
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Checkbox,
+  Collapse,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  DialogActions,
+  Button,
+} from "@mui/material";
+import { lighten } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 
 interface Goal {
-    _id: string;
-    name: string;
-    endDate: string;
+  _id: string;
+  name: string;
+  endDate: string;
 }
 
 const headerBgColor = "#3f51b5";
 const headerTextColor = "#fff";
 
-const GoalTable: React.FC = () => {
-    const [goals, setGoals] = useState<Goal[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [session, setSession] = useState<any>(null);
-    const [completedGoals, setCompletedGoals] = useState<string[]>([]);
-    const [fadedGoals, setFadedGoals] = useState<string[]>([]);
-    const router = useRouter();
+export default function TodoList() {
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [session, setSession] = useState<any>(null);
+  const [completedGoals, setCompletedGoals] = useState<string[]>([]);
+  const [fadedGoals, setFadedGoals] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEndDate, setNewEndDate] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [addingError, setAddingError] = useState<string | null>(null);
+  const router = useRouter();
 
-    // For new goal dialog
-    const [open, setOpen] = useState(false);
-    const [newName, setNewName] = useState("");
-    const [newEndDate, setNewEndDate] = useState("");
-    const [addingError, setAddingError] = useState<string | null>(null);
+  // Constants for visible items
+  const VISIBLE_ITEMS = 4;
+  const ITEM_HEIGHT = 64;   // px
+  const ITEM_MARGIN = 8;    // px
+  const CONTAINER_HEIGHT =
+    VISIBLE_ITEMS * ITEM_HEIGHT + (VISIBLE_ITEMS - 1) * ITEM_MARGIN;
 
-    // Retrieve session from cookies and handle redirection
-    useEffect(() => {
-        const sessionData = Cookies.get("session");
-        if (sessionData) {
-            setSession(JSON.parse(sessionData));
-        } else {
-            router.push("/auth/signin");
-        }
-    }, [router]);
+  // Retrieve session or redirect to sign-in
+  useEffect(() => {
+    const s = Cookies.get("session");
+    if (s) setSession(JSON.parse(s));
+    else router.push("/auth/signin");
+  }, [router]);
 
-    // Fetch goals when session changes
-    useEffect(() => {
-        const fetchGoals = async () => {
-            if (session?.user?.token) {
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/goals/`,
-                        {
-                            method: "GET",
-                            headers: {
-                                Authorization: `Bearer ${session.user.token}`,
-                            },
-                        }
-                    );
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch goals");
-                    }
-                    const data = await response.json();
-                    const formattedGoals = data.map((goal: any) => ({
-                        _id: goal._id,
-                        name: goal.title,
-                        endDate: goal.dueDate,
-                    }));
-                    // Sort goals by endDate descending (most recent first)
-                    formattedGoals.sort(
-                        (a: Goal, b: Goal) =>
-                            new Date(b.endDate).getTime() -
-                            new Date(a.endDate).getTime()
-                    );
-                    setGoals(formattedGoals);
-                } catch (err) {
-                    console.error(err);
-                    setError("Failed to fetch goals. Please try again.");
-                }
-            }
-        };
-        fetchGoals();
-    }, [session]);
-
-    // Delete goal by ID (calls API)
-    const deleteGoal = async (id: string) => {
-        if (session?.user?.token) {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/goals/${id}`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    throw new Error("Failed to delete goal");
-                }
-            } catch (err) {
-                console.error(err);
-                setError("Failed to delete goal. Please try again.");
-            }
-        }
+  // Fetch goals from API
+  useEffect(() => {
+    const fetchGoals = async () => {
+      if (!session?.user?.token) return;
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/goals/`, {
+          headers: { Authorization: `Bearer ${session.user.token}` },
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const formatted = data
+          .map((g: any) => ({
+            _id: g._id,
+            name: g.title,
+            endDate: g.dueDate,
+          }))
+          .sort(
+            (a, b) =>
+              new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+          );
+        setGoals(formatted);
+      } catch {
+        setError("Could not load your goals.");
+      }
     };
+    fetchGoals();
+  }, [session]);
 
-    // When a checkbox is checked, strike-through the goal, fade it out, then delete it.
-    const handleCheckboxChange = (goalId: string, checked: boolean) => {
-        if (checked) {
-            setCompletedGoals((prev) => [...prev, goalId]);
-            setTimeout(() => {
-                setFadedGoals((prev) => [...prev, goalId]);
-            }, 100);
-            setTimeout(() => {
-                deleteGoal(goalId);
-                setGoals((prevGoals) =>
-                    prevGoals.filter((goal) => goal._id !== goalId)
-                );
-            }, 1000); // Delay to allow fade-out transition
+  // Delete goal on server + local state
+  const deleteGoal = async (id: string) => {
+    if (!session?.user?.token) return;
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/goals/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${session.user.token}` },
         }
-    };
+      );
+      if (!res.ok) throw new Error();
+    } catch {
+      setError("Failed to delete. Try again.");
+    }
+  };
 
-    // Handle opening and closing the dialog
-    const handleOpenDialog = () => {
-        setOpen(true);
-    };
+  // Handle checkbox: strike, fade, then delete
+  const handleCheckboxChange = (id: string, checked: boolean) => {
+    if (!checked) return;
+    setCompletedGoals((p) => [...p, id]);
+    setTimeout(() => setFadedGoals((p) => [...p, id]), 100);
+    setTimeout(() => {
+      deleteGoal(id);
+      setGoals((g) => g.filter((x) => x._id !== id));
+    }, 1000);
+  };
 
-    const handleCloseDialog = () => {
-        setOpen(false);
-        setNewName("");
-        setNewEndDate("");
-        setAddingError(null);
-    };
+  // Dialog open/close
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    setNewName("");
+    setNewEndDate("");
+    setAddingError(null);
+  };
 
-    // Handle adding a new goal
-    const handleAddNewGoal = async () => {
-        if (!newName || !newEndDate) {
-            setAddingError("Please fill out both fields.");
-            return;
-        }
-        try {
-            const newGoal = {
-                title: newName,
-                description: newName,
-                dueDate: newEndDate,
-            };
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_URL}/api/goals/`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session?.user.token}`,
-                    },
-                    body: JSON.stringify(newGoal),
-                }
-            );
-            if (!response.ok) {
-                throw new Error("Failed to add goal");
-            }
-            const savedGoal = await response.json();
-            setGoals((prevGoals) => [
-                ...prevGoals,
-                {
-                    _id: savedGoal._id,
-                    name: savedGoal.title,
-                    endDate: savedGoal.dueDate,
-                },
-            ]);
-            // Re-sort after adding new goal
-            setGoals((prevGoals) =>
-                [...prevGoals].sort(
-                    (a, b) =>
-                        new Date(b.endDate).getTime() -
-                        new Date(a.endDate).getTime()
-                )
-            );
-            handleCloseDialog();
-        } catch (err) {
-            console.error(err);
-            setAddingError("Failed to add goal. Please try again.");
-        }
-    };
+  // Add new goal
+  const handleAdd = async () => {
+    if (!newName || !newEndDate) {
+      setAddingError("Both fields are required.");
+      return;
+    }
+    try {
+      const body = {
+        title: newName,
+        description: newName,
+        dueDate: newEndDate,
+      };
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/goals/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.user.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      const saved = await res.json();
+      setGoals((g) =>
+        [...g, { _id: saved._id, name: saved.title, endDate: saved.dueDate }]
+          .sort(
+            (a, b) =>
+              new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+          )
+      );
+      handleClose();
+    } catch {
+      setAddingError("Could not save. Try again.");
+    }
+  };
 
-    return (
-        <>
-            {/* Set maxHeight so that the table scrolls when there are more than 7 rows */}
-            <TableContainer component={Paper} style={{ maxHeight: "420px" }}>
-                {/* Add stickyHeader to keep the headers visible on scroll */}
-                <Table stickyHeader>
-                    <TableHead>
-                        {/* First header row: Goals title and plus icon in one row */}
-                        <TableRow>
-                            <TableCell
-                                colSpan={2}
-                                style={{
-                                    backgroundColor: headerBgColor,
-                                    padding: "8px 16px",
-                                }}
-                            >
-                                <Typography
-                                    variant="h6"
-                                    style={{
-                                        color: headerTextColor,
-                                        margin: 0,
-                                    }}
-                                >
-                                    Goals
-                                </Typography>
-                            </TableCell>
-                            <TableCell
-                                style={{
-                                    backgroundColor: headerBgColor,
-                                    padding: "8px 16px",
-                                    textAlign: "center",
-                                }}
-                            >
-                                <IconButton
-                                    onClick={handleOpenDialog}
-                                    size="small"
-                                >
-                                    <AddIcon
-                                        style={{ color: headerTextColor }}
-                                    />
-                                </IconButton>
-                            </TableCell>
-                        </TableRow>
-                        {/* Second header row: column labels */}
-                        <TableRow>
-                            <TableCell
-                                style={{
-                                    width: "33%",
-                                    backgroundColor: headerBgColor,
-                                    color: headerTextColor,
-                                }}
-                            >
-                                <Typography variant="subtitle2">
-                                    Completed
-                                </Typography>
-                            </TableCell>
-                            <TableCell
-                                style={{
-                                    width: "33%",
-                                    backgroundColor: headerBgColor,
-                                    color: headerTextColor,
-                                }}
-                            >
-                                <Typography variant="subtitle2">
-                                    Goal Name
-                                </Typography>
-                            </TableCell>
-                            <TableCell
-                                style={{
-                                    width: "33%",
-                                    backgroundColor: headerBgColor,
-                                    color: headerTextColor,
-                                    textAlign: "center",
-                                }}
-                            >
-                                <Typography variant="subtitle2">
-                                    End Date
-                                </Typography>
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {goals.map((goal) => (
-                            <TableRow
-                                key={goal._id}
-                                style={{
-                                    opacity: fadedGoals.includes(goal._id)
-                                        ? 0
-                                        : 1,
-                                    transition: "opacity 1s ease",
-                                }}
-                            >
-                                <TableCell>
-                                    <Checkbox
-                                        onChange={(e) =>
-                                            handleCheckboxChange(
-                                                goal._id,
-                                                e.target.checked
-                                            )
-                                        }
-                                        color="primary"
-                                    />
-                                </TableCell>
-                                <TableCell
-                                    style={{
-                                        textDecoration: completedGoals.includes(
-                                            goal._id
-                                        )
-                                            ? "line-through"
-                                            : "none",
-                                    }}
-                                >
-                                    {goal.name}
-                                </TableCell>
-                                <TableCell style={{ textAlign: "center" }}>
-                                    {new Date(
-                                        goal.endDate
-                                    ).toLocaleDateString()}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+  return (
+    <Paper
+      sx={{
+        maxWidth: 600,
+        mx: "auto",
+        p: 2,
+        bgcolor: headerBgColor,
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h5" sx={{ color: headerTextColor }}>
+          My To-Do List
+        </Typography>
+        <IconButton onClick={handleOpen} sx={{ color: headerTextColor }}>
+          <AddIcon />
+        </IconButton>
+      </Box>
 
-            {/* Dialog for adding new goal */}
-            <Dialog open={open} onClose={handleCloseDialog}>
-                <DialogTitle>Add New Goal</DialogTitle>
-                <DialogContent>
-                    {addingError && (
-                        <Typography color="error">{addingError}</Typography>
-                    )}
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Goal Name"
-                        type="text"
-                        fullWidth
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
+      {error && (
+        <Typography color="error" align="center" mb={2}>
+          {error}
+        </Typography>
+      )}
+
+      {/* Scrollable container (4 items tall) with hidden scrollbar */}
+      <Box
+         sx={{
+            height: CONTAINER_HEIGHT,
+            overflowY: "auto",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",  // <-- camelCase
+          }}
+      >
+        <List disablePadding>
+          {goals.map((goal, idx) => {
+            const shadeFactor =
+              0.15 + (idx / (goals.length - 1 || 1)) * 0.3;
+            return (
+              <Collapse
+                key={goal._id}
+                in={!fadedGoals.includes(goal._id)}
+                timeout={1000}
+                unmountOnExit
+              >
+                <ListItem
+                  sx={{
+                    bgcolor: lighten(headerBgColor, shadeFactor),
+                    borderRadius: 1,
+                    mb: 1,
+                    height: ITEM_HEIGHT,
+                  }}
+                >
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) =>
+                        handleCheckboxChange(goal._id, e.target.checked)
+                      }
+                      sx={{
+                        color: headerTextColor,
+                        "&.Mui-checked": { color: headerTextColor },
+                      }}
                     />
-                    <TextField
-                        margin="dense"
-                        label="End Date"
-                        type="date"
-                        fullWidth
-                        InputLabelProps={{ shrink: true }}
-                        value={newEndDate}
-                        onChange={(e) => setNewEndDate(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleAddNewGoal} color="primary">
-                        Add Goal
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </>
-    );
-};
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={goal.name}
+                    secondary={new Date(goal.endDate).toLocaleDateString()}
+                    primaryTypographyProps={{
+                      sx: {
+                        color: headerTextColor,
+                        textDecoration: completedGoals.includes(goal._id)
+                          ? "line-through"
+                          : "none",
+                      },
+                    }}
+                    secondaryTypographyProps={{
+                      sx: { color: headerTextColor },
+                    }}
+                  />
+                </ListItem>
+              </Collapse>
+            );
+          })}
+        </List>
+      </Box>
 
-export default GoalTable;
+      {/* Add-Task Dialog */}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Add New Task</DialogTitle>
+        <DialogContent>
+          {addingError && <Typography color="error">{addingError}</Typography>}
+          <Box
+            component="form"
+            sx={{
+              mt: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            <TextField
+              label="Task Name"
+              fullWidth
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <TextField
+              label="Due Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              value={newEndDate}
+              onChange={(e) => setNewEndDate(e.target.value)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleAdd}
+            sx={{
+              bgcolor: headerBgColor,
+              color: headerTextColor,
+              "&:hover": { bgcolor: headerBgColor },
+            }}
+          >
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
+}

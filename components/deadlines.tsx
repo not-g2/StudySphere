@@ -1,193 +1,153 @@
+// components/DeadlinesList.tsx
 "use client";
+
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Typography,
-    Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Tooltip,
 } from "@mui/material";
-import { headers } from "next/headers";
+import { lighten } from "@mui/material/styles";
 
 type Deadline = {
-    id: number | string;
-    name: string;
-    date: string;
-    course: string;
+  id: number | string;
+  name: string;
+  date: string;
+  course: string;
 };
 
-function DeadlinesList() {
-    const [deadlines, setDeadlines] = useState<Deadline[]>([]);
+export default function DeadlinesList() {
+  const [deadlines, setDeadlines] = useState<Deadline[]>([]);
 
-    // Helper function to calculate days left until the deadline
-    const calculateDaysLeft = (deadlineDate: string): number => {
-        const now = new Date();
-        const due = new Date(deadlineDate);
-        const diffTime = due.getTime() - now.getTime();
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  // Constants for fixed two‑row height
+  const VISIBLE_ITEMS = 2;
+  const ROW_HEIGHT = 56;          // px per row
+  const HEADER_ROWS = 1;          // only title row now
+  const HEADER_ROW_HEIGHT = 48;   // px per header row
+  const CONTAINER_HEIGHT =
+    HEADER_ROWS * HEADER_ROW_HEIGHT + VISIBLE_ITEMS * ROW_HEIGHT;
+
+  const baseColor = "#1976d2";
+
+  const calculateDaysLeft = (deadlineDate: string) => {
+    const now = new Date();
+    const due = new Date(deadlineDate);
+    const diff = due.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  useEffect(() => {
+    const fetchDeadlines = async () => {
+      try {
+        const sessionData = Cookies.get("session");
+        if (!sessionData) return;
+        const session = JSON.parse(sessionData);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/users/${session.user.id}/deadlines`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.user.token}`,
+            },
+          }
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const formatted = data.deadlines
+          .map((d: any) => ({
+            id: d.id || `${d.assignmentTitle}-${d.dueDate}`,
+            name: d.assignmentTitle,
+            date: d.dueDate,
+            course: d.courseName,
+          }))
+          .sort(
+            (a: Deadline, b: Deadline) =>
+              new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+        setDeadlines(formatted);
+      } catch {
+        // silent
+      }
     };
+    fetchDeadlines();
+  }, []);
 
-    useEffect(() => {
-        const fetchDeadlines = async () => {
-            try {
-                const sessionData = Cookies.get("session");
-                if (!sessionData) {
-                    console.error("No session data found");
-                    return;
-                }
-                const session = JSON.parse(sessionData);
-                const userId = session.user?.id;
-                if (!userId) {
-                    console.error("User ID is missing in session data");
-                    return;
-                }
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/users/${userId}/deadlines`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    const formattedDeadlines = data.deadlines.map(
-                        (deadline: any) => ({
-                            id:
-                                deadline.id ||
-                                `${deadline.assignmentTitle}-${deadline.dueDate}`,
-                            name: deadline.assignmentTitle,
-                            date: deadline.dueDate,
-                            course: deadline.courseName,
-                        })
-                    );
-                    // Sort deadlines by date in increasing order
-                    formattedDeadlines.sort((a: Deadline, b: Deadline) => {
-                        return (
-                            new Date(a.date).getTime() -
-                            new Date(b.date).getTime()
-                        );
-                    });
-                    setDeadlines(formattedDeadlines);
-                } else {
-                    console.error("Failed to fetch deadlines", response.status);
-                }
-            } catch (error) {
-                console.error("Error fetching deadlines:", error);
-            }
-        };
-
-        fetchDeadlines();
-    }, []);
-
-    return (
-        <>
-            <TableContainer
-                component={Paper}
-                style={{
-                    backgroundColor: "#FFFFFF",
-                    overflowX: "hidden",
-                    overflowY: "auto",
-                    maxHeight: "400px", // Increased for 7 rows
-                }}
+  return (
+    <TableContainer
+      component={Paper}
+      sx={{
+        backgroundColor: baseColor,
+        height: `${CONTAINER_HEIGHT}px`,
+        overflowY: "auto",
+        "&::-webkit-scrollbar": { display: "none" },
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",  // <-- use camelCase here!
+      }}
+    >
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell
+              colSpan={2}
+              align="center"
+              sx={{
+                backgroundColor: lighten(baseColor, 0.2),
+                color: "#fff",
+                p: 1,
+              }}
             >
-                <Table>
-                    <TableHead>
-                        {/* Integrated headline as the first header row */}
-                        <TableRow style={{ backgroundColor: "#1976d2" }}>
-                            <TableCell
-                                colSpan={2}
-                                align="center"
-                                style={{
-                                    color: "#FFF",
-                                    fontWeight: "bold",
-                                    padding: "8px",
-                                }}
-                            >
-                                <Typography
-                                    variant="h5"
-                                    component="div"
-                                    style={{ color: "#FFF" }}
-                                >
-                                    Upcoming Deadlines
-                                </Typography>
-                            </TableCell>
-                        </TableRow>
-                        {/* Column headers */}
-                        <TableRow style={{ backgroundColor: "#1976d2" }}>
-                            <TableCell
-                                align="center"
-                                style={{ color: "#FFF", fontWeight: "bold" }}
-                            >
-                                Deadline
-                            </TableCell>
-                            <TableCell
-                                align="center"
-                                style={{ color: "#FFF", fontWeight: "bold" }}
-                            >
-                                Days Left
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {deadlines.map((deadline) => {
-                            const daysLeft = calculateDaysLeft(deadline.date);
-                            return (
-                                <Tooltip
-                                    key={deadline.id}
-                                    title={
-                                        <div>
-                                            <Typography variant="body2">
-                                                <strong>Course:</strong>{" "}
-                                                {deadline.course}
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                <strong>Full Name:</strong>{" "}
-                                                {deadline.name}
-                                            </Typography>
-                                        </div>
-                                    }
-                                    arrow
-                                    placement="top"
-                                >
-                                    <TableRow
-                                        style={{
-                                            transition: "transform 0.2s",
-                                            cursor: "pointer",
-                                        }}
-                                        onMouseEnter={(e) =>
-                                            (e.currentTarget.style.transform =
-                                                "scale(1.02)")
-                                        }
-                                        onMouseLeave={(e) =>
-                                            (e.currentTarget.style.transform =
-                                                "scale(1)")
-                                        }
-                                    >
-                                        <TableCell align="center">
-                                            {deadline.name}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {daysLeft >= 0
-                                                ? daysLeft
-                                                : "Expired"}
-                                        </TableCell>
-                                    </TableRow>
-                                </Tooltip>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </>
-    );
+              <Typography variant="h6" sx={{ color: "#fff", m: 0 }}>
+                Upcoming Deadlines
+              </Typography>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {deadlines.map((d, idx) => {
+            const shadeFactor =
+              0.15 + (idx / (deadlines.length - 1 || 1)) * 0.3;
+            return (
+              <Tooltip
+                key={d.id}
+                title={
+                  <>
+                    <Typography variant="body2">
+                      <strong>Course:</strong> {d.course}
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>Name:</strong> {d.name}
+                    </Typography>
+                  </>
+                }
+                arrow
+                placement="top"
+              >
+                <TableRow
+                  sx={{
+                    backgroundColor: lighten(baseColor, shadeFactor),
+                    height: `${ROW_HEIGHT}px`,
+                  }}
+                >
+                  <TableCell align="center" sx={{ color: "#fff" }}>
+                    {d.name}
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "#fff" }}>
+                    {calculateDaysLeft(d.date) >= 0
+                      ? calculateDaysLeft(d.date)
+                      : "Expired"}
+                  </TableCell>
+                </TableRow>
+              </Tooltip>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
 }
-
-export default DeadlinesList;

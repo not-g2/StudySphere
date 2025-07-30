@@ -108,7 +108,7 @@ const RewardsDisplay = () => {
             paddingLeft={1}
             paddingTop={1}
             margin={0}
-            className="bg-c2"
+            className="bg-white"
             sx={{ width: "100%", height: "100vh" }}
         >
             {data.map((reward, index) => (
@@ -123,7 +123,7 @@ const RewardsDisplay = () => {
                 >
                     <Card
                         onClick={() => handleSubmit(reward)}
-                        className="!bg-c5"
+                        className="!bg-black"
                         sx={{
                             width: "90%",
                             display: "flex",

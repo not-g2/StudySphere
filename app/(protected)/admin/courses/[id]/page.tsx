@@ -1,24 +1,25 @@
+// app/(protected)/admin/courses/[id]/page.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import {
-    Box,
-    Typography,
-    Grid,
-    Card,
-    Button,
-    Skeleton,
-    IconButton,
-    Dialog,
-    TextField,
-    Fade,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  Button,
+  Skeleton,
+  IconButton,
+  Dialog,
+  TextField,
+  Fade,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import Cookies from "js-cookie";
 import { useRouter, useParams } from "next/navigation";
 
-import Banner from "@/components/UserCourses/Banner";
+import GradientBanner from "@/components/UserCourses/GradientBanner";
 import AnnouncementsList from "@/components/AdminCourses/AnnouncementsList";
 import ChaptersList from "@/components/AdminCourses/ChaptersList";
 import AnnouncementPopup from "@/components/announcmentpopup";
@@ -29,932 +30,610 @@ import AddChapterDialog from "@/components/AdminCourses/AddChapterDialog";
 import SubmissionsDialog from "@/components/AdminCourses/SubmissionsDialog";
 
 interface Announcement {
-    _id: number;
-    title: string;
-    createdAt: string;
-    description: string;
+  _id: number;
+  title: string;
+  createdAt: string;
+  description: string;
 }
 
 interface Assignment {
-    _id: number;
-    title: string;
-    dueDate: string;
-    course: string;
-    description: string;
-    link: string;
-    createdAt: string;
+  _id: number;
+  title: string;
+  dueDate: string;
+  course: string;
+  description: string;
+  link: string;
+  createdAt: string;
 }
 
 interface Chapter {
-    _id: number;
-    title: string;
-    createdAt: string;
-    chapterPdf: string;
+  _id: number;
+  title: string;
+  createdAt: string;
+  chapterPdf: string;
 }
 
 interface Student {
-    _id: string;
-    name: string;
+  _id: string;
+  name: string;
 }
 
 type Session = {
-    user: {
-        id: string;
-        token: string;
-    };
-    email: string;
-    isAdmin: boolean;
+  user: {
+    id: string;
+    token: string;
+  };
+  email: string;
+  isAdmin: boolean;
 };
 
 const DashboardPage = () => {
-    // State declarations
-    const [open, setOpen] = useState(false);
-    const [openAssm, setOpenAssm] = useState(false);
-    const [currentAnnouncement, setCurrentAnnouncement] =
-        useState<Announcement | null>(null);
-    const [currentAssignment, setCurrentAssignment] =
-        useState<Assignment | null>(null);
-    const [assignments, setAssignments] = useState<Assignment[]>([]);
-    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-    const [chapters, setChapters] = useState<Chapter[]>([]);
-    const [submissions, setSubmissions] = useState<any[]>([]);
-    const [assignmentsLoading, setAssignmentsLoading] = useState(true);
-    const [announcementsLoading, setAnnouncementsLoading] = useState(true);
-    const [chaptersLoading, setChaptersLoading] = useState(true);
-    const [submissionsLoading, setSubmissionsLoading] = useState(true);
-    const [session, setSession] = useState<Session | null>(null);
-    const [refresh, setRefresh] = useState<number>(0);
-    const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-    const [feedbackText, setFeedbackText] = useState("");
-    const [feedbackGrade, setFeedbackGrade] = useState<string>("");
-    const [currentSubmission, setCurrentSubmission] = useState<any>(null);
-    const [showSubmissionsPopup, setShowSubmissionsPopup] = useState(false);
-    const [selectedAssignment, setSelectedAssignment] =
-        useState<Assignment | null>(null);
+  // === STATE ===
+  const [session, setSession] = useState<Session | null>(null);
+  const [refresh, setRefresh] = useState(0);
 
-    const [openAnnouncementForm, setOpenAnnouncementForm] = useState(false);
-    const [openAssignmentForm, setOpenAssignmentForm] = useState(false);
-    const [openChapterForm, setOpenChapterForm] = useState(false);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
 
-    const [attStudents, setAttStudents] = useState<Student[]>([]);
-    const [attendance, setAttendance] = useState<{ [key: string]: boolean }>(
-        {}
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true);
+
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [chaptersLoading, setChaptersLoading] = useState(true);
+
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(true);
+
+  const [currentAnnouncement, setCurrentAnnouncement] = useState<Announcement | null>(null);
+  const [openAnnouncementPopup, setOpenAnnouncementPopup] = useState(false);
+
+  const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
+  const [openAssignmentPopup, setOpenAssignmentPopup] = useState(false);
+
+  const [openAnnouncementForm, setOpenAnnouncementForm] = useState(false);
+  const [openAssignmentForm, setOpenAssignmentForm] = useState(false);
+  const [openChapterForm, setOpenChapterForm] = useState(false);
+
+  const [openSubmissionsDialog, setOpenSubmissionsDialog] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [currentSubmission, setCurrentSubmission] = useState<any>(null);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackGrade, setFeedbackGrade] = useState<string>("");
+
+  const [attStudents, setAttStudents] = useState<Student[]>([]);
+  const [attendance, setAttendance] = useState<Record<string, boolean>>({});
+  const [date, setDate] = useState<string>("");
+  const [attLoading, setAttLoading] = useState(false);
+  const [attError, setAttError] = useState<string | null>(null);
+  const [openAttendanceDialog, setOpenAttendanceDialog] = useState(false);
+
+  const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
+  const [showAllChapters, setShowAllChapters] = useState(false);
+  const [fadeInAnnouncements, setFadeInAnnouncements] = useState(false);
+  const [fadeInChapters, setFadeInChapters] = useState(false);
+
+  const router = useRouter();
+  const params = useParams();
+  const courseID = params.id as string;
+
+  const cardColors = ["#0A6EA8", "#6A1B9A", "#F57C00", "#C2185B"];
+
+  // === HANDLERS ===
+
+  // Announcements
+  const handleAnnouncementClick = (a: Announcement) => {
+    setCurrentAnnouncement(a);
+    setOpenAnnouncementPopup(true);
+  };
+  const handleCloseAnnouncement = () => {
+    setOpenAnnouncementPopup(false);
+    setCurrentAnnouncement(null);
+  };
+  const handleDeleteAnnouncement = async (id: number) => {
+    if (!session || !confirm("Delete this announcement?")) return;
+    await fetch(`${process.env.NEXT_PUBLIC_URL}/api/announce/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.user.token}`,
+      },
+      body: JSON.stringify({ courseId: courseID }),
+    });
+    setRefresh((r) => r + 1);
+  };
+
+  // Chapters
+  const handleOpenChapterForm = () => setOpenChapterForm(true);
+
+  // Assignments
+  const handleAssignmentClick = (a: Assignment) => {
+    setCurrentAssignment(a);
+    setOpenAssignmentPopup(true);
+  };
+  const handleCloseAssignment = () => {
+    setOpenAssignmentPopup(false);
+    setCurrentAssignment(null);
+  };
+  const handleDeleteAssignment = async (id: number | string) => {
+    if (!session || !confirm("Delete this assignment?")) return;
+    await fetch(`${process.env.NEXT_PUBLIC_URL}/api/assgn/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${session.user.token}` },
+    });
+    setRefresh((r) => r + 1);
+  };
+
+  // Submissions & Feedback
+  const handleViewSubmissions = async (a: Assignment) => {
+    if (!session) return;
+    setSelectedAssignment(a);
+    setSubmissionsLoading(true);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_URL}/api/submissions/assignment/${a._id}/submissions`,
+      { headers: { Authorization: `Bearer ${session.user.token}` } }
     );
-    const [date, setDate] = useState<string>("");
-    const [attLoading, setAttLoading] = useState(false);
-    const [attError, setAttError] = useState<string | null>(null);
-    const [openAttendanceDialog, setOpenAttendanceDialog] = useState(false);
+    if (res.ok) setSubmissions(await res.json());
+    setSubmissionsLoading(false);
+    setOpenSubmissionsDialog(true);
+  };
+  const handleOpenFeedback = (sub: any) => {
+    setCurrentSubmission(sub);
+    setFeedbackText("");
+    setFeedbackGrade("");
+    setFeedbackDialogOpen(true);
+  };
+  const handleSubmitFeedback = async () => {
+    if (!session || !currentSubmission || !selectedAssignment) return;
+    await fetch(
+      `${process.env.NEXT_PUBLIC_URL}/api/submissions/submission/${currentSubmission._id}/feedback`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.user.token}`,
+        },
+        body: JSON.stringify({
+          studentId:
+            typeof currentSubmission.studentId === "object"
+              ? currentSubmission.studentId._id
+              : currentSubmission.studentId,
+          assignmentId: selectedAssignment._id,
+          feedback: feedbackText,
+          grade: feedbackGrade ? Number(feedbackGrade) : undefined,
+        }),
+      }
+    );
+    setFeedbackDialogOpen(false);
+    handleViewSubmissions(selectedAssignment);
+  };
 
-    // New state for “see more” toggles and fade-in
-    const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
-    const [showAllChapters, setShowAllChapters] = useState(false);
-    const [fadeInAnnouncements, setFadeInAnnouncements] = useState(false);
-    const [fadeInChapters, setFadeInChapters] = useState(false);
+  // Attendance
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDate(e.target.value);
+    // do not reset attendance here—will be fetched below
+  };
+  const toggleAttendance = (id: string) =>
+    setAttendance((p) => ({ ...p, [id]: !p[id] }));
+  const handleSubmitAttendance = async () => {
+    if (!date) return alert("Please select a date.");
+    const raw = Cookies.get("session");
+    if (!raw) return router.push("/");
+    const { user } = JSON.parse(raw) as Session;
 
-    const router = useRouter();
-    const params = useParams();
-    const courseID = params.id;
-
-    // Colors for rotating assignment cards
-    const cardColors = ["#0DB7F0", "#AB47BC", "#FA9F1B", "#F06292"];
-
-    // Announcement & Assignment Handlers
-    const handleAnnouncementClick = (announcement: Announcement) => {
-        setCurrentAnnouncement(announcement);
-        setOpen(true);
-    };
-
-    const handleAssignmentClick = (assignment: Assignment) => {
-        setCurrentAssignment(assignment);
-        setOpenAssm(true);
-    };
-
-    const handleCloseAnnouncement = () => {
-        setOpen(false);
-        setCurrentAnnouncement(null);
-    };
-
-    const handleCloseAssignment = () => {
-        setOpenAssm(false);
-        setCurrentAssignment(null);
-    };
-
-    const handleViewSubmissions = async (assignment: Assignment) => {
-        if (!session) return;
-        console.log(session);
-        setSelectedAssignment(assignment);
-        setSubmissionsLoading(true);
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_URL}/api/submissions/assignment/${assignment._id}/submissions`,
-                {
-                    headers: { Authorization: `Bearer ${session.user.token}` },
-                    method: "GET",
-                }
-            );
-            if (response.ok) {
-                const data = await response.json();
-                setSubmissions(data);
-            } else {
-                console.error("Failed to fetch submissions", response.status);
-            }
-        } catch (error) {
-            console.error("Error fetching submissions:", error);
-        } finally {
-            setSubmissionsLoading(false);
-            setShowSubmissionsPopup(true);
-        }
-    };
-
-    const handleDeleteAssignment = async (assignmentId: number | string) => {
-        if (!window.confirm("Are you sure you want to delete this assignment?"))
-            return;
-        if (!session) return;
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_URL}/api/assgn/${assignmentId}`,
-                {
-                    method: "DELETE",
-                    headers: { Authorization: `Bearer ${session.user.token}` },
-                }
-            );
-            if (response.ok) {
-                alert("Assignment deleted successfully.");
-                setRefresh((prev) => prev + 1);
-            } else {
-                alert("Failed to delete assignment.");
-            }
-        } catch (error) {
-            console.error("Error deleting assignment:", error);
-            alert("Error deleting assignment.");
-        }
-    };
-
-    const handleUpdateAssignment = (assignment: Assignment) => {
-        setCurrentAssignment(assignment);
-        setOpenAssm(true);
-    };
-
-    // Delete Announcement Handler
-    const handleDeleteAnnouncement = async (announcementId: number) => {
-        if (
-            !window.confirm(
-                "Are you sure you want to delete this announcement?"
-            )
-        )
-            return;
-        if (!session) return;
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_URL}/api/announce/delete/${announcementId}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session.user.token}`,
-                    },
-                    body: JSON.stringify({ courseId: courseID }),
-                }
-            );
-            if (response.ok) {
-                alert("Announcement deleted successfully.");
-                setRefresh((prev) => prev + 1);
-            } else {
-                alert("Failed to delete announcement.");
-            }
-        } catch (error) {
-            console.error("Error deleting announcement:", error);
-            alert("Error deleting announcement.");
-        }
-    };
-
-    // Feedback Handlers
-    const openFeedbackDialog = (submission: any) => {
-        setCurrentSubmission(submission);
-        setFeedbackText("");
-        setFeedbackGrade("");
-        setFeedbackDialogOpen(true);
-    };
-
-    const handleSubmitFeedback = async () => {
-        if (!session || !currentSubmission || !selectedAssignment) return;
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_URL}/api/submissions/submission/${currentSubmission._id}/feedback`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session.user.token}`,
-                    },
-                    body: JSON.stringify({
-                        studentId:
-                            typeof currentSubmission.studentId === "object"
-                                ? currentSubmission.studentId._id
-                                : currentSubmission.studentId,
-                        assignmentId: selectedAssignment._id,
-                        feedback: feedbackText,
-                        grade: feedbackGrade
-                            ? Number(feedbackGrade)
-                            : undefined,
-                    }),
-                }
-            );
-            if (response.ok) {
-                alert("Feedback submitted successfully.");
-                setFeedbackDialogOpen(false);
-                handleViewSubmissions(selectedAssignment);
-            } else {
-                alert("Failed to submit feedback.");
-            }
-        } catch (error) {
-            console.error("Error submitting feedback:", error);
-            alert("Error submitting feedback.");
-        }
-    };
-
-    const handleMarkSubmissionCorrected = async (submissionId: string) => {
-        if (!session) return;
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_URL}/api/submissions/approve/${submissionId}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session.user.token}`,
-                    },
-                }
-            );
-            if (response.ok) {
-                alert("Submission marked as corrected.");
-                if (selectedAssignment) {
-                    handleViewSubmissions(selectedAssignment);
-                }
-            } else {
-                alert("Failed to mark submission as corrected.");
-            }
-        } catch (error) {
-            console.error("Error marking submission as corrected:", error);
-            alert("Error marking submission as corrected.");
-        }
-    };
-
-    // Fetch Dashboard Data
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            const sessionData: string | undefined = Cookies.get("session");
-            if (sessionData && !session) {
-                setSession(JSON.parse(sessionData));
-            } else if (!sessionData) {
-                router.push("/");
-            }
-
-            if (session) {
-                const token = session.user.token;
-
-                // Fetch assignments
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/assgn/course/${courseID}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            method: "GET",
-                        }
-                    );
-                    if (response.ok) {
-                        const data = await response.json();
-                        setAssignments(data);
-                    } else {
-                        console.error("Failed to get assignment details");
-                    }
-                } catch (error) {
-                    console.error("Error getting assignment details:", error);
-                } finally {
-                    setAssignmentsLoading(false);
-                }
-
-                // Fetch announcements
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/announce/${courseID}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            method: "GET",
-                        }
-                    );
-                    if (response.ok) {
-                        const data = await response.json();
-                        setAnnouncements(data);
-                    } else {
-                        console.error("Failed to get announcement details");
-                    }
-                } catch (error) {
-                    console.error("Error getting announcement details:", error);
-                } finally {
-                    setAnnouncementsLoading(false);
-                }
-
-                // Fetch chapters
-                try {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/chapter/get/${courseID}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            method: "GET",
-                        }
-                    );
-                    if (response.ok) {
-                        const data = await response.json();
-                        setChapters(data);
-                    } else {
-                        console.error("Failed to get chapter details");
-                    }
-                } catch (error) {
-                    console.error("Error getting chapter details:", error);
-                } finally {
-                    setChaptersLoading(false);
-                }
-            }
-        };
-
-        fetchDashboardData();
-    }, [session, router, refresh, courseID]);
-
-    // Trigger fade in for announcements once loaded
-    useEffect(() => {
-        if (!announcementsLoading) {
-            setTimeout(() => {
-                setFadeInAnnouncements(true);
-            }, 300);
-        }
-    }, [announcementsLoading]);
-
-    // Trigger fade in for chapters once loaded (with a longer delay so it appears after announcements)
-    useEffect(() => {
-        if (!chaptersLoading) {
-            setTimeout(() => {
-                setFadeInChapters(true);
-            }, 600);
-        }
-    }, [chaptersLoading]);
-
-    // Attendance: Fetch students
-    useEffect(() => {
-        const fetchAttendanceStudents = async () => {
-            try {
-                if (!session) return;
-                const token = session.user.token;
-                if (!courseID) throw new Error("Course ID not found.");
-
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/courses/${courseID}/students`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch students.");
-                }
-
-                const data = await response.json();
-                setAttStudents(data.students);
-                const initAttendance = data.students.reduce(
-                    (acc: { [key: string]: boolean }, student: Student) => {
-                        acc[student._id] = false;
-                        return acc;
-                    },
-                    {}
-                );
-                setAttendance(initAttendance);
-            } catch (error) {
-                console.error("Error fetching attendance students:", error);
-                setAttError(
-                    "Failed to load attendance students. Please try again later."
-                );
-            }
-        };
-
-        if (session && courseID) {
-            fetchAttendanceStudents();
-        }
-    }, [session, courseID]);
-
-    // Attendance: Handle date change
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setDate(e.target.value);
-        const newAttendance = attStudents.reduce(
-            (acc: { [key: string]: boolean }, student: Student) => {
-                acc[student._id] = false;
-                return acc;
-            },
-            {}
-        );
-        setAttendance(newAttendance);
-    };
-
-    // Attendance: Fetch each student's attendance summary for selected date
-    useEffect(() => {
-        const fetchAttendanceForStudents = async () => {
-            if (!date || !session) return;
-            const token = session.user.token;
-            const updatedAttendance: { [key: string]: boolean } = {
-                ...attendance,
-            };
-
-            await Promise.all(
-                attStudents.map(async (student) => {
-                    try {
-                        const response = await fetch(
-                            `${process.env.NEXT_PUBLIC_URL}/api/adminauth/summary/${student._id}`,
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
-                            }
-                        );
-                        if (!response.ok) {
-                            throw new Error(
-                                `Failed to fetch summary for student ${student._id}`
-                            );
-                        }
-                        const data = await response.json();
-                        let found = false;
-                        for (const course in data.attendance) {
-                            const record = data.attendance[course].find(
-                                (rec: any) => {
-                                    const recordDate = new Date(rec.date)
-                                        .toISOString()
-                                        .slice(0, 10);
-                                    return recordDate === date;
-                                }
-                            );
-                            if (record) {
-                                updatedAttendance[student._id] =
-                                    record.status === "present";
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            updatedAttendance[student._id] = false;
-                        }
-                    } catch (err) {
-                        console.error(
-                            "Error fetching attendance summary for student",
-                            student._id,
-                            err
-                        );
-                        updatedAttendance[student._id] = false;
-                    }
-                })
-            );
-            setAttendance(updatedAttendance);
-        };
-
-        fetchAttendanceForStudents();
-    }, [date, session, attStudents]);
-
-    // Attendance: Toggle attendance checkbox
-    const toggleAttendance = (studentId: string) => {
-        setAttendance((prev) => ({
-            ...prev,
-            [studentId]: !prev[studentId],
-        }));
-    };
-
-    // Attendance: Handle submit attendance
-    const handleSubmitAttendance = async () => {
-        if (!date) {
-            alert("Please select a date.");
-            return;
-        }
-
-        const sessionData: string | undefined = Cookies.get("session");
-
-        if (!sessionData) {
-            setAttError("Session not found. Please log in again.");
-            router.push("/");
-            return;
-        }
-
-        const sessionFromCookie = JSON.parse(sessionData);
-        const token = sessionFromCookie.user.token;
-        if (!token) {
-            setAttError("Authentication token not found. Please log in again.");
-            return;
-        }
-
-        setAttLoading(true);
-        setAttError(null);
-
-        const attendanceData = attStudents.map((student) => ({
-            userId: student._id,
+    setAttLoading(true);
+    await Promise.all(
+      attStudents.map((s) =>
+        fetch(`${process.env.NEXT_PUBLIC_URL}/api/adminauth/post/mark`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
+            userId: s._id,
             courseId: courseID,
             date,
-            status: attendance[student._id] ? "present" : "absent",
-        }));
+            status: attendance[s._id] ? "present" : "absent",
+          }),
+        })
+      )
+    );
+    setAttLoading(false);
+    alert(`Attendance for ${date} recorded!`);
+  };
 
-        try {
-            await Promise.all(
-                attendanceData.map(async (record) => {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_URL}/api/adminauth/post/mark`,
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${token}`,
-                            },
-                            body: JSON.stringify(record),
-                        }
-                    );
-                    if (!response.ok) {
-                        throw new Error(
-                            `Failed to mark attendance for ${record.userId}`
-                        );
-                    }
-                })
-            );
-            alert(`Attendance for ${date} has been recorded!`);
-        } catch (error) {
-            setAttError("Failed to submit attendance. Please try again.");
-            console.error("Error submitting attendance:", error);
-        } finally {
-            setAttLoading(false);
-        }
+  // === DATA FETCHING EFFECTS ===
+
+  // Main dashboard data
+  useEffect(() => {
+    const loadData = async () => {
+      const raw = Cookies.get("session");
+      if (!raw) return router.push("/");
+      const sess: Session = JSON.parse(raw);
+      setSession(sess);
+      const headers = { Authorization: `Bearer ${sess.user.token}` };
+
+      // Assignments
+      try {
+        const r = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/assgn/course/${courseID}`, { headers });
+        if (r.ok) setAssignments(await r.json());
+      } finally {
+        setAssignmentsLoading(false);
+      }
+
+      // Announcements
+      try {
+        const r = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/announce/${courseID}`, { headers });
+        if (r.ok) setAnnouncements(await r.json());
+      } finally {
+        setAnnouncementsLoading(false);
+      }
+
+      // Chapters
+      try {
+        const r = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/chapter/get/${courseID}`, { headers });
+        if (r.ok) setChapters(await r.json());
+      } finally {
+        setChaptersLoading(false);
+      }
     };
 
-    // Prepare limited lists for announcements and chapters
-    const displayedAnnouncements = showAllAnnouncements
-        ? announcements
-        : announcements.slice(0, 4);
+    if (courseID) loadData();
+  }, [router, refresh, courseID]);
 
-    // Memoize displayedChapters so its reference doesn’t change unnecessarily.
-    const displayedChapters = useMemo(() => {
-        return showAllChapters ? chapters : chapters.slice(0, 4);
-    }, [showAllChapters, chapters]);
+  // Load students once
+  useEffect(() => {
+    const loadStudents = async () => {
+      if (!session) return;
+      const r = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/courses/${courseID}/students`, {
+        headers: { Authorization: `Bearer ${session.user.token}` },
+      });
+      if (!r.ok) return setAttError("Failed to load students");
+      const data = await r.json();
+      setAttStudents(data.students);
+      setAttendance(
+        data.students.reduce((acc: Record<string, boolean>, s: Student) => {
+          acc[s._id] = false;
+          return acc;
+        }, {})
+      );
+    };
+    if (session && courseID) loadStudents();
+  }, [session, courseID]);
 
-    return (
-        <Box
-            sx={{ backgroundColor: "#F4F6F8", minHeight: "100vh", padding: 4 }}
-        >
-            <Banner
-                courseTitle="Mathematics"
-                bannerImage="/mbanner.png"
-                professorImage="/teach1.jpg"
-            />
+  // **Fetch attendance when date changes** (no longer tied to dialog open)
+  useEffect(() => {
+    if (!date || !session) return;
+    const loadForDate = async () => {
+      const updated: Record<string, boolean> = {};
+      await Promise.all(
+        attStudents.map(async (s) => {
+          const r = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/adminauth/summary/${s._id}`, {
+            headers: { Authorization: `Bearer ${session.user.token}` },
+          });
+          if (!r.ok) {
+            updated[s._id] = false;
+            return;
+          }
+          const d = await r.json();
+          const rec = d.attendance[courseID]?.find((x: any) => x.date.slice(0, 10) === date);
+          updated[s._id] = rec?.status === "present";
+        })
+      );
+      setAttendance(updated);
+    };
+    loadForDate();
+  }, [date, session, attStudents, courseID]);
 
-            {/* Attendance Icon */}
-            <Box display="flex" justifyContent="flex-end" mb={2}>
-                <IconButton onClick={() => setOpenAttendanceDialog(true)}>
-                    <EventAvailableIcon sx={{ color: "black" }} />
-                </IconButton>
-            </Box>
+  // Fade-in effects
+  useEffect(() => {
+    if (!announcementsLoading) setTimeout(() => setFadeInAnnouncements(true), 300);
+  }, [announcementsLoading]);
+  useEffect(() => {
+    if (!chaptersLoading) setTimeout(() => setFadeInChapters(true), 600);
+  }, [chaptersLoading]);
 
-            {/* Top section: Announcements & Chapters side by side */}
-            <Grid container spacing={4} mb={4}>
-                <Grid item xs={12} md={6}>
-                    <Box display="flex" alignItems="center" mb={1}>
-                        <Typography variant="h5" color="black" sx={{ mr: 1 }}>
-                            Announcements
-                        </Typography>
-                        <IconButton
-                            onClick={() => setOpenAnnouncementForm(true)}
-                        >
-                            <AddIcon />
-                        </IconButton>
-                    </Box>
-                    {announcementsLoading ? (
-                        <Grid container spacing={2}>
-                            {Array.from(new Array(3)).map((_, index) => (
-                                <Grid item xs={12} key={index}>
-                                    <Skeleton
-                                        variant="rectangular"
-                                        height={80}
-                                        sx={{ borderRadius: 2 }}
-                                    />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    ) : (
-                        <Fade in={fadeInAnnouncements} timeout={500}>
-                            <div>
-                                <AnnouncementsList
-                                    announcements={displayedAnnouncements}
-                                    onAnnouncementClick={
-                                        handleAnnouncementClick
-                                    }
-                                    onAnnouncementDelete={
-                                        handleDeleteAnnouncement
-                                    }
-                                />
-                            </div>
-                        </Fade>
-                    )}
-                    {announcements.length > 4 && !announcementsLoading && (
-                        <Button
-                            onClick={() =>
-                                setShowAllAnnouncements((prev) => !prev)
-                            }
-                            size="small"
-                        >
-                            {showAllAnnouncements ? "Collapse" : "See More"}
-                        </Button>
-                    )}
+  // Prepare limited lists
+  const displayedAnnouncements = showAllAnnouncements
+    ? announcements
+    : announcements.slice(0, 4);
+  const displayedChapters = useMemo(
+    () => (showAllChapters ? chapters : chapters.slice(0, 4)),
+    [showAllChapters, chapters]
+  );
+
+  // === RENDER ===
+  return (
+    <Box sx={{ backgroundColor: "#F4F6F8", minHeight: "100vh", p: 4 }}>
+      <GradientBanner width="100%" height="250px" courseTitle={courseID} />
+
+      {/* Attendance Icon */}
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        <IconButton onClick={() => setOpenAttendanceDialog(true)}>
+          <EventAvailableIcon sx={{ color: "black" }} />
+        </IconButton>
+      </Box>
+
+      {/* Announcements & Chapters */}
+      <Grid container spacing={4} mb={4}>
+        {/* Announcements */}
+        <Grid item xs={12} md={6}>
+          <Box display="flex" alignItems="center" mb={1}>
+            <Typography variant="h5" sx={{ mr: 1 }}>
+              Announcements
+            </Typography>
+            <IconButton onClick={() => setOpenAnnouncementForm(true)}>
+              <AddIcon />
+            </IconButton>
+          </Box>
+          {announcementsLoading ? (
+            <Grid container spacing={2}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Grid item xs={12} key={i}>
+                  <Skeleton
+                    variant="rectangular"
+                    height={80}
+                    sx={{ borderRadius: 2 }}
+                  />
                 </Grid>
-                <Grid item xs={12} md={6}>
-                    <Box display="flex" alignItems="center" mb={1}>
-                        <Typography variant="h5" color="black" sx={{ mr: 1 }}>
-                            Chapters
-                        </Typography>
-                        <IconButton onClick={() => setOpenChapterForm(true)}>
-                            <AddIcon />
-                        </IconButton>
-                    </Box>
-                    {chaptersLoading ? (
-                        <Grid container spacing={2}>
-                            {Array.from(new Array(3)).map((_, index) => (
-                                <Grid item xs={12} key={index}>
-                                    <Skeleton
-                                        variant="rectangular"
-                                        height={60}
-                                        sx={{ borderRadius: 2 }}
-                                    />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    ) : (
-                        <Fade in={fadeInChapters} timeout={500}>
-                            <div>
-                                <ChaptersList chapters={displayedChapters} />
-                            </div>
-                        </Fade>
-                    )}
-                    {chapters.length > 4 && !chaptersLoading && (
-                        <Button
-                            onClick={() => setShowAllChapters((prev) => !prev)}
-                            size="small"
-                        >
-                            {showAllChapters ? "Collapse" : "See More"}
-                        </Button>
-                    )}
-                </Grid>
+              ))}
             </Grid>
-
-            {/* Assignments Section */}
-            <Box mt={4}>
-                <Box display="flex" alignItems="center" mb={2}>
-                    <Typography variant="h5" color="black" sx={{ mr: 1 }}>
-                        Assignments
-                    </Typography>
-                    <IconButton onClick={() => setOpenAssignmentForm(true)}>
-                        <AddIcon />
-                    </IconButton>
-                </Box>
-                {assignmentsLoading ? (
-                    <Grid container spacing={2}>
-                        {Array.from(new Array(3)).map((_, index) => (
-                            <Grid item xs={12} key={index}>
-                                <Skeleton
-                                    variant="rectangular"
-                                    height={100}
-                                    sx={{ borderRadius: 2 }}
-                                />
-                            </Grid>
-                        ))}
-                    </Grid>
-                ) : assignments.length > 0 ? (
-                    <Box>
-                        {assignments.map((assignment, index) => (
-                            <Card
-                                key={assignment._id}
-                                sx={{
-                                    backgroundColor:
-                                        cardColors[index % cardColors.length],
-                                    padding: 2,
-                                    marginBottom: 2,
-                                }}
-                            >
-                                <Box>
-                                    <Typography variant="h6" color="white">
-                                        {assignment.title}
-                                    </Typography>
-                                    <Typography variant="body2" color="white">
-                                        {assignment.description}
-                                    </Typography>
-                                    <Typography variant="caption" color="white">
-                                        Due: {assignment.dueDate}
-                                    </Typography>
-                                </Box>
-                                <Box mt={1} display="flex" gap={1}>
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        color="primary"
-                                        onClick={() =>
-                                            handleUpdateAssignment(assignment)
-                                        }
-                                    >
-                                        Update
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        color="error"
-                                        onClick={() =>
-                                            handleDeleteAssignment(
-                                                assignment._id
-                                            )
-                                        }
-                                    >
-                                        Delete
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        color="success"
-                                        onClick={() =>
-                                            handleViewSubmissions(assignment)
-                                        }
-                                    >
-                                        View Submissions
-                                    </Button>
-                                </Box>
-                            </Card>
-                        ))}
-                    </Box>
-                ) : (
-                    <Typography color="black">
-                        No assignments available
-                    </Typography>
-                )}
-            </Box>
-
-            {/* Dialogs */}
-            <AddAnnouncementDialog
-                open={openAnnouncementForm}
-                onClose={() => setOpenAnnouncementForm(false)}
-                courseID={courseID}
-                onAnnouncementAdded={() => setRefresh((prev) => prev + 1)}
-            />
-
-            <AddAssignmentDialog
-                open={openAssignmentForm}
-                onClose={() => setOpenAssignmentForm(false)}
-                courseID={courseID}
-                onAssignmentAdded={() => setRefresh((prev) => prev + 1)}
-            />
-
-            <AddChapterDialog
-                open={openChapterForm}
-                onClose={() => setOpenChapterForm(false)}
-                courseID={courseID}
-                onChapterAdded={() => setRefresh((prev) => prev + 1)}
-            />
-
-            <AnnouncementPopup
-                open={open}
-                handleClose={handleCloseAnnouncement}
-                announcement={currentAnnouncement}
-            />
-            <AssignmentPopup
-                open={openAssm}
-                handleClose={handleCloseAssignment}
-                assignment={currentAssignment}
-                studentId={session?.user.id}
-            />
-
-            <SubmissionsDialog
-                open={showSubmissionsPopup}
-                onClose={() => setShowSubmissionsPopup(false)}
-                submissions={submissions}
-                submissionsLoading={submissionsLoading}
-                selectedAssignmentTitle={selectedAssignment?.title || ""}
-                onFeedbackClick={openFeedbackDialog}
-            />
-
-            {/* Feedback Dialog */}
-            <Dialog
-                open={feedbackDialogOpen}
-                onClose={() => setFeedbackDialogOpen(false)}
-                fullWidth
-                maxWidth="sm"
+          ) : (
+            <Fade in={fadeInAnnouncements} timeout={500}>
+              <div>
+                <AnnouncementsList
+                  announcements={displayedAnnouncements}
+                  onAnnouncementClick={handleAnnouncementClick}
+                  onAnnouncementDelete={handleDeleteAnnouncement}
+                />
+              </div>
+            </Fade>
+          )}
+          {!announcementsLoading && announcements.length > 4 && (
+            <Button
+              size="small"
+              onClick={() => setShowAllAnnouncements((p) => !p)}
             >
-                <Box>
-                    <Typography variant="h6" sx={{ color: "black", p: 2 }}>
-                        Provide Feedback
-                    </Typography>
-                    <Box sx={{ p: 2 }}>
-                        <TextField
-                            fullWidth
-                            label="Feedback"
-                            multiline
-                            rows={4}
-                            value={feedbackText}
-                            onChange={(e) => setFeedbackText(e.target.value)}
-                            margin="normal"
-                            InputLabelProps={{ style: { color: "black" } }}
-                            InputProps={{ style: { color: "black" } }}
-                        />
-                        <TextField
-                            fullWidth
-                            label="Grade (optional)"
-                            value={feedbackGrade}
-                            onChange={(e) => setFeedbackGrade(e.target.value)}
-                            margin="normal"
-                            InputLabelProps={{ style: { color: "black" } }}
-                            InputProps={{ style: { color: "black" } }}
-                        />
-                    </Box>
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            p: 2,
-                        }}
-                    >
-                        <Button
-                            onClick={() => setFeedbackDialogOpen(false)}
-                            color="secondary"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleSubmitFeedback}
-                            variant="contained"
-                            color="primary"
-                            sx={{ ml: 1 }}
-                        >
-                            Submit Feedback
-                        </Button>
-                    </Box>
-                </Box>
-            </Dialog>
+              {showAllAnnouncements ? "Collapse" : "See More"}
+            </Button>
+          )}
+        </Grid>
 
-            {/* Attendance Dialog */}
-            <Dialog
-                open={openAttendanceDialog}
-                onClose={() => setOpenAttendanceDialog(false)}
-                fullWidth
-                maxWidth="sm"
+        {/* Chapters */}
+        <Grid item xs={12} md={6}>
+          <Box display="flex" alignItems="center" mb={1}>
+            <Typography variant="h5" sx={{ mr: 1 }}>
+              Chapters
+            </Typography>
+            <IconButton onClick={handleOpenChapterForm}>
+              <AddIcon />
+            </IconButton>
+          </Box>
+          {chaptersLoading ? (
+            <Grid container spacing={2}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Grid item xs={12} key={i}>
+                  <Skeleton
+                    variant="rectangular"
+                    height={60}
+                    sx={{ borderRadius: 2 }}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Fade in={fadeInChapters} timeout={500}>
+              <div>
+                <ChaptersList chapters={displayedChapters} />
+              </div>
+            </Fade>
+          )}
+          {!chaptersLoading && chapters.length > 4 && (
+            <Button
+              size="small"
+              onClick={() => setShowAllChapters((p) => !p)}
             >
-                <Box sx={{ p: 2 }}>
-                    <Typography variant="h5" color="black" sx={{ mb: 2 }}>
-                        Attendance
-                    </Typography>
-                    <TextField
-                        type="date"
-                        label="Select Date"
-                        value={date}
-                        onChange={handleDateChange}
-                        InputLabelProps={{ shrink: true }}
-                        sx={{ mb: 2 }}
-                        fullWidth
-                    />
-                    <Box>
-                        {attStudents.map((student) => (
-                            <Box
-                                key={student._id}
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    mb: 1,
-                                }}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={attendance[student._id] || false}
-                                    onChange={() =>
-                                        toggleAttendance(student._id)
-                                    }
-                                    style={{ marginRight: "8px" }}
-                                />
-                                <Typography>{student.name}</Typography>
-                            </Box>
-                        ))}
-                    </Box>
-                    <Button
-                        onClick={handleSubmitAttendance}
-                        variant="contained"
-                        color="primary"
-                        sx={{ mt: 2 }}
-                        disabled={attLoading}
-                    >
-                        {attLoading ? "Submitting..." : "Submit Attendance"}
-                    </Button>
-                    {attError && (
-                        <Typography color="red" sx={{ mt: 2 }}>
-                            {attError}
-                        </Typography>
-                    )}
-                </Box>
-            </Dialog>
+              {showAllChapters ? "Collapse" : "See More"}
+            </Button>
+          )}
+        </Grid>
+      </Grid>
+
+      {/* Assignments */}
+      <Box mb={4}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Typography variant="h5" sx={{ mr: 1 }}>
+            Assignments
+          </Typography>
+          <IconButton onClick={() => setOpenAssignmentForm(true)}>
+            <AddIcon />
+          </IconButton>
         </Box>
-    );
+        {assignmentsLoading ? (
+          <Grid container spacing={2}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Grid item xs={12} key={i}>
+                <Skeleton
+                  variant="rectangular"
+                  height={100}
+                  sx={{ borderRadius: 2 }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        ) : assignments.length > 0 ? (
+          assignments.map((a, idx) => (
+            <Card
+              key={a._id}
+              sx={{
+                backgroundColor: cardColors[idx % cardColors.length],
+                p: 2,
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" color="white">
+                {a.title}
+              </Typography>
+              <Typography variant="body2" color="white">
+                {a.description}
+              </Typography>
+              <Typography variant="caption" color="white">
+                Due: {a.dueDate}
+              </Typography>
+              <Box mt={1} display="flex" gap={1}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={() => handleAssignmentClick(a)}
+                >
+                  View
+                </Button>
+                <Button
+                  size="small"
+                  color="error"
+                  onClick={() => handleDeleteAssignment(a._id)}
+                >
+                  Delete
+                </Button>
+                <Button
+                  size="small"
+                  color="success"
+                  onClick={() => handleViewSubmissions(a)}
+                >
+                  Submissions
+                </Button>
+              </Box>
+            </Card>
+          ))
+        ) : (
+          <Typography>No assignments available</Typography>
+        )}
+      </Box>
+
+      {/* Dialogs */}
+      <AddAnnouncementDialog
+        open={openAnnouncementForm}
+        onClose={() => setOpenAnnouncementForm(false)}
+        courseID={courseID}
+        onAnnouncementAdded={() => setRefresh((r) => r + 1)}
+      />
+      <AddAssignmentDialog
+        open={openAssignmentForm}
+        onClose={() => setOpenAssignmentForm(false)}
+        courseID={courseID}
+        onAssignmentAdded={() => setRefresh((r) => r + 1)}
+      />
+      <AddChapterDialog
+        open={openChapterForm}
+        onClose={() => setOpenChapterForm(false)}
+        courseID={courseID}
+        onChapterAdded={() => setRefresh((r) => r + 1)}
+      />
+
+      <AnnouncementPopup
+        open={openAnnouncementPopup}
+        handleClose={handleCloseAnnouncement}
+        announcement={currentAnnouncement}
+      />
+      <AssignmentPopup
+        open={openAssignmentPopup}
+        handleClose={handleCloseAssignment}
+        assignment={currentAssignment}
+        studentId={session?.user.id}
+      />
+      <SubmissionsDialog
+        open={openSubmissionsDialog}
+        onClose={() => setOpenSubmissionsDialog(false)}
+        submissions={submissions}
+        submissionsLoading={submissionsLoading}
+        selectedAssignmentTitle={selectedAssignment?.title || ""}
+        onFeedbackClick={handleOpenFeedback}
+      />
+
+      {/* Feedback Dialog */}
+      <Dialog
+        open={feedbackDialogOpen}
+        onClose={() => setFeedbackDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <Box p={2}>
+          <Typography variant="h6">Provide Feedback</Typography>
+          <TextField
+            fullWidth
+            label="Feedback"
+            multiline
+            rows={4}
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Grade (optional)"
+            value={feedbackGrade}
+            onChange={(e) => setFeedbackGrade(e.target.value)}
+            margin="normal"
+          />
+          <Box display="flex" justifyContent="flex-end" mt={2}>
+            <Button onClick={() => setFeedbackDialogOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={handleSubmitFeedback} sx={{ ml: 1 }}>
+              Submit
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
+
+      {/* Attendance Dialog */}
+      <Dialog
+        open={openAttendanceDialog}
+        onClose={() => setOpenAttendanceDialog(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <Box p={2}>
+          <Typography variant="h5" mb={2}>
+            Attendance
+          </Typography>
+          <TextField
+            type="date"
+            label="Select Date"
+            value={date}
+            onChange={handleDateChange}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          {attStudents.map((s) => (
+            <Box key={s._id} display="flex" alignItems="center" mb={1}>
+              <input
+                type="checkbox"
+                checked={attendance[s._id] || false}
+                onChange={() => toggleAttendance(s._id)}
+                style={{ marginRight: 8 }}
+              />
+              <Typography>{s.name}</Typography>
+            </Box>
+          ))}
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleSubmitAttendance}
+            disabled={attLoading}
+          >
+            {attLoading ? "Submitting..." : "Submit Attendance"}
+          </Button>
+          {attError && (
+            <Typography color="error" mt={2}>
+              {attError}
+            </Typography>
+          )}
+        </Box>
+      </Dialog>
+    </Box>
+  );
 };
 
 export default DashboardPage;

@@ -375,6 +375,23 @@ router.delete("/removeuser/:adminid/:userid/:courseid",authMiddleware,async(req,
             message : "Internal server error!"
         })
     }
-})
+});
+
+router.get('/:id/name', async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Only select the `name` field
+    const course = await Course.findById(id).select('name');
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    // return { name: '...' }
+    res.json({ name: course.name });
+  } catch (err) {
+    console.error('Error fetching course name:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 module.exports = router;

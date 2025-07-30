@@ -198,7 +198,7 @@ router.post("/joingroup/:groupcode",authMiddleware,async(req,res)=>{
     }
 })
 
-// delete a group
+// delete a group not sure if this works?
 router.delete("/delgroup/:groupid",authMiddleware,async(req,res)=>{
     try{
         const {groupid} = req.params;

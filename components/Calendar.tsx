@@ -1,300 +1,305 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import Cookies from "js-cookie";
+import SubjectSchedulerModal from "@/components/timetable";
 import "../app/(protected)/output.css";
 
-// Ensures timetable events are shown only for the current week
-const getDateForDay = (day: string) => {
-    const daysOfWeek = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-    ];
-    const today = new Date();
-    const currentDayIndex = today.getDay();
-    const targetDayIndex = daysOfWeek.indexOf(day);
-
-    const diff = (targetDayIndex - currentDayIndex + 7) % 7;
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + diff);
-
-    return targetDate.toISOString().split("T")[0]; // Returns 'YYYY-MM-DD'
+// Helper to map a weekday name to this week’s date (YYYY-MM-DD)
+const getDateForDay = (day: string): string => {
+  const daysOfWeek = [
+    "Sunday", "Monday", "Tuesday", "Wednesday",
+    "Thursday", "Friday", "Saturday",
+  ];
+  const today = new Date();
+  const diff = (daysOfWeek.indexOf(day) - today.getDay() + 7) % 7;
+  const target = new Date(today);
+  target.setDate(today.getDate() + diff);
+  return target.toISOString().split("T")[0];
 };
 
 interface EventData {
-    title: string;
-    start: string;
-    end?: string;
-    allDay?: boolean;
-    extendedProps?: {
-        day?: string;
-        slotStartTime?: string;
-        type?: string;
-        description?: string;
-    };
+  title: string;
+  start: string;
+  end?: string;
+  allDay?: boolean;
+  extendedProps?: {
+    type?: string;
+    // for timetable slots:
+    day?: string;
+    slotStartTime?: string;
+    // for reminders:
+    id?: string;
+  };
 }
 
-const MyCalendar = () => {
-    const [events, setEvents] = useState<EventData[]>([]);
-    const [session, setSession] = useState<any>(null);
-    const [refresh, setRefresh] = useState<number>(0);
+interface MyCalendarProps {
+  refreshTrigger: number;
+}
 
-    // Fetch user session from cookies
-    useEffect(() => {
-        const fetchSession = () => {
-            const sessionData = Cookies.get("session");
-            if (sessionData) {
-                setSession(JSON.parse(sessionData));
-            } else {
-                console.error("No session data found in cookies");
-            }
-        };
-        fetchSession();
-    }, []);
+const MyCalendar: React.FC<MyCalendarProps> = ({ refreshTrigger }) => {
+  const [events, setEvents] = useState<EventData[]>([]);
+  const [session, setSession] = useState<any>(null);
+  const [refresh, setRefresh] = useState<number>(0);
+  const [openScheduler, setOpenScheduler] = useState<boolean>(false);
 
-    // Fetch timetable, reminders, and deadlines
-    useEffect(() => {
-        if (!session) return;
-        const userId = session.user?.id;
-        if (!userId) {
-            console.error("User ID is missing in session data");
-            return;
+  // 1) Load user session from cookie on mount
+  useEffect(() => {
+    const raw = Cookies.get("session");
+    if (raw) {
+      setSession(JSON.parse(raw));
+    } else {
+      console.error("No session data found in cookies");
+    }
+  }, []);
+
+  // 2) Fetch timetable, reminders, deadlines whenever session, local refresh, or reminder refresh changes
+  useEffect(() => {
+    if (!session) return;
+    const userId = session.user.id;
+
+    // Clear out old events
+    setEvents([]);
+
+    // --- Timetable slots ---
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/tt/timetable/${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.user.token}`,
+            },
+          }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const slots: EventData[] = data.timetable.flatMap((entry: any) => {
+            const date = getDateForDay(entry.day);
+            return entry.slots.map((slot: any) => ({
+              title: `${slot.subject} (${slot.activity})`,
+              start: `${date}T${slot.startTime}:00`,
+              end: `${date}T${slot.endTime}:00`,
+              extendedProps: {
+                type: "timetable",
+                day: entry.day,
+                slotStartTime: slot.startTime,
+              },
+            }));
+          });
+          setEvents((prev) => [...prev, ...slots]);
+        } else {
+          console.error("Failed to fetch timetable:", res.status);
         }
+      } catch (err) {
+        console.error("Error fetching timetable:", err);
+      }
+    })();
 
-        const fetchTimetable = async () => {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/tt/timetable/${userId}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    const formattedEvents = data.timetable.flatMap(
-                        (entry: any) => {
-                            const dayDate = getDateForDay(entry.day);
-                            return entry.slots.map((slot: any) => ({
-                                title: `${slot.subject} (${slot.activity})`,
-                                start: `${dayDate}T${slot.startTime}:00`,
-                                end: `${dayDate}T${slot.endTime}:00`,
-                                extendedProps: {
-                                    day: entry.day,
-                                    slotStartTime: slot.startTime,
-                                    type: "timetable",
-                                },
-                            }));
-                        }
-                    );
-                    setEvents((prev) => [...prev, ...formattedEvents]);
-                } else {
-                    const data = await response.json();
-                    console.error(
-                        "Failed to fetch timetable:",
-                        response.status,
-                        data.message
-                    );
-                }
-            } catch (error) {
-                console.error("Error fetching timetable:", error);
-            }
-        };
-
-        const fetchReminders = async () => {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/reminder/reminders/${userId}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-                if (response.ok) {
-                    const reminders = await response.json();
-                    const formattedReminders = reminders.map(
-                        (reminder: any) => ({
-                            title: reminder.name,
-                            start: reminder.startdate,
-                            end: new Date(
-                                new Date(reminder.enddate).getTime() + 86400000
-                            )
-                                .toISOString()
-                                .split("T")[0], // Ensure full-day stretch
-                            allDay: true,
-                            extendedProps: {
-                                description: reminder.description,
-                                type: "reminder",
-                            },
-                        })
-                    );
-                    setEvents((prev) => [...prev, ...formattedReminders]);
-                } else {
-                    console.error(
-                        "Failed to fetch reminders:",
-                        response.status
-                    );
-                }
-            } catch (error) {
-                console.error("Error fetching reminders:", error);
-            }
-        };
-
-        const fetchDeadlines = async () => {
-            try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/users/${userId}/deadlines`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${session.user.token}`,
-                        },
-                    }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    const formattedDeadlines = data.deadlines.map(
-                        (deadline: any) => ({
-                            title: `Deadline: ${deadline.assignmentTitle} (${deadline.courseName})`,
-                            start: deadline.dueDate,
-                            allDay: true,
-                            extendedProps: {
-                                type: "deadline",
-                            },
-                        })
-                    );
-                    setEvents((prev) => [...prev, ...formattedDeadlines]);
-                } else {
-                    console.error(
-                        "Failed to fetch deadlines:",
-                        response.status
-                    );
-                }
-            } catch (error) {
-                console.error("Error fetching deadlines:", error);
-            }
-        };
-
-        // Reset events before re-fetching to avoid duplicates
-        setEvents([]);
-        fetchTimetable();
-        fetchReminders();
-        fetchDeadlines();
-    }, [session, refresh]);
-
-    // Handle event clicks (for deletion or viewing details)
-    const handleEventClick = async (clickInfo: EventClickArg) => {
-        const event = clickInfo.event;
-        const eventType = event.extendedProps.type;
-
-        if (eventType === "timetable") {
-            const day: string = event.extendedProps.day;
-            const startTime: string = event.extendedProps.slotStartTime;
-
-            if (
-                !window.confirm(
-                    `Are you sure you want to delete this slot: ${event.title}?`
-                )
+    // --- Reminders ---
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/reminder/reminders/${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.user.token}`,
+            },
+          }
+        );
+        if (res.ok) {
+          const reminders = await res.json();
+          const evs: EventData[] = reminders.map((r: any) => ({
+            title: r.description,
+            start: r.startdate,
+            end: new Date(
+              new Date(r.enddate).getTime() + 86400000
             )
-                return;
-
-            try {
-                const studentId = session.user?.id;
-                if (!studentId) {
-                    console.error("User ID is missing in session data");
-                    return;
-                }
-
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL}/api/tt/delete-slot/${studentId}`,
-                    {
-                        method: "DELETE",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ day, startTime }),
-                    }
-                );
-
-                if (response.ok) {
-                    setRefresh((prev) => prev + 1);
-                    alert("Slot deleted successfully.");
-                } else {
-                    console.error("Failed to delete slot:", response.status);
-                    alert("Failed to delete slot.");
-                }
-            } catch (error) {
-                console.error("Error deleting slot:", error);
-                alert("Error deleting slot.");
-            }
-        } else if (eventType === "reminder") {
-            alert(
-                `Reminder: ${event.title}\nDescription: ${event.extendedProps.description}`
-            );
-        } else if (eventType === "deadline") {
-            alert(
-                `Deadline: ${event.title}\nDue Date: ${
-                    event.start
-                        ? event.start.toISOString().split("T")[0]
-                        : "N/A"
-                }`
-            );
+              .toISOString()
+              .split("T")[0],
+            allDay: true,
+            extendedProps: {
+              type: "reminder",
+              id: r._id,
+            },
+          }));
+          setEvents((prev) => [...prev, ...evs]);
+        } else {
+          console.error("Failed to fetch reminders:", res.status);
         }
-    };
+      } catch (err) {
+        console.error("Error fetching reminders:", err);
+      }
+    })();
 
-    return (
-        <div className="p-6 bg-white rounded-lg shadow-lg">
-            {/* Global overrides for FullCalendar styling */}
-            <style jsx global>{`
-                .fc .fc-daygrid-day-frame {
-                    background-color: white !important;
-                    border: 1px solid black !important;
-                }
-                .fc .fc-daygrid-day-number {
-                    color: black !important;
-                }
-                .fc .fc-event {
-                    color: black !important;
-                }
-            `}</style>
-            <h1 className="text-2xl font-bold text-black mb-4">
-                Schedule Calendar
-            </h1>
-            <FullCalendar
-                plugins={[dayGridPlugin, interactionPlugin]}
-                initialView="dayGridMonth"
-                events={events}
-                eventClick={handleEventClick}
-                selectable={true}
-                editable={true}
-                headerToolbar={{
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,dayGridWeek,dayGridDay",
-                }}
-                height="auto"
-                dayMaxEvents={true}
-                eventContent={(eventInfo: EventContentArg) => (
-                    <div className="whitespace-normal break-words text-black">
-                        {eventInfo.event.title}
-                    </div>
-                )}
-            />
-        </div>
-    );
+    // --- Deadlines ---
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/users/${userId}/deadlines`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.user.token}`,
+            },
+          }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const evs: EventData[] = data.deadlines.map((d: any) => ({
+            title: `Deadline: ${d.assignmentTitle}`,
+            start: d.dueDate,
+            allDay: true,
+            extendedProps: { type: "deadline" },
+          }));
+          setEvents((prev) => [...prev, ...evs]);
+        } else {
+          console.error("Failed to fetch deadlines:", res.status);
+        }
+      } catch (err) {
+        console.error("Error fetching deadlines:", err);
+      }
+    })();
+  }, [session, refresh, refreshTrigger]);
+
+  // 3) Handle event clicks (delete flows + alerts)
+  const handleEventClick = async (info: EventClickArg) => {
+    const evt = info.event;
+    const props = evt.extendedProps as any;
+
+    // --- Delete timetable slot ---
+    if (props.type === "timetable") {
+      if (!confirm(`Delete slot "${evt.title}"?`)) return;
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/tt/delete-slot/${session.user.id}`,
+          {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              day: props.day,
+              startTime: props.slotStartTime,
+            }),
+          }
+        );
+        if (res.ok) {
+          setRefresh((n) => n + 1);
+        } else {
+          alert("Failed to delete slot.");
+        }
+      } catch (err) {
+        console.error("Error deleting slot:", err);
+        alert("Error deleting slot.");
+      }
+      return;
+    }
+
+    // --- Delete reminder ---
+    if (props.type === "reminder") {
+      if (!confirm(`Delete reminder: "${evt.title}"?`)) return;
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_URL}/api/reminder/delreminder/${props.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.user.token}`,
+            },
+          }
+        );
+        if (res.ok) {
+          setRefresh((n) => n + 1);
+        } else {
+          alert("Failed to delete reminder.");
+        }
+      } catch (err) {
+        console.error("Error deleting reminder:", err);
+        alert("Error deleting reminder.");
+      }
+      return;
+    }
+
+    // --- Click a deadline ---
+    if (props.type === "deadline") {
+      alert(`Deadline: ${evt.title}`);
+      return;
+    }
+  };
+
+  // 4) When "Add Schedule" modal submits, re-fetch
+  const handleModalSubmit = (schedule: any) => {
+    console.log("New schedule:", schedule);
+    setOpenScheduler(false);
+    setRefresh((n) => n + 1);
+  };
+
+  return (
+    <>
+      <div className="p-6 bg-white rounded-lg shadow-lg">
+        {/* Global style overrides */}
+        <style jsx global>{`
+          .fc .fc-daygrid-day-frame {
+            background-color: white !important;
+            border: 1px solid black !important;
+          }
+          .fc .fc-daygrid-day-number {
+            color: black !important;
+          }
+          .fc .fc-event {
+            color: black !important;
+          }
+          .fc .fc-toolbar-title {
+            color: black !important;
+          }
+        `}</style>
+
+        <h1 className="text-2xl font-bold text-black mb-4">
+          Schedule Calendar
+        </h1>
+
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={events}
+          eventClick={handleEventClick}
+          selectable
+          editable
+          customButtons={{
+            addSchedule: {
+              text: "+",
+              click: () => setOpenScheduler(true),
+            },
+          }}
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "addSchedule dayGridMonth,dayGridWeek,dayGridDay",
+          }}
+          height="auto"
+          dayMaxEvents
+          eventContent={(ev: EventContentArg) => (
+            <div className="whitespace-normal break-words text-black">
+              {ev.event.title}
+            </div>
+          )}
+        />
+      </div>
+
+      {openScheduler && (
+        <SubjectSchedulerModal
+          onScheduleSubmit={handleModalSubmit}
+          onClose={() => setOpenScheduler(false)}
+        />
+      )}
+    </>
+  );
 };
 
 export default MyCalendar;

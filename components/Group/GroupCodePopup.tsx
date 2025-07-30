@@ -1,3 +1,4 @@
+// components/Group/GroupCodePopup.tsx
 "use client";
 import React, { useState } from "react";
 import {
@@ -29,7 +30,7 @@ const GroupCodePopup: React.FC<GroupCodePopupProps> = ({
       return;
     }
     onJoinGroup(groupCode);
-    setGroupCode(""); // Reset the input field after joining
+    setGroupCode("");
     setError("");
     handleClose();
   };
