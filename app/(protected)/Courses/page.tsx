@@ -316,7 +316,7 @@ const ClassesPage = () => {
           },
           body: JSON.stringify({
             studentId: session.user.id,
-            courseCode,
+            courseCode: classCode,
           }),
         }
       );
